@@ -1,0 +1,130 @@
+/* param2 holds on the full type                                             */
+/* license: GNU Lesser General Public License Version 2.1 or later           */
+/* ------------------------------------------------------------------------- */
+
+shorten std.{assert!, do!, drop-last}.
+
+namespace derive.param2.trivial {
+
+pred prove-args i:list term, i:list term, o:list term.
+prove-args [] [] [].
+prove-args [X,PX|Rest] [TX,TPX_X|TRest] [X,P1,PX,P2|PRest] :-
+  coq.safe-dest-app TPX_X HD ARGS,
+  drop-last 1 ARGS ARG,
+  coq.mk-app HD ARG TPX,
+  param2-trivial-db TPX P, !,
+  P1 = {{ lib:elpi.derive.trivial_full lp:TX lp:TPX lp:P lp:X }},
+  P2 = {{ lib:elpi.derive.trivial_uniq lp:TX lp:TPX lp:P lp:X lp:PX }},
+  prove-args Rest TRest PRest.
+
+pred oty i:term, i:term, i:term, i:list term, i:list term, o:term.
+oty IsT W _ [Idx,V] _ {{ lib:@elpi.eq lp:Ty lp:Wx lp:V }} :-
+  Ty = app[IsT,Idx], Wx = app[W,Idx].
+
+pred body i:term, i:term, i:term, i:term, i:list term, i:list term, o:term.
+body _ _ K (app _) V VT R :- std.do! [
+  /*
+  coq.safe-dest-app K (global (indc Kname)) Params,
+  
+  prove-args V VT P,
+  assert! (param2-congr-db Kname CongrK) "run derive.param2.congr first",
+  coq.mk-app CongrK Params Rhd,
+  coq.mk-app Rhd P R,*/
+  trivialize-param2 V VT Triv,
+  do-args {std.rev V} {std.rev VT} {std.rev Triv} [] K R,
+].
+
+pred trivialize-param2 i:list term, i:list term, o:list term.
+trivialize-param2 [] [] [].
+trivialize-param2 [_,_|XS] [_,TPX|PS] [TPX1,T|TS] :- std.do! [
+  coq.safe-dest-app TPX HD ARGS,
+  drop-last 1 ARGS ARG,
+  coq.mk-app HD ARG TPX1,
+  param2-trivial-db TPX1 T,
+  trivialize-param2 XS PS TS,
+].
+
+pred do-args i:list term, i:list term, i:list term, i:list term, i:term, o:term.
+do-args [] [] [] _ _ {{ lib:@elpi.erefl _ _ }}.
+do-args [PX,X|XS] [_,TX|PS] [Triv,P|Trivs] Old K R :- std.do! [
+  Q = {{ lib:elpi.derive.trivial_uniq lp:TX lp:P lp:Triv lp:X lp:PX }},
+  F = {{ lib:elpi.derive.trivial_full lp:TX lp:P lp:Triv lp:X }},
+  std.assert-ok! (coq.typecheck Q TQ) "wtf",
+  (pi v\
+     coq.mk-app K {std.rev {std.append {std.append Old [v,X]} XS}} (K1 v)),
+  std.append Old [F,X] Old1,
+  coq.build-match Q TQ (do-oty K1 PX) (do-body XS PS Trivs Old1 K) R,
+].
+
+pred do-oty i:(term -> term), i:term, i:term, i:list term, i:list term, o:term.
+do-oty K E _ [V,_] _ {{ lib:@elpi.eq _ _ lp:KV }} :- copy E V => copy (K V) KV.
+
+pred do-body i:list term, i:list term, i:list term, i:list term, i:term, i:term, i:term, i:list term, i:list term, o:term.
+do-body XS PS Trivs Old K _ _ _ _ R :- do-args XS PS Trivs Old K R.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+pred body-params
+  i:int,   % number of params left
+  i:term,  % inductive type applied to parameters treated so far
+  i:term,  % inductive type arity to process
+  o:term.
+
+body-params 0 IsT (prod _ T _\ prod _ T _\ sort _) R :- !, std.do! [
+  std.assert! (param2-inhab-db IsT W) "www",
+  R = {{ fun x : lp:T =>
+          lib:elpi.derive.contracts2self lp:T lp:IsT x (lp:W x)
+             ((fix IH (x : lp:T) (y : lp:IsT x x) {struct y} :
+                lib:@elpi.eq (lp:IsT x x) (lp:W x x) y := lp:{{ {
+
+          param2-trivial-db IsT {{ fun x : lp:T =>
+          lib:elpi.derive.contracts2self lp:T lp:IsT x (lp:W x x) (IH x) }} =>
+        coq.build-match {{y}} {{lp:IsT x x}} (oty IsT W) (body IsT W)
+      } }}
+  ) x) }},
+].
+
+% param1 have the form : isT A (P : A -> Type) .. , so we process two
+% param2 have the form : isT A B (P : A -> B -> Type) .. , so we process two
+% binders at a time and we assume (H : trivial P) for each A and P
+body-params N T (prod A TA a\ prod P (TP a) (F a)) R :- N > 0, coq.sort? TA, !,
+  M is N - 2,
+  R = (fun A TA a\
+        fun P (TP a) p\
+         fun _ {{ lib:elpi.derive.trivial lp:a lp:p }} pf\ {
+    decl a A TA =>
+    decl p P (TP a) =>
+    decl pf `_` {{ lib:elpi.derive.trivial lp:a lp:p }} =>
+    param a a p =>
+    param2-trivial-db p pf => % to prove (P x) use (H x)
+    param2-inhab-db p {{ lib:elpi.derive.trivial_full lp:a lp:p lp:pf }} => % to prove (P x) use (H x)
+      body-params M {coq.mk-app T [a,p]}
+        (F a p)}).
+body-params N T (prod A TA a\ prod P (TP a) (F a)) R :- N > 0, !,
+  M is N - 2,
+  R = (fun A TA a\
+        fun P (TP a) p\ {
+    decl a A TA =>
+    decl p P (TP a) =>
+    param a a p =>
+      body-params M {coq.mk-app T [a,p]} (F a p)}).
+
+body-params _ T _ _ :-
+  coq.say "derive.param2_trivial: wrong shape " {coq.term->string T}
+            ". It does not look like a unary parametricity translation of an inductive with no indexes.",
+  fail.
+
+pred main i:inductive, i:string, o:list prop.
+main GR Suffix [Clause,param2-trivial-done GR] :- do! [
+  coq.env.indt GR _ Lno _ Arity _ _,
+  body-params Lno (global (indt GR)) Arity R,
+  % coq.say {coq.term->string R},
+  std.assert-ok! (coq.typecheck R RT) "derive.param2_trivial generates illtyped term",
+
+  Name is {coq.gref->id (indt GR)} ^ Suffix,
+  coq.env.add-const Name R RT @transparent! Cst,
+  Clause  = (param2-trivial-db (global (indt GR)) (global (const Cst))),
+  coq.elpi.accumulate _ "derive.param2.trivial.db" (clause _ _ Clause),
+  coq.elpi.accumulate _ "derive.param2.trivial.db" (clause _ _ (param2-trivial-done GR)),
+].
+
+}
