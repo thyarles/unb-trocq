@@ -197,9 +197,10 @@ main GR Prefix C :- do! [
 
   % generate clause and add to the db
   mk-clause 0 Lno T T Arity [] (global (const Funct)) Clause,
+  coq.elpi.accumulate _ "derive.mymap.db" (clause _ _ (mymap-def GR (global (const Funct)))),
   coq.elpi.accumulate _ "derive.mymap.db" (clause _ _ Clause),
   coq.elpi.accumulate _ "derive.mymap.db" (clause _ _ (mymap-done GR)),
-  C = [mymap-done GR,Clause]
+  C = [mymap-done GR,Clause, (mymap-def GR (global (const Funct)))]
 ].
   
 }
