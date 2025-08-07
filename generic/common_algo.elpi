@@ -1,6 +1,10 @@
 
 namespace derive.common-algo {
 
+pred rel-mode i:bool o:term. 
+rel-mode ff {{ Param2a0.Rel }}.
+rel-mode tt {{ Param2b0.Rel }}.
+
 pred swap i:term, i:term, i:bool, o:term, o:term.
 swap A B tt B A.
 swap A B ff A B.
@@ -31,8 +35,9 @@ mk-mR-type 0 (prod IN1 ITyTy x\ prod IN2 ITyTy2 y\ (Bo x y)) ML _ Rel Swap
 % Process two type parameters + 1 relation at a time.
 % Apply these parameters to the LHS of the equation.
 mk-mR-type N (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN _ ar\ (Bo a1 a2 ar)) ML _ Rel Swap
-             (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN {{ Param2a0.Rel lp:a1 lp:a2 }} ar\ (R a1 a2 ar)) :-
+             (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN {{ lp:AR lp:a1 lp:a2 }} ar\ (R a1 a2 ar)) :-
   M is N - 1, 
+  rel-mode Swap AR,
   pi a1 a2 ar\
     sigma NewML NewMR NewRel\
       coq.mk-app ML [a1, a2, ar] NewML, 

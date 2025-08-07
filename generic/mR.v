@@ -13,22 +13,6 @@ From elpi.apps Require Import map.
 
 From Trocq Require Import Hierarchy.
 Unset Uniform Inductive Parameters. 
-(* Unset Universe Polymorphism.
-
-Inductive PU (A : Type) : Type :=
-| AB : A -> unit -> PU A
-| AC : A -> bool -> PU A.
-
-Inductive PP (A : Type): Type :=
-| ABC : A -> unit -> PP A. *)
-
-(* Elpi derive.param2 unit. *)
-(* Elpi derive.mymap PU. *)
-(* Elpi derive.mymap unit.
-Elpi derive.map PU.
-Elpi derive.map PP.
-Elpi derive.mymap PP.
-Elpi derive.mymap PU. *)
 
 Elpi Db derive.mR.db lp:{{
   % [ar-db A1 A2 AR] returns the relation between a type A1 and A2.
