@@ -112,7 +112,7 @@ name-injector FName I J GR Kn [InjTy|InjTyss] [Clause|Clauses] :-
   NameIJ is {std.any->string FName} ^ {std.any->string I} ^ {std.any->string J},
   coq.env.add-const NameIJ InjTy _ _ C,
   % Clause = (injections-db Kn J (global (const C)) :- !),
-  Clause = (injections-db Kn J (global (const C))),
+  Clause = (injections-db (global (indc Kn)) J (global (const C))),
   name-injector FName I Jn GR Kn InjTyss Clauses.
 
 pred name-injectors i:string, i:int, i:inductive, i:list constructor, i:list (list term), o:list (list prop).
@@ -175,7 +175,7 @@ main GR Prefix Clauses :- std.do! [
 %   ),
 %   coq.env.add-const FName Body Type _ C,
   std.flatten Clausess Clauses,
-  ClausesFin = [injections-done GR | Clauses], %[injections-done GR, injections GR (const C)],
+  ClausesFin = [injections-done (global (indt GR)) | Clauses], %[injections-done GR, injections GR (const C)],
   std.forall ClausesFin (x\
     coq.elpi.accumulate _ "derive.injections.db" (clause _ _ x)
   ),

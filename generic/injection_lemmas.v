@@ -14,10 +14,10 @@ Elpi Db derive.injections.db lp:{{
   %  and K, 
   %  a natural number > 0 (representing the constructor number)
   %  with the list of injection lemmas for that constructor
-  pred injections-db i:constructor, i:int, o:term.
+  pred injections-db i:term, i:int, o:term.
 
   % [injections-done T K] means T K was already derived
-  pred injections-done o:inductive. 
+  pred injections-done o:term. 
 }}.
 
 Elpi Command derive.injections.

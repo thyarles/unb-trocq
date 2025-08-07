@@ -1,6 +1,6 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
-From elpi.apps.derive.elpi Extra Dependency "param2.elpi" as param2.
 From elpi.apps.derive.elpi Extra Dependency "discriminate.elpi" as discr.
+From Trocq Extra Dependency "common_algo.elpi" as common.
 From Trocq Extra Dependency "mR.elpi" as mR.
 From Trocq Require Import mymap injection_lemmas.
 
@@ -43,12 +43,12 @@ Elpi Db derive.mR.db lp:{{
 Elpi Command derive.mR.
 Elpi Accumulate File derive_hook.
 Elpi Accumulate Db Header derive.param2.db.
-Elpi Accumulate File param2.
 Elpi Accumulate Db derive.param2.db.
 Elpi Accumulate Db derive.mymap.db.
 Elpi Accumulate File discr.
 Elpi Accumulate Db derive.isK.db.
 Elpi Accumulate Db derive.injections.db.
+Elpi Accumulate File common.
 Elpi Accumulate Db derive.mR.db.
 Elpi Accumulate File mR.
 Elpi Accumulate lp:{{

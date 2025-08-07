@@ -8,7 +8,7 @@ Unset Uniform Inductive Parameters.
 
 Elpi Db derive.mymap.db lp:{{
   % [mymap-def I C] brings the constant defined for mapping inductive I.
-  pred mymap-def i:inductive, o:term.
+  pred mymap-def i:term, o:term.
 
   % [mymap T1 T2 D] for T1 and T2 brings a map D from T1 to T2. 
   pred mymap-db i:term, i:term, o:term.
@@ -62,9 +62,10 @@ Inductive ThreeTypes (A B C : Type) :=
 Elpi derive.mymap ThreeTypes.
 Print ThreeTypes_mymap.
 
+
 Elpi Query lp:{{
     coq.locate "option" (indt Option),
-    std.findall (mymap-def Option _) Rules. % empty
+    std.findall (mymap-def (global (indt Option)) _) Rules. % empty
     %std.findall (mymap-db {{ option nat }} {{ option nat }} _) Rules. % non empty
     %std.findall (mymap-db {{ nat }} {{ nat }} _) Rules. % non empty
     std.findall (mymap-db {{ nat }} B C) Rules. % empty

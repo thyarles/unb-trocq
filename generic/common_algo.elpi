@@ -1,0 +1,43 @@
+
+namespace derive.common-algo {
+
+pred swap i:term, i:term, i:bool, o:term, o:term.
+swap A B tt B A.
+swap A B ff A B.
+% The number of Type parameters in T
+% Type of inductive T,
+% Type of bin parametricity translation TR,
+% ML LHS of map equality
+% MR RHS of map equality
+% Rel type of TR applied to arguments
+% Returns the type of map in R for T
+% X is the first inductive, Y is the second inductive. 
+pred mk-mR-type i:int, i:term, i:term, i:term, i:term, i:bool, o:term.
+% Reached a sort, return map L = R -> IR.
+mk-mR-type 0 (sort _) ML MR Rel Swap R :- 
+  Map = {{ lp:ML  = lp:MR }},
+  swap Map Rel Swap First Second,
+  R = prod `_` First _\ Second.
+% Introducing X and Y.
+% The RHS of the equality is Y.
+mk-mR-type 0 (prod IN1 ITyTy x\ prod IN2 ITyTy2 y\ (Bo x y)) ML _ Rel Swap
+             (prod IN1 ITyTy x\ prod IN2 ITyTy2 y\ (R x y)) :-
+  pi x y\
+    sigma NewML NewMR NewRel\
+      coq.mk-app ML [x] NewML, 
+      NewMR = y,
+      coq.mk-app Rel [x,y] NewRel,
+    mk-mR-type 0 (Bo x y) NewML NewMR NewRel Swap (R x y).
+% Process two type parameters + 1 relation at a time.
+% Apply these parameters to the LHS of the equation.
+mk-mR-type N (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN _ ar\ (Bo a1 a2 ar)) ML _ Rel Swap
+             (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN {{ Param2a0.Rel lp:a1 lp:a2 }} ar\ (R a1 a2 ar)) :-
+  M is N - 1, 
+  pi a1 a2 ar\
+    sigma NewML NewMR NewRel\
+      coq.mk-app ML [a1, a2, ar] NewML, 
+      NewMR = a2,
+      coq.mk-app Rel [a1,a2,ar] NewRel,
+    mk-mR-type M (Bo a1 a2 ar) NewML NewMR NewRel Swap (R a1 a2 ar).
+
+}
