@@ -46,17 +46,3 @@ Elpi Accumulate lp:{{
   usage :- coq.error "Usage: derive.mR <object name>".
 }}. 
 
-
-Elpi Query lp:{{
-  F = {{ fun (A : Type) (l : list A) => match l with nil => unit | cons a l => Prop end }}.
-  %coq.elaborate-skeleton F Ty FE ok,
-  coq.typecheck F Ty ok.
-  coq.say F.
-  %F = {{ fun b : bool => match b with true => unit | false => Prop end }}.
-  %std.findall (param {{ option }} {{ option }} T ) Rules,
-  %std.findall (param {{ list }} {{ list }} T ) Rules,
-  %std.findall (mymap-db {{ option nat }} {{ option nat }} C ) Rules,
-  %coq.typecheck T Ty _,
-  coq.say Rules.
-
-}}. 

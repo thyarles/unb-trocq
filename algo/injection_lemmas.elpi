@@ -1,3 +1,5 @@
+shorten derive.algo-utils.{duplicate-arguments, count-args, name-ijs}.
+
 namespace derive.injections {
 
 /* for all projectors of type forall Args T, ret 
@@ -27,32 +29,9 @@ get-projectors GRK J Max [P|PJs] :-
 pred for-K-get-projectors i:int, i:list constructor, i:list term, o: list int, o:list (list term).
 for-K-get-projectors _ [] [] [] []:- !.
 for-K-get-projectors TyParamNo [Kn|KNs] [KTy|KTys] [ArgsNo|ArgsNos] [R|RS]:- 
-    coq.count-prods KTy ArgsParamNo,
-    ArgsNo is ArgsParamNo - TyParamNo,
+    count-args TyParamNo KTy ArgsNo,
     get-projectors Kn 0 ArgsNo R,
     for-K-get-projectors TyParamNo KNs KTys ArgsNos RS.
-
-func names12 name -> name, name.
-names12 N N1 N2 :- !,
-  coq.name-suffix N 1 N1, coq.name-suffix N 2 N2.
-
-% given TyParam ArgNo and T, 
-% duplicate-argument skips TyParam lambdas, 
-% then for the first ArgNo lambda adds another lambda expecting an argument of the same Type, 
-% after all lambdas are processed returns the body unchanged
-% Returns a list with the original variables, and a list with the added ones
-pred duplicate-arguments i:int, i:int, i:term, o:term.
-duplicate-arguments 0 0 T T :- !.
-duplicate-arguments 0 O (prod N TyA T) (prod Arg1 TyA a1\ (prod Arg2 TyA a2\ (S a1 a2))) :- 
-    O > 0,
-    P is O - 1,
-    names12 N Arg1 Arg2,
-    (pi a1 a2\ duplicate-arguments 0 P (T a1) (S a1 a2)).
-duplicate-arguments N O (prod TyName TyArg T) (prod TyName TyArg S) :- !,
-  N > 0,
-  M is N - 1,
-  pi a1\ duplicate-arguments M O (T a1) (S a1).
-
 
 % TyParam, ArgNo, F, Type of the equality, Left HS, Right HS
 % F is of type forall (Typarams : Type) ((Arg1 : A1) (Arg2 : A2) ...), Ret
@@ -103,28 +82,8 @@ build-types-injectors _ _ [] [] [] [] [] :- !.
 build-types-injectors TyParamNo GR [Kn|KNs] [ArgNo|ArgsNos] [KTy|KTys] [PJs|PJss] [R|RS] :- 
   build-type-K-injector TyParamNo 1 GR Kn ArgNo KTy PJs R,
   build-types-injectors TyParamNo GR KNs ArgsNos KTys PJss RS.
-    % build-types-injectors Kn PJs R, 
 
-pred name-injector i:string, i:int, i:int, i:inductive, i:constructor, i:list term, o:list prop.
-name-injector _ _ _ _ _ [] []. 
-name-injector FName I J GR Kn [InjTy|InjTyss] [Clause|Clauses] :-
-  Jn is J + 1,
-  NameIJ is {std.any->string FName} ^ {std.any->string I} ^ {std.any->string J},
-  coq.env.add-const NameIJ InjTy _ _ C,
-  % Clause = (injections-db Kn J (global (const C)) :- !),
-  Clause = (injections-db (global (indc Kn)) J (global (const C))),
-  name-injector FName I Jn GR Kn InjTyss Clauses.
-
-pred name-injectors i:string, i:int, i:inductive, i:list constructor, i:list (list term), o:list (list prop).
-name-injectors _ _ _ [] [] [].
-name-injectors FName I GR [Kn | KNs] [InjTys | InjTyss] [Clauses | Clausess] :-
-  In is I + 1,
-  name-injector FName I 1 GR Kn InjTys Clauses,
-  name-injectors FName In GR KNs InjTyss Clausess.
-  
-  
 pred implement-K-injector-J i:int, i:int, i:int, i:int, i:term, o:term.
-  % implement-K-injector-J _ _ _ _ T T.
 implement-K-injector-J 0 J 0 TyParam (prod E Ty _) R :- !,
   I is J - 1,
   R = {{ fun e:(lp:Ty) => lp:(PL e) }},
@@ -167,13 +126,8 @@ main GR Prefix Clauses :- std.do! [
   std.map PJss (x\ r\ sigma R\ (std.map x (y\ r\ sigma Ty\ coq.typecheck y Ty _, r = Ty) R), r = R) PJTyss,
   build-types-injectors TyParamNo GR KNs ArgsNos KTys PJTyss InjTyss,
   implement-injectors TyParamNo ArgsNos InjTyss Injss,
-  name-injectors FName 1 GR KNs Injss Clausess,
-%   TTT is {{lib:@elpi.derive.eq_f}},
-%   coq.say TTT,
-%   std.forall Clauses (x\
-%     coq.elpi.accumulate _ "derive.injections.db" (clause _ _ x)
-%   ),
-%   coq.env.add-const FName Body Type _ C,
+  Register = (k\j\c\ (injections-db (global (indc k)) j (global (const c)))),
+  name-ijs FName 1 GR KNs Injss Register Clausess,
   std.flatten Clausess Clauses,
   ClausesFin = [injections-done (global (indt GR)) | Clauses], %[injections-done GR, injections GR (const C)],
   std.forall ClausesFin (x\

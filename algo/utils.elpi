@@ -1,0 +1,99 @@
+namespace derive.algo-utils {
+
+func names12 name -> name, name.
+names12 N N1 N2 :- !,
+  coq.name-suffix N 1 N1, coq.name-suffix N 2 N2.
+
+pred name-prefix i: name, i:string, o:name.
+name-prefix N P R :-
+  coq.name->id N NS,
+  S is P ^ NS,
+  coq.string->name S R.
+
+% given TyParam ArgNo and T, 
+% duplicate-argument skips TyParam products, 
+% then for the first ArgNo products adds another product expecting an argument of the same Type, 
+% after all lambdas are processed returns the body unchanged
+pred duplicate-arguments i:int, i:int, i:term, o:term.
+duplicate-arguments 0 0 T T :- !.
+duplicate-arguments 0 O (prod N TyA T) (prod Arg1 TyA a1\ (prod Arg2 TyA a2\ (S a1 a2))) :- 
+    O > 0,
+    P is O - 1,
+    names12 N Arg1 Arg2,
+    (pi a1 a2\ duplicate-arguments 0 P (T a1) (S a1 a2)).
+duplicate-arguments N O (prod TyName TyArg T) (prod TyName TyArg S) :- !,
+  N > 0,
+  M is N - 1,
+  pi a1\ duplicate-arguments M O (T a1) (S a1).
+
+pred count-args i:int, i:term, o:int.
+count-args N T R :-
+  coq.count-prods T M,
+  R is M - N.
+
+% given list eta-src type, eta-RT, list of etas, list of src, list of dest, list of src = dest, 
+% builds the corresponding ap.
+pred mk-aps-etas i:list term, i:term, i:list term, i:list term, i:list term, i:list term, o:list term.
+mk-aps-etas [] _ [] [] [] [] [].
+mk-aps-etas [DTy|DestTys] ITyTy [Eta|Etas] [SA|SrcArgs] [DA|DestArgs] [Eq|Eqs] [RE | RS] :-
+  Ap = {{ eq_f }},
+  coq.mk-app Ap [DTy,ITyTy,Eta,SA,DA,Eq] R,
+  coq.elaborate-skeleton R _ RE ok,
+  mk-aps-etas DestTys ITyTy Etas SrcArgs DestArgs Eqs RS.
+
+% K comes with type arguments already applied.
+pred mk-ith-eta i:int, i:list term, i:list term, i:list term, i:term, o:term.
+mk-ith-eta I MArgs DestArgs DestTys K FR :- 
+  J is I - 1,
+  std.take J DestArgs Done, % list of args already processed.
+  std.drop I MArgs MTODO, % list of args to yet process
+  std.nth J DestTys CurrTy,
+  (pi curr\ 
+    coq.mk-app K {std.append Done [curr|MTODO]} (KArgs curr)),
+  FR = fun `R` CurrTy (r\ (KArgs r)).
+
+
+% KDest comes with the type arguments already applied.
+pred mk-etas-priv i:list term, i:list term, i:list term, i:int, i:int, i: term, o:list term.
+mk-etas-priv _ _ _ M N  _ [] :- M > N.
+mk-etas-priv SrcArgs DestArgs DestTys I N KDest [R| RS] :- 
+  J is I + 1,
+  mk-ith-eta I SrcArgs DestArgs DestTys KDest R,
+  mk-etas-priv SrcArgs DestArgs DestTys J N KDest RS.
+
+pred mk-etas i:list term, i:list term, i:list term, i: term, o:list term.
+mk-etas SrcArgs DestArgs TyDest KAppTyArgs REtas :-
+  mk-etas-priv SrcArgs DestArgs TyDest 1 {std.length DestArgs} KAppTyArgs REtas.
+
+pred compose-path i:list term, i:term, i:term o: term.
+compose-path [] End _ End.
+compose-path [Argk|Args] End ITy {{ @eq_trans lp:ITy _ _ _ lp:Argk lp:R }} :-
+  compose-path Args End ITy R.
+
+% List of src args, list of dest args and their types, K applied to type parameters, equalities src = dest, type of K TyParam Dest.
+% returns (ap eta1 s1 d1 e1) @ ... @ ap etan sn dn en.
+pred mk-chain i:list term, i:list term, i:list term, i:term, i:list term, i:term, i:term, o:term.
+mk-chain SrcArgs DestArgs DestArgsTy K Eqs ITyTy RHS R :-
+  mk-etas SrcArgs DestArgs DestArgsTy K REtas,
+  mk-aps-etas DestArgsTy ITyTy REtas SrcArgs DestArgs Eqs Raps,
+  compose-path Raps {{ @eq_refl lp:ITyTy lp:RHS }} ITyTy RSkel,
+  coq.elaborate-skeleton RSkel _ R ok.
+
+pred name-ij i:string, i:int, i:int, i:inductive, i:constructor, i:list term, i: constructor -> int -> constant -> prop, o:list prop.
+name-ij _ _ _ _ _ [] _ []. 
+name-ij FName I J GR Kn [InjTy|InjTyss] F [Clause|Clauses] :-
+  Jn is J + 1,
+  NameIJ is {std.any->string FName} ^ {std.any->string I} ^ {std.any->string J},
+  coq.env.add-const NameIJ InjTy _ _ C,
+  Clause = (F Kn J C),
+  name-ij FName I Jn GR Kn InjTyss F Clauses.
+
+% Prefix, current constructor, an inductive, its constructors, list of list of terms to name
+pred name-ijs i:string, i:int, i:inductive, i:list constructor, i:list (list term), i: constructor -> int -> constant -> prop, o:list (list prop).
+name-ijs _ _ _ [] [] _ [].
+name-ijs FName I GR [Kn | KNs] [InjTys | InjTyss] F [Clauses | Clausess] :-
+  In is I + 1,
+  name-ij FName I 1 GR Kn InjTys F Clauses,
+  name-ijs FName In GR KNs InjTyss F Clausess.
+  
+}

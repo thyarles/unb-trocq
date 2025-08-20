@@ -1,6 +1,7 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
 From Trocq.Algo Extra Dependency "Rm.elpi" as Rm.
 From Trocq.Algo Extra Dependency "common_algo.elpi" as common.
+From Trocq.Algo Extra Dependency "utils.elpi" as algo_utils.
 
 From elpi Require Import elpi.
 From elpi.apps Require Import derive.param2.
@@ -27,6 +28,7 @@ Elpi Accumulate Db Header derive.param2.db.
 Elpi Accumulate Db derive.param2.db.
 Elpi Accumulate Db derive.mymap.db.
 Elpi Accumulate File common.
+Elpi Accumulate File algo_utils.
 Elpi Accumulate Db derive.Rm.db.
 Elpi Accumulate File Rm.
 Elpi Accumulate lp:{{
