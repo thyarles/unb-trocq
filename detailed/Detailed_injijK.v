@@ -12,13 +12,6 @@ Elpi derive.isK False.
 Elpi derive.mR False.
 Elpi derive.Rm False.
 
-Notation False_Pred := (fun w1 w2 wR => False_mR w1 w2 (False_Rm w1 w2 wR) = wR) (only parsing).
-Definition False_mRRmK : forall (w1 w2 : False) (wR : False_R w1 w2), False_mR w1 w2 (False_Rm w1 w2 wR) = wR.
-Proof.
-refine (fun f1 f2 fR => _).
-exact (False_R_ind False_Pred f1 f2 fR).
-Defined.
-
 Elpi derive.param2 Unit.
 Elpi derive.mymap Unit.
 Elpi derive.projK Unit.
@@ -27,28 +20,11 @@ Elpi derive.isK Unit.
 Elpi derive.mR Unit.
 Elpi derive.Rm Unit.
 
-Notation Unit_Pred := (fun u1 u2 uR => Unit_mR u1 u2 (Unit_Rm u1 u2 uR) = uR).
-Definition Unit_mRRmK : forall (w1 w2 : Unit) (wR : Unit_R w1 w2), Unit_mR w1 w2 (Unit_Rm w1 w2 wR) = wR.
-Proof.
-refine (fun u1 u2 uR=> _).
-refine (Unit_R_ind Unit_Pred _ u1 u2 uR).
-- exact (@eq_refl (Unit_R TT TT) TT_R).
-Defined.
-
 Elpi derive.param2 Bool.
 Elpi derive.mymap Bool.
 Elpi derive.isK Bool.
 Elpi derive.mR Bool.
 Elpi derive.Rm Bool.
-
-Notation Bool_Pred := (fun b1 b2 bR => Bool_mR b1 b2 (Bool_Rm b1 b2 bR) = bR).
-Definition Bool_mRRmK : forall (w1 w2 : Bool) (wR : Bool_R w1 w2), Bool_mR w1 w2 (Bool_Rm w1 w2 wR) = wR.
-Proof.
-refine (fun b1 b2 bR=> _).
-refine (Bool_R_ind Bool_Pred _ _ b1 b2 bR).
-- exact (@eq_refl (Bool_R Falseb Falseb) Falseb_R).
-- exact (@eq_refl (Bool_R Trueb Trueb) Trueb_R).
-Defined.
 
 Elpi derive.param2 Wrap.
 Elpi derive.mymap Wrap.
@@ -73,18 +49,6 @@ Proof.
 refine (fun u1 u2 p1=> _).
 refine (conv _ u1 u2 p1 (Wrap_Pred_inj11K u1) _).
 exact (@eq_refl (@eq Unit u1 u1) (@eq_refl Unit u1)).
-Defined.
-
-Notation Wrap_Pred := (fun w1 w2 wR => Wrap_mR w1 w2 (Wrap_Rm w1 w2 wR) = wR).
-Definition Wrap_mRRmK : forall (w1 w2 : Wrap) (wR : Wrap_R w1 w2), 
-    Wrap_mR w1 w2 (Wrap_Rm w1 w2 wR) = wR.
-Proof.
-refine (fun w1 w2 wR=> _).
-refine (Wrap_R_ind Wrap_Pred _ w1 w2 wR).
-- refine (fun u1 u2 uR => _). 
-refine (@eq_ind_r _ (Unit_Rm u1 u2 uR) (fun t=> KWrap1_R u1 u2 (Unit_mR u1 u2 t) = KWrap1_R u1 u2 uR) _ _ (Wrap_inj11K (Unit_mymap u1) u2 (Unit_Rm u1 u2 uR))).
-refine (@eq_ind_r _ uR (fun t => KWrap1_R u1 u2 t = KWrap1_R u1 u2 uR) _ _ (Unit_mRRmK u1 u2 uR)).
-exact (@eq_refl (Wrap_R (KWrap1 u1) (KWrap1 u2)) (KWrap1_R u1 u2 uR)).
 Defined.
 
 Elpi derive.param2 WrapMore.

@@ -1,4 +1,4 @@
-shorten derive.common-algo.{mk-mR-type}.
+shorten derive.common-algo.{mk-mR-type-Rm}.
 shorten derive.algo-utils.{mk-chain}.
 
 namespace derive.Rm {
@@ -53,7 +53,7 @@ process-args Ksrc Kdest N TyArgsNo (prod AN1 A1Ty a1\ prod AN2 A2Ty a2\ prod ARN
   @pi-decl ARN (ARTy a1 a2) ar\
     coq.mk-app Ksrc [a1] (NewKS a1),
     coq.mk-app Kdest [a2] (NewKD a2),
-    (param a2 a1 ar =>
+    (param a2 a1 ar =!=>
     process-args (NewKS a1) (NewKD a2) M TyArgsNo (Bo a1 a2 ar) Goal TySrc TyDest ITyTy (R a1 a2 ar)),
     % if the type of the argument is an instance of the inductive type add an induction hypothesis
     whd ITyTy _ Ind _,
@@ -147,7 +147,7 @@ main GR Prefix Clauses :- std.do! [
   param Ind Ind TR,
   coq.typecheck TR TRTy _,
   mymap-def Ind IndMap,
-  mk-mR-type TyParamNo TRTy IndMap {{ Type }} TR tt MRTy,
+  mk-mR-type-Rm TyParamNo TRTy IndMap {{ Type }} TR MRTy,
   coq.elaborate-skeleton MRTy _ MRTyE ok,
   TR = global (indt GRR),
   coq.gref->id (indt GRR) Rname,
@@ -157,7 +157,7 @@ main GR Prefix Clauses :- std.do! [
   coq.env.indt GRR _ _ _ _ _ KTyRs,
   std.map KNs (x\ r\ r = (global (indc x))) Ks,
   implement-Rm TyParamNo TyParamNo MRTyE Ks Ks KTys KTyRs Pred (global RInd) R,
-  coq.elaborate-skeleton R MRTyE Re ok,
+  coq.elaborate-skeleton R MRTyE Re E,
   Name is Prefix ^ "Rm",
   coq.ensure-fresh-global-id Name FName,
   coq.env.add-const FName Re MRTyE _ C,

@@ -79,7 +79,8 @@ mk-chain SrcArgs DestArgs DestArgsTy K Eqs ITyTy RHS R :-
   compose-path Raps {{ @eq_refl lp:ITyTy lp:RHS }} ITyTy RSkel,
   coq.elaborate-skeleton RSkel _ R ok.
 
-pred name-ij i:string, i:int, i:int, i:inductive, i:constructor, i:list term, i: constructor -> int -> constant -> prop, o:list prop.
+% pred name-ij i:string, i:int, i:int, i:inductive, i:constructor, i:list term, i: constructor -> int -> constant -> prop, o:list prop.
+pred name-ij i:string, i:int, i:int, i:inductive, i:constructor, i:list term, i: (pred i:constructor, i:int, o:constant), o:list prop.
 name-ij _ _ _ _ _ [] _ []. 
 name-ij FName I J GR Kn [InjTy|InjTyss] F [Clause|Clauses] :-
   Jn is J + 1,
@@ -89,7 +90,8 @@ name-ij FName I J GR Kn [InjTy|InjTyss] F [Clause|Clauses] :-
   name-ij FName I Jn GR Kn InjTyss F Clauses.
 
 % Prefix, current constructor, an inductive, its constructors, list of list of terms to name
-pred name-ijs i:string, i:int, i:inductive, i:list constructor, i:list (list term), i: constructor -> int -> constant -> prop, o:list (list prop).
+pred name-ijs i:string, i:int, i:inductive, i:list constructor, i:list (list term), i: (pred i:constructor, i:int, o:constant), o:list (list prop).
+% pred name-ijs i:string, i:int, i:inductive, i:list constructor, i:list (list term), i: constructor -> int -> constant -> prop, o:list (list prop).
 name-ijs _ _ _ [] [] _ [].
 name-ijs FName I GR [Kn | KNs] [InjTys | InjTyss] F [Clauses | Clausess] :-
   In is I + 1,

@@ -62,6 +62,7 @@ bo-k-args ParamsRev K _ Args Tys R :-
 % map.aux FRel R :-
 %   coq.mk-app {{ map }} [FRel] R. 
 
+pred bo-k-args.aux i:term, i:list term, i:list term, i:term, o:term.
 bo-k-args.aux R [] [] _ R :- coq.typecheck R _ ok.
 bo-k-args.aux K [A|As] [T|Ts] (prod _ S Ty) R :-
   mymap-db T S FRel,

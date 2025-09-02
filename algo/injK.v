@@ -8,7 +8,8 @@ From elpi Require Import elpi.
 From elpi.apps Require Import derive.bcongr. (* for eq_f register *) 
 (* From elpi.apps Require Import projK.  *)
 
-From Trocq Require Import HoTT_additions Hierarchy.
+From Trocq Require Import Hierarchy.
+(* From Trocq Require Import HoTT_additions Hierarchy. *)
 Unset Uniform Inductive Parameters. 
 
 Definition conv (A : Type) (x y : A) (p: x = y) 
@@ -37,10 +38,6 @@ Elpi Accumulate File algo_utils.
 Elpi Accumulate Db derive.injectionsK.db.
 Elpi Accumulate Db derive.injections.db.
 Elpi Accumulate File injK.
-(* Elpi Query lp:{{ 
-  %std.nth 0 {std.iota 5} L.
-  R = {{lib:@elpi.derive.conv}}.
-}}. *)
 Elpi Accumulate lp:{{
   main [str I] :- !, coq.locate I (indt GR),
     coq.gref->id (indt GR) Tname,
@@ -51,14 +48,3 @@ Elpi Accumulate lp:{{
   pred usage.
   usage :- coq.error "Usage: derive.Rm <object name>".
 }}. 
-
-From Trocq.Tests Require Import coverage.
-Elpi derive.projK Box.
-Elpi derive.injections Box.
-Elpi derive.injectionsK Box.
-Elpi derive.projK WrapMore.
-Elpi derive.injections WrapMore.
-Elpi derive.injectionsK WrapMore.
-Elpi derive.projK List.
-Elpi derive.injections List.
-Elpi derive.injectionsK List.

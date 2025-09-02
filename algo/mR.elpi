@@ -1,5 +1,5 @@
 
-shorten derive.common-algo.{mk-mR-type}.
+shorten derive.common-algo.{mk-mR-type-mR}.
 
 namespace derive.mR {
 
@@ -164,7 +164,7 @@ main GR Prefix Clauses :- std.do! [
   param Ind Ind TR,
   coq.typecheck TR TRTy _,
   mymap-def Ind IndMap,
-  mk-mR-type UnifParamNo TRTy IndMap {{ Type }} TR ff MRTy,
+  mk-mR-type-mR UnifParamNo TRTy IndMap {{ Type }} TR MRTy,
   coq.elaborate-skeleton MRTy _ MRTyE ok,
   implement-mR UnifParamNo UnifParamNo MRTyE T,
   coq.elaborate-skeleton T MRTyE TE ok,
