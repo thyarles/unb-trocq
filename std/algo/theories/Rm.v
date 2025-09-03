@@ -4,14 +4,14 @@ From Trocq Extra Dependency "algo/elpi/common_algo.elpi" as common.
 From Trocq Extra Dependency "algo/elpi/utils.elpi" as algo_utils.
 
 From elpi Require Import elpi.
-From elpi.apps Require Import derive.param2.
-From elpi.apps Require Import derive.bcongr. (* for eq_f register *) 
-From Trocq Require Import mymap.
-From elpi.apps Require Import derive.induction.
-(* From Trocq Require Import HoTT_additions Hierarchy. *)
-From Trocq Require Import Hierarchy.
-Unset Uniform Inductive Parameters. 
+From Trocq Require Export Hierarchy.
 
+From elpi.apps Require Export derive.param2.
+From elpi.apps Require Export derive.bcongr. (* for eq_f register *) 
+(* From Trocq Require Export mymap. *)
+(* todo: the real dependency is mymap *)
+From Trocq Require Import mR. 
+Unset Uniform Inductive Parameters. 
 Elpi Db derive.Rm.db lp:{{
   % [ar-db A1 A2 AR] returns the relation between a type A1 and A2.
   pred ar-db i:term, i:term, o:term. 
@@ -20,7 +20,7 @@ Elpi Db derive.Rm.db lp:{{
   pred rm-db i:term, o:term.
 
   % [Rm-done T] mean T was already derived
-  pred rm-done o:term.
+  pred rm-done o:inductive.
 }}.
 
 Elpi Command derive.Rm.
@@ -43,3 +43,17 @@ Elpi Accumulate lp:{{
   pred usage.
   usage :- coq.error "Usage: derive.Rm <object name>".
 }}. 
+
+(* hook into derive *)
+(* Elpi Accumulate derive Db Header derive.Rm.db.
+Elpi Accumulate derive Db derive.Rm.db.
+Elpi Accumulate derive File common.
+Elpi Accumulate derive File algo_utils.
+Elpi Accumulate derive File Rm.
+
+Elpi Accumulate derive lp:{{
+dep1 "Rm" "mymap".
+dep1 "Rm" "param2".
+derivation (indt T) Prefix ff (derive "Rm" (derive.Rm.main T Prefix) (rm-done T)).
+
+}}. *)

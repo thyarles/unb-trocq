@@ -156,7 +156,7 @@ implement-mR N TyParamNo (prod A1 A1Ty a1\ prod A2 A2Ty a2\ prod AR (ARTy a1 a2)
     implement-mR M TyParamNo (Bo a1 a2 ar) (R a1 a2 ar).
 
 
-pred main i:inductive, i:string, o:list prop.
+func main inductive, string -> list prop.
 main GR Prefix Clauses :- std.do! [
   Name is Prefix ^ "mR",
   coq.env.indt GR _ UnifParamNo _ _ _ _,
@@ -171,7 +171,7 @@ main GR Prefix Clauses :- std.do! [
   coq.ensure-fresh-global-id Name FName,
   coq.env.add-const FName TE MRTyE _ C,
   I = global (indt GR),
-  Clauses = [mR-done I, mR-db I (global (const C))],
+  Clauses = [mR-done GR, mR-db I (global (const C))],
   std.forall Clauses (x\
     coq.elpi.accumulate _ "derive.mR.db" (clause _ _ x)
   ),

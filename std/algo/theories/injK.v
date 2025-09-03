@@ -2,11 +2,11 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
 From Trocq Extra Dependency "algo/elpi/injK.elpi" as injK.
 From Trocq Extra Dependency "algo/elpi/utils.elpi" as algo_utils.
-From Trocq Require Import injection_lemmas. 
+From Trocq Require Export injection_lemmas. 
 
 From elpi Require Import elpi.
-From elpi.apps Require Import derive.bcongr. (* for eq_f register *) 
-(* From elpi.apps Require Import projK.  *)
+From elpi.apps Require Export derive.bcongr. (* for eq_f register *) 
+(* From Trocq Require Export Rm. *)
 
 From Trocq Require Import Hierarchy.
 (* From Trocq Require Import HoTT_additions Hierarchy. *)
@@ -29,10 +29,10 @@ Elpi Db derive.injectionsK.db lp:{{
   pred injectionsK-db i:term, i:int, o:term.
 
   % [injectionsK-done T K] means T K was already derived
-  pred injectionsK-done o:term. 
+  pred injectionsK-done o:inductive. 
 }}.
 
-Elpi Command derive.injectionsK.
+Elpi Command derive.injK.
 Elpi Accumulate File derive_hook.
 Elpi Accumulate File algo_utils.
 Elpi Accumulate Db derive.injectionsK.db.
@@ -48,3 +48,16 @@ Elpi Accumulate lp:{{
   pred usage.
   usage :- coq.error "Usage: derive.Rm <object name>".
 }}. 
+
+(* hook into derive *)
+(* Elpi Accumulate derive Db derive.injectionsK.db.
+Elpi Accumulate derive File algo_utils.
+Elpi Accumulate derive File injK.
+
+Elpi Accumulate derive lp:{{
+
+dep1 "injK" "injections".
+derivation (indt T) Prefix ff (derive "injK" (derive.injK.main T Prefix) (injectionsK-done T)).
+
+}}. *)
+

@@ -42,3 +42,5 @@ algo/theories/injK.v
 algo/tests/test_injK.v
 algo/theories/mRRmK.v 
 algo/tests/test_mRRmK.v
+algo/theories/algo.v
+algo/tests/test_algo.v

@@ -4,9 +4,10 @@ From elpi.apps.derive.elpi Extra Dependency "derive_synterp_hook.elpi" as derive
 From Trocq Extra Dependency "algo/elpi/injection_lemmas.elpi" as injections.
 From Trocq Extra Dependency "algo/elpi/utils.elpi" as algo_utils.
 
-From elpi Require Import elpi.
-From elpi.apps Require Import derive.bcongr. (* for eq_f register *) 
-From elpi.apps Require Import projK. 
+From elpi.apps Require Import derive.legacy.
+From elpi.apps Require Export derive.bcongr. (* for eq_f register  *)
+From elpi.apps Require Export derive.projK. 
+
 Unset Uniform Inductive Parameters. 
 Elpi Db derive.injections.db lp:{{
 
@@ -18,7 +19,7 @@ Elpi Db derive.injections.db lp:{{
   pred injections-db i:term, i:int, o:term.
 
   % [injections-done T K] means T K was already derived
-  pred injections-done o:term. 
+  pred injections-done o:inductive. 
 }}.
 
 Elpi Command derive.injections.
@@ -42,4 +43,17 @@ Elpi Accumulate lp:{{
   pred usage.
   usage :- coq.error "Usage: derive.injections <object name>".
 }}. 
+
+(* hook into derive *)
+(* Elpi Accumulate derive Db derive.injections.db.
+Elpi Accumulate derive File injection.
+Elpi Accumulate derive File algo_utils.
+Elpi Accumulate derive File injections.
+
+Elpi Accumulate derive lp:{{
+
+dep1 "injections" "projK".
+derivation (indt T) Prefix ff (derive "injections" (derive.injections.main T Prefix) (injections-done T)).
+
+}}. *)
 

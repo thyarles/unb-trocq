@@ -183,7 +183,7 @@ mk-clause N Lno Ity1 Ity2 X Todo Map C :- whd1 X X1, !,
   mk-clause N Lno Ity1 Ity2 X1 Todo Map C.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-pred main i:inductive, i:string, o:list prop.
+func main inductive, string -> list prop.
 main GR Prefix C :- do! [
   T = global (indt GR),
   coq.env.indt GR _Ind Lno Luno Arity _ _,
@@ -205,20 +205,3 @@ main GR Prefix C :- do! [
 ].
   
 }
-/*
-namespace derive.mymap {
-  
-  pred main i:inductive, i:string, o:list prop.
-  main GR Prefix Clauses :- std.do! [
-    %... % synthesize Body and Type
-    Name is Prefix ^ "myconcept",
-    coq.ensure-fresh-global-id Name FName,
-    coq.env.add-const FName Body Type _ C,
-    Clauses = [mymap-done GR, mymap-db GR (const C)],
-    std.forall Clauses (x\
-      coq.elpi.accumulate _ "derive.mymap.db" (clause _ _ x)
-    ),
-  ].
-
-}
-*/

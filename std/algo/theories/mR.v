@@ -2,16 +2,16 @@ From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
 From elpi.apps.derive.elpi Extra Dependency "discriminate.elpi" as discr.
 From Trocq Extra Dependency "algo/elpi/common_algo.elpi" as common.
 From Trocq Extra Dependency "algo/elpi/mR.elpi" as mR.
-From Trocq Require Import mymap injection_lemmas.
+From Trocq Extra Dependency "algo/elpi/injection_lemmas.elpi" as injections.
 
 From elpi Require Import elpi.
-From elpi.apps Require Import derive.param2 derive.isK.
-From elpi.apps Require Import derive.bcongr (* for eq_f register *) 
+From elpi.apps Require Export derive.param2 derive.isK.
+From elpi.apps Require Export derive.bcongr (* for eq_f register *) 
                               derive.eqK (*for bool_discr *)
                               derive.isK. (* for isK db required by discriminate *)
-(* From elpi.apps Require Import map.                               *)
+From Trocq Require Export mymap injection_lemmas. 
 
-From Trocq Require Import Hierarchy.
+From Trocq Require Export Hierarchy.
 Unset Uniform Inductive Parameters. 
 
 Elpi Db derive.mR.db lp:{{
@@ -21,7 +21,7 @@ Elpi Db derive.mR.db lp:{{
   pred mR-db i:term, o:term.
 
   % [mR-done T] mean T was already derived
-  pred mR-done o:term.
+  pred mR-done o:inductive.
 }}.
 
 Elpi Command derive.mR.
@@ -45,4 +45,31 @@ Elpi Accumulate lp:{{
   pred usage.
   usage :- coq.error "Usage: derive.mR <object name>".
 }}. 
+
+(* hook into derive *)
+(* Elpi Accumulate derive Db derive.mR.db.
+Elpi Accumulate derive File discr.
+Elpi Accumulate derive File common.
+Elpi Accumulate derive File injections.
+Elpi Accumulate derive File mR.
+
+#[phases="both"] Elpi Accumulate derive lp:{{
+  dep1 "mR" "param2".
+  dep1 "mR" "mymap".
+  dep1 "mR" "injections".
+  dep1 "mR" "isK".
+}}.
+
+#[synterp] Elpi Accumulate derive lp:{{
+  derivation _ _ (derive "mR" (cl\ cl = []) true).
+}}.
+
+Elpi Accumulate derive lp:{{
+
+derivation (indt T) Prefix ff (derive "mR" (derive.mR.main T Prefix) (mR-done T)).
+
+}}. *)
+
+
+
 

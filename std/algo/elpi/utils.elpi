@@ -97,5 +97,31 @@ name-ijs FName I GR [Kn | KNs] [InjTys | InjTyss] F [Clauses | Clausess] :-
   In is I + 1,
   name-ij FName I 1 GR Kn InjTys F Clauses,
   name-ijs FName In GR KNs InjTyss F Clausess.
+
+% Returns the list of P of F K I P of a constructor. 
+pred get-KI i:constructor, i:int, i:int, i:(pred i:constructor, i:int, o:term), o:list term.
+get-KI _ Max Max _ [] :- !.
+get-KI GRK J Max F [P|PJs] :- 
+    I is J + 1,
+    F GRK I P,
+    get-KI GRK I Max F PJs.
+
+% for a list of P of F K I for a list of constructors 
+pred for-K-get-KI i:int, i:list constructor, i:list term, 
+i:(pred i:constructor, i:int, o:term),
+o: list int, o:list (list term).
+for-K-get-KI _ [] [] _ [] []:- !.
+for-K-get-KI TyParamNo [Kn|KNs] [KTy|KTys] F [ArgsNo|ArgsNos] [R|RS]:- 
+    count-args TyParamNo KTy ArgsNo,
+    get-KI Kn 0 ArgsNo F R,
+    for-K-get-KI TyParamNo KNs KTys F ArgsNos RS.
+
+% from a type of shape 3*(forall (a1 : T1) (a2 : T2), AR a1 a2, ...) extracts list of T1 and T2
+pred type-of-args i:term, i:int, o:list term, o:list term. 
+type-of-args _ 0 [] [].
+type-of-args (prod _ ATy1 a1\ prod _ ATy2 a2\ prod _ _ ar\ (Bo a1 a2 ar)) N [ATy1| SR] [ATy2 | DR] :-
+  M is N - 1,
+  pi a1 a2 ar\ 
+   type-of-args (Bo a1 a2 ar) M SR DR.
   
 }

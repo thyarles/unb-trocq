@@ -1,4 +1,4 @@
-shorten derive.algo-utils.{duplicate-arguments, count-args, name-ijs}.
+shorten derive.algo-utils.{duplicate-arguments, count-args, name-ijs, for-K-get-KI}.
 
 namespace derive.injections {
 
@@ -15,23 +15,6 @@ for each ArgNumber in 1 to J+1,
 get the Projector GRK ArgNumber, 
 Get the type ProjType, forall ArgTys Args Ind, ret 
 Return the processed Types */
-
-
-% Returns the list of projectors of a constructor. 
-pred get-projectors i:constructor, i:int, i:int, o:list term.
-get-projectors _ Max Max [] :- !.
-get-projectors GRK J Max [P|PJs] :- 
-    I is J + 1,
-    projK-db GRK I P,
-    get-projectors GRK I Max PJs.
-
-% for a list of constructors returns a list with all the projectors of that construct 
-pred for-K-get-projectors i:int, i:list constructor, i:list term, o: list int, o:list (list term).
-for-K-get-projectors _ [] [] [] []:- !.
-for-K-get-projectors TyParamNo [Kn|KNs] [KTy|KTys] [ArgsNo|ArgsNos] [R|RS]:- 
-    count-args TyParamNo KTy ArgsNo,
-    get-projectors Kn 0 ArgsNo R,
-    for-K-get-projectors TyParamNo KNs KTys ArgsNos RS.
 
 % TyParam, ArgNo, F, Type of the equality, Left HS, Right HS
 % F is of type forall (Typarams : Type) ((Arg1 : A1) (Arg2 : A2) ...), Ret
@@ -117,7 +100,11 @@ implement-injectors TyParam [ArgNo | ArgNos] [InjTys | InjTyss] [R | RS ] :-
   implement-K-injectors TyParam 1 ArgNo InjTys R,
   implement-injectors TyParam ArgNos InjTyss RS.
 
-pred main i:inductive, i:string, o:list prop.
+pred for-K-get-projectors i:int, i:list constructor, i:list term, o: list int, o:list (list term).
+for-K-get-projectors TyParamNo KNs KTys ArgsNos PJss :-
+  for-K-get-KI TyParamNo KNs KTys (grk\ i\ p\ projK-db grk i p) ArgsNos PJss.
+
+func main inductive, string -> list prop.
 main GR Prefix Clauses :- std.do! [
   Name is Prefix ^ "injections",
   coq.ensure-fresh-global-id Name FName,
@@ -129,7 +116,7 @@ main GR Prefix Clauses :- std.do! [
   Register = (k\j\c\ (injections-db (global (indc k)) j (global (const c)))),
   name-ijs FName 1 GR KNs Injss Register Clausess,
   std.flatten Clausess Clauses,
-  ClausesFin = [injections-done (global (indt GR)) | Clauses], %[injections-done GR, injections GR (const C)],
+  ClausesFin = [injections-done GR | Clauses], %[injections-done GR, injections GR (const C)],
   std.forall ClausesFin (x\
     coq.elpi.accumulate _ "derive.injections.db" (clause _ _ x)
   ),

@@ -178,7 +178,7 @@ implement-injK-types TyParamNo [Kn|KNs] [ArgNo|ArgNos] [InjKTys|InjKTyss] [DestN
   implement-injK-types TyParamNo KNs ArgNos InjKTyss DestNoss RS.
 
 
-pred main i:inductive, i:string, o:list prop.
+func main inductive, string -> list prop.
 main GR Prefix Clauses :- std.do! [
   
   Name is Prefix ^ "injK",
@@ -190,7 +190,7 @@ main GR Prefix Clauses :- std.do! [
   implement-injK-types TyParamNo KNs ArgNos RTys DestNos RS,
   name-ijs FName 1 GR KNs RS Register Clausess,
   std.flatten Clausess Clauses,
-  ClausesFin = [injectionsK-done (global (indt GR)) | Clauses],
+  ClausesFin = [injectionsK-done GR | Clauses],
   std.forall ClausesFin (x\
     coq.elpi.accumulate _ "derive.injectionsK.db" (clause _ _ x)
   ),
