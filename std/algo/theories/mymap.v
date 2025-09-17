@@ -43,13 +43,13 @@ Elpi Accumulate lp:{{
 }}. 
 
 (* hook into derive *)
-(* Elpi Accumulate derive Db derive.mymap.db.
+Elpi Accumulate derive Db derive.mymap.db.
 Elpi Accumulate derive File mymap.
 
 Elpi Accumulate derive lp:{{
 
 derivation (indt T) Prefix ff (derive "mymap" (derive.mymap.main T Prefix) (mymap-done T)).
 
-}}. *)
+}}.
 
 

@@ -4,6 +4,13 @@ func names12 name -> name, name.
 names12 N N1 N2 :- !,
   coq.name-suffix N 1 N1, coq.name-suffix N 2 N2.
 
+pred gen-names-umap i:name, o:name, o:name, o:name, o:name.
+gen-names-umap N N1 N2 NR NU :-
+  coq.name-suffix N 1 N1, 
+  coq.name-suffix N 2 N2,
+  coq.name-suffix N "R" NR, 
+  coq.name-suffix N "U" NU.
+
 pred name-prefix i: name, i:string, o:name.
 name-prefix N P R :-
   coq.name->id N NS,

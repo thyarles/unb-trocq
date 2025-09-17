@@ -47,7 +47,7 @@ Elpi Accumulate lp:{{
 }}. 
 
 (* hook into derive *)
-(* Elpi Accumulate derive Db derive.mR.db.
+Elpi Accumulate derive Db derive.mR.db.
 Elpi Accumulate derive File discr.
 Elpi Accumulate derive File common.
 Elpi Accumulate derive File injections.
@@ -60,15 +60,11 @@ Elpi Accumulate derive File mR.
   dep1 "mR" "isK".
 }}.
 
-#[synterp] Elpi Accumulate derive lp:{{
-  derivation _ _ (derive "mR" (cl\ cl = []) true).
-}}.
-
 Elpi Accumulate derive lp:{{
 
 derivation (indt T) Prefix ff (derive "mR" (derive.mR.main T Prefix) (mR-done T)).
 
-}}. *)
+}}.
 
 
 

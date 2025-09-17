@@ -54,7 +54,7 @@ Elpi Accumulate lp:{{
 
 
 
-(* hook into derive
+(* hook into derive *)
 Elpi Accumulate derive Db derive.mRRmK.db.
 Elpi Accumulate derive File common.
 Elpi Accumulate derive File algo_utils.
@@ -69,4 +69,4 @@ dep1 "mRRmK" "mR".
 dep1 "mRRmK" "Rm".
 derivation (indt T) Prefix ff (derive "mRRmK" (derive.mRRmK.main T Prefix) (mRRmK-done T)).
 
-}}. *)
+}}.

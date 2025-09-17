@@ -45,7 +45,7 @@ Elpi Accumulate lp:{{
 }}. 
 
 (* hook into derive *)
-(* Elpi Accumulate derive Db Header derive.Rm.db.
+Elpi Accumulate derive Db Header derive.Rm.db.
 Elpi Accumulate derive Db derive.Rm.db.
 Elpi Accumulate derive File common.
 Elpi Accumulate derive File algo_utils.
@@ -56,4 +56,4 @@ dep1 "Rm" "mymap".
 dep1 "Rm" "param2".
 derivation (indt T) Prefix ff (derive "Rm" (derive.Rm.main T Prefix) (rm-done T)).
 
-}}. *)
+}}.

@@ -45,7 +45,7 @@ Elpi Accumulate lp:{{
 }}. 
 
 (* hook into derive *)
-(* Elpi Accumulate derive Db derive.injections.db.
+Elpi Accumulate derive Db derive.injections.db.
 Elpi Accumulate derive File injection.
 Elpi Accumulate derive File algo_utils.
 Elpi Accumulate derive File injections.
@@ -55,5 +55,5 @@ Elpi Accumulate derive lp:{{
 dep1 "injections" "projK".
 derivation (indt T) Prefix ff (derive "injections" (derive.injections.main T Prefix) (injections-done T)).
 
-}}. *)
+}}.
 
