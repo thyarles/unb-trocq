@@ -1,0 +1,97 @@
+
+shorten derive.common-algo. {rel-mode}.
+shorten derive.algo-utils.{gen-names-umap}.
+namespace derive.umap {
+
+% TyParamNo
+% Arity 
+% Ind
+% IndR
+% TyArgs1
+% TyArgs2
+% ARArgs
+pred mk-umap-type-priv i:int, i:term, i:term, i:term, i:term, o:term.
+mk-umap-type-priv 0 _ IndL IndR Rel {{ @IsUMap lp:IndL lp:IndR lp:Rel}}.
+mk-umap-type-priv N (prod TN Ty t\ (Bo t)) IndL IndR Rel 
+        (prod TN1 Ty t1\ prod TN2 Ty t2\ prod TRN (ARTy t1 t2) ar\ prod URN (UMTy t1 t2 ar) ur\ (R t1 t2 ar ur)) :-
+  M is N - 1,
+  gen-names-umap TN TN1 TN2 TRN URN,
+  @pi-decl TN1 Ty t1\
+  @pi-decl TN2 Ty t2\
+  (ARTy t1 t2) = {{ lp:t1 -> lp:t2 -> Type }},
+  @pi-decl TRN (ARTy t1 t2) ar\
+  (UMTy t1 t2 ar) = {{ @IsUMap lp:t1 lp:t2 lp:ar }},
+  @pi-decl URN (UMTy t1 t2 ar) ur\
+    coq.mk-app IndL [t1] (NIndL t1),
+    coq.mk-app IndR [t2] (NIndR t2),
+    coq.mk-app Rel [t1,t2,ar] (NRel t1 t2 ar),
+    mk-umap-type-priv M (Bo t1) (NIndL t1) (NIndR t2) (NRel t1 t2 ar) (R t1 t2 ar ur).
+  
+% TyParamNo Arity Ind Rel
+pred mk-umap-type i:int, i:term, i:term, i:term, o:term.
+mk-umap-type TyParamNo Arity Ind Rel R :-
+  mk-umap-type-priv TyParamNo Arity Ind Ind Rel R.
+
+% given two types and an UMap between them, elaborates the types of the different hierarchy relations.
+pred insert-coersions i:term, i:term, i:term, o:term, o:term, o:term, o:term.
+insert-coersions T1 T2 UR MapR MRR RMR MRRMKR :-
+  coq.mk-app {rel-mode 0} [T1,T2] MapRTy,
+  coq.mk-app {rel-mode 1} [T1,T2] MRRTy,
+  coq.mk-app {rel-mode 2} [T1,T2] RMRTy,
+  coq.mk-app {rel-mode 4} [T1,T2] MRRMKRTy,
+  std.assert-ok! (coq.elaborate-skeleton UR MapRTy MapR) "derive.umap fails to insert coersions to MapR",
+  std.assert-ok! (coq.elaborate-skeleton UR MRRTy MRR) "derive.umap fails to insert coersions to MRR",
+  std.assert-ok! (coq.elaborate-skeleton UR RMRTy RMR) "derive.umap fails to insert coersions to RMR",
+  std.assert-ok! (coq.elaborate-skeleton UR MRRMKRTy MRRMKR) "derive.umap fails to insert coersions to MRRMKR".
+
+% TyParamNo UMapTy IndL IndR Rel IndMap MR RM MRRMK 
+pred implement-umap i:int, i:term, i:term, i:term, i:term, i:term, i:term, i:term, i:term, o:term. 
+% implement-umap _ _ _ _ _ _ _ _ {{ Type }}.
+implement-umap 0 _ IndL IndR Rel IndMap MR RM MRRMK R :-
+  R = {{ @MkUMap lp:IndL lp:IndR lp:Rel lp:IndMap lp:MR lp:RM lp:MRRMK }}.
+implement-umap N (prod TN1 Ty1 t1\ prod TN2 Ty2 t2\ prod TRN (ARTy t1 t2) ar\ prod URN (UMTy t1 t2 ar) ur\ (Bo t1 t2 ar ur)) IndL IndR Rel IndMap MR RM MRRMK (fun TN1 Ty1 t1\ fun TN2 Ty2 t2\ fun TRN (ARTy t1 t2) ar\ fun URN (UMTy t1 t2 ar) ur\ (R t1 t2 ar ur)) :-
+  M is N - 1,
+  @pi-decl TN1 Ty1 t1\
+  @pi-decl TN2 Ty2 t2\
+  @pi-decl TRN (ARTy t1 t2) ar\
+  @pi-decl URN (UMTy t1 t2 ar) ur\
+    coq.mk-app IndL [t1] (NIndL t1),
+    coq.mk-app IndR [t2] (NIndR t2),
+    coq.mk-app Rel [t1,t2,ar] (NRel t1 t2 ar),
+    (UR t1 t2 ar ur) =  {{ (@Param40.BuildRel _ _ lp:ar lp:ur (@Map0.BuildHas _ _ (@sym_rel lp:t1 lp:t2 lp:ar))) }},
+    insert-coersions t1 t2 (UR t1 t2 ar ur) (MapR t1 t2 ar ur) (MRR t1 t2 ar ur) (RMR t1 t2 ar ur) (MRRMKR t1 t2 ar ur),
+    coq.mk-app IndMap [t1, t2, (MapR t1 t2 ar ur)] (NIndMap t1 t2 ar ur),
+    coq.mk-app MR [t1,t2, (MRR t1 t2 ar ur)] (NMR t1 t2 ar ur),
+    coq.mk-app RM [t1,t2, (RMR t1 t2 ar ur)] (NRM t1 t2 ar ur),
+    coq.mk-app MRRMK [t1,t2, (MRRMKR t1 t2 ar ur)] (NMRRMKR t1 t2 ar ur),
+    implement-umap M (Bo t1 t2 ar ur) (NIndL t1) (NIndR t2) (NRel t1 t2 ar) 
+                      (NIndMap t1 t2 ar ur) (NMR t1 t2 ar ur) (NRM t1 t2 ar ur) (NMRRMKR t1 t2 ar ur) (R t1 t2 ar ur).
+
+
+func main inductive, string -> list prop.
+main GR Prefix Clauses :- std.do! [
+
+  coq.env.indt GR _ TyParamNo _ Arity _ _,
+  Ind = (global (indt GR)),
+  std.assert! (param Ind Ind IndR) "derive.umap: use derive.param2 before",
+  std.assert! (mymap-def Ind IndMap) "derive.umap: use derive.mymap before",
+  std.assert! (mR-db Ind MR) "derive.umap: use derive.mR before",
+  std.assert! (rm-db Ind RM) "derive.umap: use derive.Rm before",
+  std.assert! (mRRmK-db Ind MRRMK) "derive.umap: use derive.MRRMK before",
+  mk-umap-type TyParamNo Arity Ind IndR UMapTySkel,
+  std.assert-ok! (coq.elaborate-skeleton UMapTySkel _ UMapTy) "derive.umap generates illtyped type",
+  implement-umap TyParamNo UMapTy Ind Ind IndR IndMap MR RM MRRMK RUMapSkel,
+  std.assert-ok! (coq.elaborate-skeleton RUMapSkel _ RUMap) "derive.umap generates illtyped term",
+  NameUMap is Prefix ^ "umap",
+  coq.ensure-fresh-global-id NameUMap FNameUMap,
+  %coq.env.add-const FNameUMap RUMap UMapTy _ CUMap,
+  % todo: check RUMap against UMapTy modulo universes
+  coq.env.add-const FNameUMap RUMap _ _ CUMap,
+  ClausesUMap = [umap-done GR, umap-db Ind (global (const CUMap))],
+  Clauses = ClausesUMap,
+  std.forall Clauses (x\
+    coq.elpi.accumulate _ "derive.umap.db" (clause _ _ x)
+  ),
+].
+
+}
