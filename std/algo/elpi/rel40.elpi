@@ -1,0 +1,69 @@
+shorten derive.common-algo. {rel-mode}.
+shorten derive.algo-utils.{gen-names-umap}.
+
+namespace derive.rel40 {
+
+% TyParamNo
+% Arity 
+% Ind
+% IndR
+% TyArgs1
+% TyArgs2
+% ARArgs
+pred mk-rel40-type-priv i:int, i:term, i:term, i:term, o:term.
+mk-rel40-type-priv 0 _ IndL IndR {{ @Param40.Rel lp:IndL lp:IndR }}.
+mk-rel40-type-priv N (prod TN Ty t\ (Bo t)) IndL IndR 
+        (prod TN1 Ty t1\ prod TN2 Ty t2\ prod TRN (ARTy t1 t2) ar\ prod URN (UMTy t1 t2 ar) ur\ (R t1 t2 ar ur)) :-
+  M is N - 1,
+  gen-names-umap TN TN1 TN2 TRN URN,
+  @pi-decl TN1 Ty t1\
+  @pi-decl TN2 Ty t2\
+  (ARTy t1 t2) = {{ lp:t1 -> lp:t2 -> Type }},
+  @pi-decl TRN (ARTy t1 t2) ar\
+  (UMTy t1 t2 ar) = {{ @IsUMap lp:t1 lp:t2 lp:ar }},
+  @pi-decl URN (UMTy t1 t2 ar) ur\
+    coq.mk-app IndL [t1] (NIndL t1),
+    coq.mk-app IndR [t2] (NIndR t2),
+    mk-rel40-type-priv M (Bo t1) (NIndL t1) (NIndR t2) (R t1 t2 ar ur).
+  
+% TyParamNo Arity Ind Rel
+pred mk-rel40-type i:int, i:term, i:term, o:term.
+mk-rel40-type TyParamNo Arity Ind R :-
+  mk-rel40-type-priv TyParamNo Arity Ind Ind R.
+
+% TyParamNo UMapTy IndL IndR Rel IndMap MR RM MRRMK 
+pred implement-rel40 i:int, i:term, i:term, o:term.
+% implement-umap _ _ _ _ _ _ _ _ {{ Type }}.
+implement-rel40 0 _ UMapI R :-
+  R = {{ @Build40 _ _ _ lp:UMapI }}. 
+implement-rel40 N (prod TN1 Ty1 t1\ prod TN2 Ty2 t2\ prod TRN (ARTy t1 t2) ar\ prod URN (UMTy t1 t2 ar) ur\ (Bo t1 t2 ar ur)) 
+  UMapI (fun TN1 Ty1 t1\ fun TN2 Ty2 t2\ fun TRN (ARTy t1 t2) ar\ fun URN (UMTy t1 t2 ar) ur\ (R t1 t2 ar ur)) :-
+  M is N - 1,
+  @pi-decl TN1 Ty1 t1\
+  @pi-decl TN2 Ty2 t2\
+  @pi-decl TRN (ARTy t1 t2) ar\
+  @pi-decl URN (UMTy t1 t2 ar) ur\
+    coq.mk-app UMapI [t1,t2,ar,ur] (NUMapI t1 t2 ar ur),
+    implement-rel40 M (Bo t1 t2 ar ur) (NUMapI t1 t2 ar ur) (R t1 t2 ar ur).
+
+func main inductive, string -> list prop.
+main GR Prefix Clauses :- std.do! [
+
+  coq.env.indt GR _ TyParamNo _ Arity _ _,
+  Ind = (global (indt GR)),
+  std.assert! (umap-db Ind UMapI) "derive.rel40: use derive.umap before",
+  mk-rel40-type TyParamNo Arity Ind Rel40TySkel,
+  std.assert-ok! (coq.elaborate-skeleton Rel40TySkel _ Rel40Ty) "derive.rel40 generates illtyped type",
+  implement-rel40 TyParamNo Rel40Ty UMapI RRel40Skel,
+  std.assert-ok! (coq.elaborate-skeleton RRel40Skel _ RRel40) "derive.umap generates illtyped term",
+  NameRel is Prefix ^ "rel40",
+  coq.ensure-fresh-global-id NameRel FNameRel,
+  coq.env.add-const FNameRel RRel40 _ _ CRel,
+  ClausesRel = [rel40-done GR, rel40-db Ind (global (const CRel))],
+  Clauses = ClausesRel,
+  std.forall Clauses (x\
+    coq.elpi.accumulate _ "derive.rel40.db" (clause _ _ x)
+  ),
+].
+
+}

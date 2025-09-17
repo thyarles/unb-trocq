@@ -1,0 +1,60 @@
+From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
+From elpi.apps.derive.elpi Extra Dependency "derive_synterp_hook.elpi" as derive_synterp_hook.
+From Trocq Extra Dependency "algo/elpi/common_algo.elpi" as common.
+From Trocq Extra Dependency "algo/elpi/utils.elpi" as utils.
+From Trocq Extra Dependency "algo/elpi/sym.elpi" as sym.
+
+From elpi.apps Require Import derive.legacy derive.param2.
+
+From Trocq Require Export Hierarchy.
+Unset Uniform Inductive Parameters. 
+
+Elpi Db derive.sym.db lp:{{
+
+  % [sym I S] links I inductive type, 
+  %  with the function showing symmetry 
+  pred sym-db i:term, o:term.
+
+  % [sym-done T K] means T K was already derived
+  pred sym-done o:inductive. 
+}}.
+
+Elpi Command derive.sym.
+Elpi Accumulate File derive_hook.
+Elpi Accumulate Db Header derive.param2.db.
+Elpi Accumulate Db derive.param2.db.
+Elpi Accumulate File common.
+Elpi Accumulate File utils.
+Elpi Accumulate Db Header derive.sym.db.
+Elpi Accumulate Db derive.sym.db.
+Elpi Accumulate File sym.
+Elpi Accumulate lp:{{
+  
+  main [str I] :- !, 
+    coq.locate I (indt GR),
+    % Ind is (indt GR)
+    coq.gref->id (indt GR) Tname,
+    Suffix is Tname ^ "_",
+    derive.sym.main GR Suffix _.
+  main _ :- usage.
+
+  pred usage.
+  usage :- coq.error "Usage: derive.sym <object name>".
+}}. 
+
+(* hook into derive *)
+
+
+
+Elpi Accumulate derive Db Header derive.sym.db.
+Elpi Accumulate derive Db derive.sym.db.
+Elpi Accumulate derive File common.
+Elpi Accumulate derive File utils. 
+Elpi Accumulate derive File sym.
+
+Elpi Accumulate derive lp:{{
+
+dep1 "sym" "param2".
+derivation (indt T) Prefix ff (derive "sym" (derive.sym.main T Prefix) (sym-done T)).
+
+}}.

@@ -131,4 +131,52 @@ type-of-args (prod _ ATy1 a1\ prod _ ATy2 a2\ prod _ _ ar\ (Bo a1 a2 ar)) N [ATy
   pi a1 a2 ar\ 
    type-of-args (Bo a1 a2 ar) M SR DR.
   
+ % whd beta-iota-delta-zeta, main code
+pred whd-fuel i:term, i:stack, i:int, o:term, o:stack.
+whd-fuel T S 0 T S.
+whd-fuel (app [Hd|Args]) C N X XC :- !, whd-fuel Hd {std.append Args C} N X XC.
+whd-fuel (fun _ _ _ as X) [] _ X [] :- !.
+whd-fuel (fun N T F) [B|C] M X XC :- !,
+  (pi x\ def x N T B => cache x BN_ => whd-fuel (F x) C M (F1 x) (C1 x)), X = F1 B, XC = C1 B.
+whd-fuel (let N T B F) C M X XC :- !,
+  (pi x\ def x N T B => cache x BN_ => whd-fuel (F x) C M (F1 x) (C1 x)), X = F1 B, XC = C1 B.
+whd-fuel (global (const GR)) C M X XC :- 
+  O is M - 1, unfold GR none C D DC, !, whd-fuel D DC O X XC.
+whd-fuel (pglobal (const GR) I) C M X XC :- 
+  O is M - 1,
+  unfold GR (some I) C D DC, !, whd-fuel D DC O X XC.
+whd-fuel (primitive (proj _ N)) [A|C] M X XC :- whd-indc A _ KA, !,
+  whd-fuel {proj-red KA N C} M X XC.
+whd-fuel (global (const GR) as HD) C M X XC :- coq.env.primitive? GR, !,
+  unwind HD C Orig,
+  coq.reduction.lazy.whd_all Orig R,
+  if (same_term Orig R) (X = HD, XC = C) (whd-fuel R [] M X XC).
+whd-fuel (match A _ L) C M X XC :- whd-indc A GR KA, !,
+  whd-fuel {match-red GR KA L C} M X XC.
+whd-fuel (fix _ N _ F as Fix) C M X XC :- nth-stack N C LA A RA, whd-indc A GR KA, !,
+  whd-fuel {fix-red F Fix LA GR KA RA} M X XC.
+whd-fuel N C M X XC :- name N, def N _ _ V, !, cache-whd N VN V, whd-fuel VN C M X XC.
+whd-fuel X C _ X C. 
+
+pred iota-step i:term, i:stack, o:term, o:stack.
+iota-step (match A _ L) C X XC :- whd-indc A GR KA, !,
+ match-red GR KA L C X XC.
+
+pred invert-eqs i:list term, o:list term.
+invert-eqs Eqs IEqs :-
+  std.map Eqs (x\r\ sigma Skel TMP Err\ Skel = {{ @eq_sym _ _ _ lp:x}}, 
+              coq.elaborate-skeleton Skel _ TMP ok, 
+              r = TMP
+              ) IEqs.
+
+% expects list of equations
+pred rewrite-with i:list term, i:list term, i:term, o:term.
+rewrite-with [] [] End End. 
+rewrite-with [Eq|Eqs] [Pat|Pats] End R :-
+  (pi rest\
+    (T rest) = {{ @eq_ind _ _ lp:Pat lp:rest _ lp:Eq }}),
+  rewrite-with Eqs Pats End RestSkel,
+  coq.elaborate-skeleton RestSkel _ Rest ok,
+  R = (T Rest).
+
 }
