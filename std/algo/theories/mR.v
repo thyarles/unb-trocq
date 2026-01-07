@@ -1,8 +1,8 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
 From elpi.apps.derive.elpi Extra Dependency "discriminate.elpi" as discr.
-From Trocq.Algo Extra Dependency "common_algo.elpi" as common.
-From Trocq.Algo Extra Dependency "mR.elpi" as mR.
-From Trocq.Algo Require Import mymap injection_lemmas.
+From Trocq Extra Dependency "algo/elpi/common_algo.elpi" as common.
+From Trocq Extra Dependency "algo/elpi/mR.elpi" as mR.
+From Trocq Require Import mymap injection_lemmas.
 
 From elpi Require Import elpi.
 From elpi.apps Require Import derive.param2 derive.isK.

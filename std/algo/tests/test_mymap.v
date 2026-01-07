@@ -1,6 +1,6 @@
-From Trocq.Tests Require Import coverage.
+From Trocq Require Import coverage.
 From elpi Require Import elpi.
-From Trocq.Algo Require Import mymap.
+From Trocq Require Import mymap.
 From Trocq Require Import Hierarchy.
 Unset Uniform Inductive Parameters.
 

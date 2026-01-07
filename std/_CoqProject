@@ -29,19 +29,16 @@ generic/Param_vector.v
 generic/Trocq.v
 generic/Vernac.v
 
--R ../algo Trocq.Algo
--R ../tests Trocq.Tests
-
-../tests/coverage.v
-../algo/mymap.v
-../tests/test_mymap.v
-../algo/injection_lemmas.v
-../tests/test_injection_lemmas.v
-../algo/mR.v
-../tests/test_mR.v
-../algo/Rm.v
-../tests/test_Rm.v
-../algo/injK.v
-../tests/test_injK.v
-../algo/mRRmK.v 
-../tests/test_mRRmK.v
+algo/tests/coverage.v
+algo/theories/mymap.v
+algo/tests/test_mymap.v
+algo/theories/injection_lemmas.v
+algo/tests/test_injection_lemmas.v
+algo/theories/mR.v
+algo/tests/test_mR.v
+algo/theories/Rm.v
+algo/tests/test_Rm.v
+algo/theories/injK.v
+algo/tests/test_injK.v
+algo/theories/mRRmK.v 
+algo/tests/test_mRRmK.v

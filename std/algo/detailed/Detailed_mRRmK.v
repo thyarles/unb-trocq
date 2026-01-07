@@ -1,7 +1,10 @@
 From Coq Require Import ssreflect ssrfun ssrbool.
-From Trocq.Algo Require Import mR Rm injK.
-From Trocq.Tests Require Import coverage.
-From Trocq Require Import HoTT_additions Hierarchy.
+From Trocq Require Import mR Rm injK.
+From Trocq Require Import Hierarchy.
+From Trocq Require Import HoTTNotations.
+From Trocq Require Import coverage.
+(* Search (?e ^). *)
+(* From Trocq Require Import HoTT_additions Hierarchy. *)
 Unset Uniform Inductive Parameters.
 
 Elpi derive.param2 False.
@@ -78,10 +81,13 @@ refine (fun w1 w2 wR=> _).
 refine (Wrap_R_ind Wrap_Pred _ w1 w2 wR).
 - refine (fun u1 u2 uR => _). 
 refine (match 
-(Wrap_injK11 (Unit_mymap u1) u2 (Unit_Rm u1 u2 uR))^ in _ = t 
+(@eq_sym _ _ _ (Wrap_injK11 (Unit_mymap u1) u2 (Unit_Rm u1 u2 uR))) 
+(* (Wrap_injK11 (Unit_mymap u1) u2 (Unit_Rm u1 u2 uR))^ *)
+in _ = t 
 return KWrap1_R u1 u2 (Unit_mR u1 u2 t) = KWrap1_R u1 u2 uR
 with eq_refl => _ end
 ).
+
 refine (match (Unit_mRRmK u1 u2 uR)^ in _ = t 
 return KWrap1_R u1 u2 t = KWrap1_R u1 u2 uR
 with eq_refl => eq_refl end
@@ -124,6 +130,10 @@ refine (fun w1 w2 wR => _).
 refine (WrapMore_R_ind WrapMore_Pred _ _ _ w1 w2 wR).
 - refine (fun u1 u2 uR => _).
   refine (fun b1 b2 bR => _).
+  simpl.
+  (* Set Printing All. *)
+  cbn beta.
+  cbn iota beta delta.
   refine (match (WrapMore_injK11 (Unit_mymap u1) u2 (Unit_Rm _ _ uR) (Bool_mymap b1) b2 (Bool_Rm _ _ bR))^ in _ = t 
   return 
 KWrap_R u1 u2 (Unit_mR u1 u2 t) b1 b2
@@ -155,11 +165,22 @@ bcongr.eq_f Bool WrapMore
 (Bool_Rm b1 b2 bR)))) =
 KWrap_R u1 u2 uR b1 b2 bR
 with eq_refl => _  end).
-refine (match (WrapMore_injK12 (Unit_mymap u1) u2 (Unit_Rm _ _ uR) (Bool_mymap b1) b2 (Bool_Rm _ _ bR))^ in _ = t 
-return 
+set RWe1 := (WrapMore_injK12 (Unit_mymap u1) u2 (Unit_Rm _ _ uR) (Bool_mymap b1) b2 (Bool_Rm _ _ bR))^.
+set eqf1 := bcongr.eq_f _ _ _ _ _ _.
+set eqf2 := bcongr.eq_f _ _ _ _ _ _.
+Set Printing All.
+
+set T := WrapMore_injections12 (Unit_mymap u1) u2 (Bool_mymap b1) b2
+(bcongr.eq_f Unit WrapMore (KWrap^~ (Bool_mymap b1)) (Unit_mymap u1) u2
+(Unit_Rm u1 u2 uR) @
+(bcongr.eq_f Bool WrapMore [eta KWrap u2] (Bool_mymap b1) b2 (Bool_Rm b1 b2 bR) @
+1)).
+refine (match (WrapMore_injK12 (Unit_mymap u1) u2 (Unit_Rm _ _ uR) (Bool_mymap b1) b2 (Bool_Rm _ _ bR))^ 
+(* in _ = t  *)
+(* return 
 KWrap_R u1 u2 uR b1 b2
 (Bool_mR b1 b2 t) =
-KWrap_R u1 u2 uR b1 b2 bR
+KWrap_R u1 u2 uR b1 b2 bR *)
 with eq_refl => _ end
 ).
 refine (match (Bool_mRRmK _ _ bR)^ in _ = t return 

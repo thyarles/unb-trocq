@@ -1,7 +1,7 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
-From Trocq.Algo Extra Dependency "mRRmK.elpi" as mRRmK.
-From Trocq.Algo Require Import injK mR Rm.
-From Trocq.Algo Extra Dependency "common_algo.elpi" as common.
+From Trocq Extra Dependency "algo/elpi/mRRmK.elpi" as mRRmK.
+From Trocq Require Import injK mR Rm.
+From Trocq Extra Dependency "algo/elpi/common_algo.elpi" as common.
 (* From Trocq.Algo Extra Dependency "utils.elpi" as algo_utils. *)
 
 From elpi Require Import elpi.

@@ -1,5 +1,5 @@
-From Trocq.Algo Require Import Rm.
-From Trocq.Tests Require Import coverage.
+From Trocq Require Import Rm.
+From Trocq Require Import coverage.
 From Trocq Require Import Hierarchy.
 Unset Uniform Inductive Parameters.
 

@@ -1,8 +1,8 @@
 
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
-From Trocq.Algo Extra Dependency "injK.elpi" as injK.
-From Trocq.Algo Extra Dependency "utils.elpi" as algo_utils.
-From Trocq.Algo Require Import injection_lemmas. 
+From Trocq Extra Dependency "algo/elpi/injK.elpi" as injK.
+From Trocq Extra Dependency "algo/elpi/utils.elpi" as algo_utils.
+From Trocq Require Import injection_lemmas. 
 
 From elpi Require Import elpi.
 From elpi.apps Require Import derive.bcongr. (* for eq_f register *) 

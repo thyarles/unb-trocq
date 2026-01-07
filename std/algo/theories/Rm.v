@@ -1,12 +1,12 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
-From Trocq.Algo Extra Dependency "Rm.elpi" as Rm.
-From Trocq.Algo Extra Dependency "common_algo.elpi" as common.
-From Trocq.Algo Extra Dependency "utils.elpi" as algo_utils.
+From Trocq Extra Dependency "algo/elpi/Rm.elpi" as Rm.
+From Trocq Extra Dependency "algo/elpi/common_algo.elpi" as common.
+From Trocq Extra Dependency "algo/elpi/utils.elpi" as algo_utils.
 
 From elpi Require Import elpi.
 From elpi.apps Require Import derive.param2.
 From elpi.apps Require Import derive.bcongr. (* for eq_f register *) 
-From Trocq.Algo Require Import mymap.
+From Trocq Require Import mymap.
 From elpi.apps Require Import derive.induction.
 (* From Trocq Require Import HoTT_additions Hierarchy. *)
 From Trocq Require Import Hierarchy.

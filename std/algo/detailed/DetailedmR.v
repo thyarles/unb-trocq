@@ -1,7 +1,8 @@
 From Coq Require Import ssreflect.
 From elpi.apps.derive Require Import derive derive.param2.
 From Trocq Require Import mymap injection_lemmas.
-Require Import HoTT_additions Hierarchy.
+Require Import Hierarchy.
+(* Require Import HoTT_additions Hierarchy. *)
 Unset Uniform Inductive Parameters.
 (* Unset Universe Polymorphism. *)
 Unset Universe Minimization ToSet.

@@ -1,7 +1,8 @@
 From Coq Require Import ssreflect ssrfun ssrbool.
-From Trocq.Algo Require Import mR Rm.
-From Trocq.Tests Require Import coverage.
-From Trocq Require Import HoTT_additions Hierarchy.
+From Trocq Require Import mR Rm.
+From Trocq Require Import coverage.
+From Trocq Require Import Hierarchy.
+(* From Trocq Require Import HoTT_additions Hierarchy. *)
 Unset Uniform Inductive Parameters.
 
 Elpi derive.param2 False.
