@@ -1,5 +1,5 @@
 shorten derive.common-algo. {rel-mode}.
-shorten derive.algo-utils.{gen-names-umap}.
+shorten derive.algo-utils.{gen-names-map}.
 
 namespace derive.rel40 {
 
@@ -15,7 +15,7 @@ mk-rel40-type-priv 0 _ IndL IndR {{ @Param40.Rel lp:IndL lp:IndR }}.
 mk-rel40-type-priv N (prod TN Ty t\ (Bo t)) IndL IndR 
         (prod TN1 Ty t1\ prod TN2 Ty t2\ prod TRN (ARTy t1 t2) ar\ prod URN (UMTy t1 t2 ar) ur\ (R t1 t2 ar ur)) :-
   M is N - 1,
-  gen-names-umap TN TN1 TN2 TRN URN,
+  gen-names-map TN TN1 TN2 TRN URN,
   @pi-decl TN1 Ty t1\
   @pi-decl TN2 Ty t2\
   (ARTy t1 t2) = {{ lp:t1 -> lp:t2 -> Type }},

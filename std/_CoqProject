@@ -34,6 +34,8 @@ algo/theories/sym.v
 algo/tests/test_sym.v
 algo/theories/symK.v
 algo/tests/test_symK.v
+algo/theories/RsymK.v
+algo/tests/test_RsymK.v
 algo/theories/mymap.v
 algo/tests/test_mymap.v
 algo/theories/injection_lemmas.v
@@ -52,3 +54,4 @@ algo/theories/umap.v
 algo/tests/test_umap.v
 algo/theories/Rel40.v
 algo/tests/test_Rel40.v
+algo/theories/Rel44.v

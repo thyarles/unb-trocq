@@ -22,6 +22,7 @@ Check Nat_umap : IsUMap Nat_R.
 
 Elpi derive Box.
 Check Box_umap : forall A1 A2 AR UR, IsUMap (Box_R A1 A2 AR).
+Print Box_umap.
 
 Elpi derive Option.
 Check Option_umap : forall A1 A2 AR UR, IsUMap (Option_R A1 A2 AR).

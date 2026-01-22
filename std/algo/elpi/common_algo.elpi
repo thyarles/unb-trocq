@@ -9,6 +9,8 @@ rel-mode 3 {{ Param30.Rel }}. % _
 rel-mode 4 {{ Param40.Rel }}. % mRRmK
 rel-mode 5 {{ fun (A B : Type)=> A -> B -> Type }}. % sym
 rel-mode 6 {{ fun (A B : Type)=> A -> B -> Type }}. % symK
+rel-mode 7 {{ fun (A B : Type)=> A -> B -> Type }}. % rsymK
+rel-mode 8 {{ Param44.Rel }}. % 
 
 pred swap i:term, i:term, i:bool, o:term, o:term.
 swap A B tt B A.
@@ -31,12 +33,16 @@ mk-return ML MR Rel 2 ITyTy2 R :-
   mk-impl-return ML MR Rel tt ITyTy2 R.
 % mk-return ML MR Rel 
 
-pred symm_tyargs i: list term, i: list term, o: list term.
-symm_tyargs [] L L.
-symm_tyargs [A1, A2, AR | L2] Acc R :- 
+pred sym-tyargs-priv i: list term, i: list term, o: list term.
+sym-tyargs-priv [] L L.
+sym-tyargs-priv [A1, A2, AR | L2] Acc R :- 
   coq.mk-app {{ @sym_rel }} [A1,A2,AR] RAS,
   std.append Acc [A2, A1, RAS ] NewAcc,
-  symm_tyargs L2 NewAcc R.
+  sym-tyargs-priv L2 NewAcc R.
+
+pred sym-tyargs i: list term, o: list term.
+sym-tyargs L R :-
+  sym-tyargs-priv L [] R.
 
 % The number of Type parameters in T
 % Type of inductive T,
@@ -77,17 +83,30 @@ mk-mR-type-priv 0 (prod IN1 ITyTy x\ prod IN2 ITyTy2 _) _ _ Rel 4 LRev MR-DB RM-
 mk-mR-type-priv 0 (prod IN1 ITyTy x\ prod IN2 ITyTy2 _) _ _ Rel 5 LRev _ _
              (prod IN1 ITyTy x\ prod IN2 ITyTy2 y\ (R x y)) :-
   std.rev LRev L,
-  symm_tyargs L [] L2,
+  sym-tyargs L L2,
   @pi-decl IN1 ITyTy x\
   @pi-decl IN2 ITyTy2 y\
   coq.mk-app Rel {std.append L [x,y]} (RelTy1 x y),
   coq.mk-app Rel {std.append L2 [y,x]} (RelTy2 x y),
   R x y = {{ lp:{{RelTy1 x y}} -> lp:{{RelTy2 x y}} }}.
+mk-mR-type-priv 0 (prod IN1 ITyTy x\ prod IN2 ITyTy2 _) RSym _ Rel 7 LRev _ _
+             (prod IN1 ITyTy x\ prod IN2 ITyTy2 y\ (R x y)) :-
+  std.rev LRev L,
+  sym-tyargs L L2,
+  @pi-decl IN1 ITyTy x\
+  @pi-decl IN2 ITyTy2 y\
+  coq.mk-app Rel {std.append L [x,y]} (RelTy1 x y),
+  coq.mk-app Rel {std.append L2 [y,x]} (RelTy2 x y),
+  RSkel x y = {{ lp:RSym lp:{{RelTy2 x y}} lp:{{RelTy1 x y}} }},
+  whd1 (RSkel x y) (R x y).
+mk-mR-type-priv 0 (prod IN1 ITyTy x\ prod IN2 ITyTy2 _) _ _ Rel 8 _ _ _
+             R :-
+  coq.mk-app { rel-mode 8 } [ITyTy, ITyTy2] R.
 % TODO: remove use of MR-DB, try just pass the MR and RM 
 mk-mR-type-priv 0 (prod IN1 ITyTy x\ prod IN2 ITyTy2 _) SymC _ Rel 6 LRev _ _
              (prod IN1 ITyTy x\ prod IN2 ITyTy2 y\ prod `IR` (RelTy x y) iR\ (R x y iR)) :-
   std.rev LRev L,
-  symm_tyargs L [] L2,
+  sym-tyargs L L2,
   @pi-decl IN1 ITyTy x\
   @pi-decl IN2 ITyTy2 y\
   coq.mk-app Rel {std.append L [x,y]} (RelTy x y),
@@ -127,5 +146,13 @@ mk-mR-type-sym N T Rel R :-
 pred mk-mR-type-symK i:int, i:term, i:term, i:term, o:term.
 mk-mR-type-symK N T Rel Sym R :-
   mk-mR-type-priv N T Sym _ Rel 6 [] _ _ R.
+
+pred mk-mR-type-rsymK i:int, i:term, i:term, i:term, o:term.
+mk-mR-type-rsymK N T Rel RSym R :-
+  mk-mR-type-priv N T RSym _ Rel 7 [] _ _ R.
+
+pred mk-mR-type-rel44 i:int, i:term, i:term, o:term.
+mk-mR-type-rel44 N T Rel R :-
+  mk-mR-type-priv N T _ _ Rel 8 [] _ _ R.
 
 }
