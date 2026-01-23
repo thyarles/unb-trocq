@@ -72,19 +72,6 @@ t = KWrap_R u1 u2 uR b1 b2 bR) _ _ (Bool_symK b1 b2 bR)^).
   (* rewrite Unit_symK Bool_symK. *)
   exact: eq_refl.
 - refine (fun w1 w2 wR=> _).
-  cbn delta beta iota.
-  rewrite Wrap_symK.
-  exact: eq_refl.
-- refine (fun u1 u2 uR=> _).
-  refine (fun u3 u4 uR2 => _).
-  refine (fun u5 u6 uR3 => _).
-  cbn delta beta iota.
-  rewrite !Unit_symK. 
-  exact: eq_refl.
-Defined.
-
-Elpi derive.param2 Nat.
-Elpi derive.sym Nat.
 
 Notation Nat_symKPred := (fun w1 w2 (wR : Nat_R w1 w2) => Nat_sym w2 w1 (Nat_sym w1 w2 wR) = wR).
 Fixpoint Nat_symK : forall w1 w2 (wR : Nat_R w1 w2), Nat_sym w2 w1 (Nat_sym w1 w2 wR) = wR.

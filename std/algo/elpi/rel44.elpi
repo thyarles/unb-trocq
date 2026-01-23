@@ -1,0 +1,75 @@
+shorten derive.algo-utils.{type-of-args, whd-fuel, iota-step, invert-eqs, rewrite-with}.
+shorten derive.common-algo.{mk-mR-type-rel44,sym-tyargs}.
+
+namespace derive.rel44 {
+
+pred refine-covariant-tyargs i: list term, i:term, i:list term, o: list term.
+refine-covariant-tyargs [] _ L L.
+refine-covariant-tyargs [A1, A2, AR | L2] Refiner Acc R :- 
+  coq.mk-app Refiner [A1,A2,AR] Refined,
+  std.append Acc [A1, A2, AR, Refined] NewAcc,
+  refine-covariant-tyargs L2 Refiner NewAcc R.
+
+pred refine-Lsym i: list term, i:list term, i:term, i:list term, o: list term.
+refine-Lsym [] [] _ L L.
+refine-Lsym [A1, A2, AR | L2] [_,_,_,Refined | L2Ref] Refiner Acc R :- 
+  coq.safe-dest-app Refined _ Lref,
+  coq.mk-app Refiner Lref RefinedContra,
+  std.append Acc [A1, A2, AR, RefinedContra] NewAcc,
+  refine-Lsym L2 L2Ref Refiner NewAcc R.
+
+% TyargNo, rel44 Type, mapi, eq_map, rsymK, list of args
+pred implement-rel44 i:int, i:term, i:term, i:term, i:term, i:term, i:term, i:term, i:list term, o:term.
+implement-rel44 0 _ 
+  Mapi Eq_map RsymK CovariantNN ContravariantNN BuildNN LRev R :-
+  !,
+  coq.say LRev,
+  std.rev LRev L,
+  refine-covariant-tyargs L CovariantNN [] LCo,
+  sym-tyargs L LSym,
+  refine-Lsym LSym LCo ContravariantNN [] LContra,
+  coq.say "LCo" LCo,
+  coq.say "LContra" LContra,
+  coq.say "LSym " LSym,
+  coq.mk-app Mapi LCo MapCovariant,
+  coq.mk-app Mapi LContra MapContravariant,
+  coq.mk-app RsymK LSym RsymKSym,
+  R = {{ lp:BuildNN lp:MapCovariant (lp:Eq_map lp:RsymKSym lp:MapContravariant )}}.
+implement-rel44 N (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 a2) ar\ (Bo a1 a2 ar)) 
+  Mapi Eq_map RsymK CovariantNN ContravariantNN BuildNN L
+  (fun AN1 ATy1 a1\ fun AN2 ATy2 a2\ fun ARN (ARTy a1 a2) ar\ (R a1 a2 ar)) :-
+  M is N - 1,
+  @pi-decl AN1 ATy1 a1\ %A1 : Type
+  @pi-decl AN2 ATy2 a2\ %A2 : Type
+  @pi-decl ARN (ARTy a1 a2) ar\ % AR : Param00.Rel A1 A2
+    sigma NewL\
+      std.append [ar,a2,a1] L NewL,
+      implement-rel44 M (Bo a1 a2 ar) Mapi Eq_map RsymK CovariantNN ContravariantNN BuildNN NewL (R a1 a2 ar).
+
+
+func main inductive, string -> list prop.
+main GR Prefix Clauses :- std.do! [
+
+  coq.env.indt GR _ TyParamNo _ _ KNs KTys,
+  Ind = (global (indt GR)),
+  std.assert! (param Ind Ind TR) "derive.rel44: use derive.param2 before",
+  coq.typecheck TR TRTy _,
+  mk-mR-type-rel44 TyParamNo TRTy TR SymKTy,
+  std.assert-ok! (coq.elaborate-skeleton SymKTy _ SymKTyE) "derive.rel44 generates illtyped type",
+  std.assert! (umap-db Ind UmapI) "derive.rel44: use derive.umap before",
+  std.assert! (rsymK-db Ind RSymKInd) "derive.rel44: use derive.rsymK before",
+  Eq_map = {{ eq_Map4 }},
+  implement-rel44 TyParamNo SymKTyE UmapI Eq_map RSymKInd (pglobal {{:gref Param44.covariant }} _) (pglobal {{:gref Param44.contravariant }} _) {{ MkUParam }} [] R,
+  coq.say "Term is" R,
+  std.assert-ok! (coq.elaborate-skeleton R SymKTyE Re) "derive.rel44 generates illtyped term",
+  Name is Prefix ^ "rel44",
+  coq.ensure-fresh-global-id Name FName,
+  coq.env.add-const FName Re SymKTyE _ C,
+  I = global (indt GR),
+  Clauses = [rel44-done GR, rel44-db I (global (const C))],
+  std.forall Clauses (x\
+    coq.elpi.accumulate _ "derive.rel44.db" (clause _ _ x)
+  ),
+].
+
+}
