@@ -1,6 +1,7 @@
 {
     "name": "Trocq",
     "image": "cohencyril/trocq-deps",
+    "runArgs": ["--platform", "linux/amd64"],
     "postAttachCommand": "make -j8 -k",
     "customizations": {
         "vscode": {
