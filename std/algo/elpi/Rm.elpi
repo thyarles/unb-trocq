@@ -105,30 +105,28 @@ implement-Rm 0 _TyParamNo (prod IN1 ITy1 i1\ prod IN2 ITy2 i2\ prod ARN (ARTy i1
     mkBranches KsS KsD KTys KTyRs ITy2 Pred Brs,
     std.append Brs [i1,i2,ar] (IndArgs i1 i2 ar),
     coq.mk-app RIndP (IndArgs i1 i2 ar) (R i1 i2 ar).
-implement-Rm N TyParamNo (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 a2) ar\ (Bo a1 a2 ar)) KsS KsD KTys KTyRs Pred RInd
-            (fun AN1 ATy1 a1\ fun AN2 ATy2 a2\ fun ARN (ARTy a1 a2) ar\ (R a1 a2 ar)) :-
+implement-Rm N TyParamNo (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 a2) ar\ prod AMN (AMTy a1 a2 ar) am\ (Bo a1 a2 ar am)) KsS KsD KTys KTyRs Pred RInd
+            (fun AN1 ATy1 a1\ fun AN2 ATy2 a2\ fun ARN (ARTy a1 a2) ar\ fun AMN (AMTy a1 a2 ar) am\ (R a1 a2 ar am)) :-
   M is N - 1,
   @pi-decl AN1 ATy1 a1\ %A1 : Type
   @pi-decl AN2 ATy2 a2\ %A2 : Type
-  @pi-decl ARN (ARTy a1 a2) ar\ % AR : Param2b0.Rel A1 A2
-    coq.mk-app Pred [a1,a2,ar] (NewPred a1 a2 ar),
-    
-    (ARType a1 a2) = {{ lp:a1 -> lp:a2 -> Type }},
-    coq.elaborate-skeleton ar (ARType a1 a2) (RelAR a1 a2 ar) ok,
+  @pi-decl ARN (ARTy a1 a2) ar\ % AR : Param2b0.Rel A1 A2 Changing into A1 -> A2 -> Type
+  @pi-decl AMN (AMTy a1 a2 ar) am\ % Map2b.Has AR
 
+    coq.mk-app Pred [a1,a2,ar,am] (NewPred a1 a2 ar am),
     coq.mk-app RInd [a1,a2,ar] (NewRIndSkel a1 a2 ar),
     coq.elaborate-skeleton (NewRIndSkel a1 a2 ar) _ (NewRInd a1 a2 ar) ok,
 
     std.map KsS (x\ r\ sigma TMP\ coq.mk-app x [a1] TMP, r = TMP) (NewKsS a1),
     std.map KsD (x\ r\ sigma TMP\ coq.mk-app x [a2] TMP, r = TMP) (NewKsD a2),
     std.map KTys (x\ r\ sigma TMP\ coq.subst-prod [a2] x TMP, r = TMP) (NewKTys a2),
-    std.map KTyRs (x\ r\ sigma TMP1\ coq.subst-prod [a1,a2,(RelAR a1 a2 ar)] x TMP1, r = TMP1) (NewKTyRs a1 a2 ar),
-    Rm = {{ @Trocq.Hierarchy.R_in_map }},
-    coq.mk-app Rm [a1, a2, ar] (RMS a1 a2 ar),
+    std.map KTyRs (x\ r\ sigma TMP1\ coq.subst-prod [a1,a2,ar] x TMP1, r = TMP1) (NewKTyRs a1 a2 ar),
+    Rm = {{ @Trocq.Hierarchy.Map2b.R_in_map }},
+    coq.mk-app Rm [a1, a2, ar, am] (RMS a1 a2 ar am),
     % coq.elaborate-skeleton (RMS a1 a2 ar) _ (RM a1 a2 ar) ok,
     ar-db a1 a2 ar ==>
-    rm-db a1 (RMS a1 a2 ar) ==>
-    implement-Rm M TyParamNo (Bo a1 a2 ar) (NewKsS a1) (NewKsD a2) (NewKTys a2) (NewKTyRs a1 a2 ar) (NewPred a1 a2 ar) (NewRInd a1 a2 ar) (R a1 a2 ar).
+    rm-db a1 (RMS a1 a2 ar am) ==>
+    implement-Rm M TyParamNo (Bo a1 a2 ar am) (NewKsS a1) (NewKsD a2) (NewKTys a2) (NewKTyRs a1 a2 ar) (NewPred a1 a2 ar am) (NewRInd a1 a2 ar) (R a1 a2 ar am).
 
 
 func main inductive, string -> list prop.

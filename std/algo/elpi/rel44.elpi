@@ -23,14 +23,10 @@ pred implement-rel44 i:int, i:term, i:term, i:term, i:term, i:term, i:term, i:te
 implement-rel44 0 _ 
   Mapi Eq_map RsymK CovariantNN ContravariantNN BuildNN LRev R :-
   !,
-  coq.say LRev,
   std.rev LRev L,
   refine-covariant-tyargs L CovariantNN [] LCo,
   sym-tyargs L LSym,
   refine-Lsym LSym LCo ContravariantNN [] LContra,
-  coq.say "LCo" LCo,
-  coq.say "LContra" LContra,
-  coq.say "LSym " LSym,
   coq.mk-app Mapi LCo MapCovariant,
   coq.mk-app Mapi LContra MapContravariant,
   coq.mk-app RsymK LSym RsymKSym,
@@ -60,7 +56,6 @@ main GR Prefix Clauses :- std.do! [
   std.assert! (rsymK-db Ind RSymKInd) "derive.rel44: use derive.rsymK before",
   Eq_map = {{ eq_Map4 }},
   implement-rel44 TyParamNo SymKTyE UmapI Eq_map RSymKInd (pglobal {{:gref Param44.covariant }} _) (pglobal {{:gref Param44.contravariant }} _) {{ MkUParam }} [] R,
-  coq.say "Term is" R,
   std.assert-ok! (coq.elaborate-skeleton R SymKTyE Re) "derive.rel44 generates illtyped term",
   Name is Prefix ^ "rel44",
   coq.ensure-fresh-global-id Name FName,

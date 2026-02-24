@@ -137,23 +137,25 @@ implement-mR 0 TyParamNo (prod I1 I1Ty i1\ prod I2 I2Ty i2\ (Bo i1 i2)) (fun I1 
   @pi-decl I1 I1Ty i1\
   @pi-decl I2 I2Ty i2\
     coq.build-match i1 I1Ty (rty-1 Bo i2) (mkBranch TyParamNo Bo i2 I2Ty) (R i1 i2).
-implement-mR N TyParamNo (prod A1 A1Ty a1\ prod A2 A2Ty a2\ prod AR (ARTy a1 a2) ar\ (Bo a1 a2 ar)) 
-                         (fun  A1 A1Ty a1\  fun A2 A2Ty a2\  fun AR (ARTy a1 a2) ar\ (R a1 a2 ar)) :-
+implement-mR N TyParamNo (prod A1 A1Ty a1\ prod A2 A2Ty a2\ prod AR (ARTy a1 a2) ar\ prod AM (AMTy a1 a2 ar) am\ (Bo a1 a2 ar am)) 
+                         (fun  A1 A1Ty a1\  fun A2 A2Ty a2\  fun AR (ARTy a1 a2) ar\ fun AM (AMTy a1 a2 ar) am\ (R a1 a2 ar am)) :-
   M is N - 1,
   @pi-decl A1 A1Ty a1\
   @pi-decl A2 A2Ty a2\
   @pi-decl AR (ARTy a1 a2) ar\
-    Map = {{ @Trocq.Hierarchy.map }},
-    coq.mk-app Map [a1,a2,ar] (PMapA a1 a2 ar),
+  @pi-decl AM (AMTy a1 a2 ar) am\
+    Map = {{ @Trocq.Hierarchy.Map1.map }},
+    coq.mk-app Map [a1,a2,ar,am] (PMapA a1 a2 ar am),
     % insert coercions
-    coq.elaborate-skeleton (PMapA a1 a2 ar) _ (MapA a1 a2 ar) ok,
-    MR = {{ @Trocq.Hierarchy.map_in_R }},
-    coq.mk-app MR [a1,a2,ar] (PMR a1 a2 ar),
-    coq.elaborate-skeleton (PMR a1 a2 ar) _ (MRA a1 a2 ar) ok,
-    mymap-def A1Ty (MapA a1 a2 ar) ==>
-    mR-db a1 (MRA a1 a2 ar) ==>
+    coq.elaborate-skeleton (PMapA a1 a2 ar am) _ (MapA a1 a2 ar am) ok,
+    MR = {{ @Trocq.Hierarchy.Map2a.map_in_R }},
+    coq.mk-app MR [a1,a2,ar,am] (PMR a1 a2 ar am),
+    coq.elaborate-skeleton (PMR a1 a2 ar am) _ (MRA a1 a2 ar am) ok,
+    mymap-def A1Ty (MapA a1 a2 ar am) ==>
+    mR-db a1 (MRA a1 a2 ar am) ==>
+    % todo: check usage of ar-db in mR
     ar-db a1 a2 ar ==>
-    implement-mR M TyParamNo (Bo a1 a2 ar) (R a1 a2 ar).
+    implement-mR M TyParamNo (Bo a1 a2 ar am) (R a1 a2 ar am).
 
 
 func main inductive, string -> list prop.

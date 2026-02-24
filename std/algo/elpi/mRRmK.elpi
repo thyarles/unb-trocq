@@ -231,32 +231,30 @@ implement-mRRmK 0 (prod IN1 ITy1 i1\ prod IN2 ITy2 i2\ prod ARN (ARTy i1 i2) _) 
     mkBranches KsS KsD KTys KTyRs ITy2 Pred KRs InjKss Brs,
     std.append Brs [i1,i2,ar] (IndArgs i1 i2 ar),
     coq.mk-app RIndP (IndArgs i1 i2 ar) (R i1 i2 ar).
-implement-mRRmK N (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 a2) ar\ (Bo a1 a2 ar)) KsS KsD KTys KTyRs Pred RInd KRs InjKss
-            (fun AN1 ATy1 a1\ fun AN2 ATy2 a2\ fun ARN (ARTy a1 a2) ar\ (R a1 a2 ar)) :-
+implement-mRRmK N (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 a2) ar\ prod AMN (AMTy a1 a2 ar) am\ (Bo a1 a2 ar am)) KsS KsD KTys KTyRs Pred RInd KRs InjKss
+            (fun AN1 ATy1 a1\ fun AN2 ATy2 a2\ fun ARN (ARTy a1 a2) ar\ fun AMN (AMTy a1 a2 ar) am\ (R a1 a2 ar am)) :-
   M is N - 1,
   @pi-decl AN1 ATy1 a1\ %A1 : Type
   @pi-decl AN2 ATy2 a2\ %A2 : Type
-  @pi-decl ARN (ARTy a1 a2) ar\ % AR : Param40.Rel A1 A2
-    coq.mk-app Pred [a1,a2,ar] (NewPred a1 a2 ar),
+  @pi-decl ARN (ARTy a1 a2) ar\ % AR : A1 -> A2 -> Type 
+  @pi-decl AMN (AMTy a1 a2 ar) am\ % Map4.Has AR 
+    coq.mk-app Pred [a1,a2,ar, am] (NewPred a1 a2 ar am),
     
-    (ARType a1 a2) = {{ lp:a1 -> lp:a2 -> Type }},
-    coq.elaborate-skeleton ar (ARType a1 a2) (RelAR a1 a2 ar) ok,
-
     coq.mk-app RInd [a1,a2,ar] (NewRIndSkel a1 a2 ar),
     coq.elaborate-skeleton (NewRIndSkel a1 a2 ar) _ (NewRInd a1 a2 ar) ok,
     
     std.map KsS (x\ r\ sigma TMP\ coq.mk-app x [a1] TMP, r = TMP) (NewKsS a1),
     std.map KsD (x\ r\ sigma TMP\ coq.mk-app x [a2] TMP, r = TMP) (NewKsD a2),
     std.map KTys (x\ r\ sigma TMP\ coq.subst-prod [a2] x TMP, r = TMP) (NewKTys a2),
-    std.map KTyRs (x\ r\ sigma TMP1\ coq.subst-prod [a1,a2,(RelAR a1 a2 ar)] x TMP1, r = TMP1) (NewKTyRs a1 a2 ar),
-    std.map KRs (x\ r\ sigma TMP\ coq.mk-app x [a1,a2,(RelAR a1 a2 ar)] TMP, r = TMP) (NewKRs a1 a2 ar),
+    std.map KTyRs (x\ r\ sigma TMP1\ coq.subst-prod [a1,a2,ar] x TMP1, r = TMP1) (NewKTyRs a1 a2 ar),
+    std.map KRs (x\ r\ sigma TMP\ coq.mk-app x [a1,a2,ar] TMP, r = TMP) (NewKRs a1 a2 ar),
 
-    MRRMK = {{ @Trocq.Hierarchy.R_in_mapK }},
-    coq.mk-app MRRMK [a1, a2, ar] (MRRMKS a1 a2 ar),
-    coq.typecheck (MRRMKS a1 a2 ar) _ ok,
+    MRRMK = {{ @Trocq.Hierarchy.Map4.R_in_mapK }},
+    coq.mk-app MRRMK [a1, a2, ar, am] (MRRMKS a1 a2 ar am),
+    coq.typecheck (MRRMKS a1 a2 ar am) _ ok,
     ar-db a1 a2 ar ==>
-    mRRmK-db a2 (MRRMKS a1 a2 ar) ==>
-    implement-mRRmK M (Bo a1 a2 ar) (NewKsS a1) (NewKsD a2) (NewKTys a2) (NewKTyRs a1 a2 ar) (NewPred a1 a2 ar) (NewRInd a1 a2 ar) (NewKRs a1 a2 ar) InjKss (R a1 a2 ar).
+    mRRmK-db a2 (MRRMKS a1 a2 ar am) ==>
+    implement-mRRmK M (Bo a1 a2 ar am) (NewKsS a1) (NewKsD a2) (NewKTys a2) (NewKTyRs a1 a2 ar) (NewPred a1 a2 ar am) (NewRInd a1 a2 ar) (NewKRs a1 a2 ar) InjKss (R a1 a2 ar am).
 
 
 

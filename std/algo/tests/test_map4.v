@@ -21,22 +21,23 @@ Elpi derive Nat.
 Check Nat_mRRmK : forall n1 n2 nR, Nat_mR n1 n2 (Nat_Rm n1 n2 nR) = nR.
 
 Elpi derive Box.
-Check Box_mRRmK : forall A1 A2 (AR : Param40.Rel A1 A2), forall (b1 : Box A1) (b2 : Box A2) (bR : Box_R A1 A2 AR b1 b2),
-  Box_mR A1 A2 AR b1 b2 (Box_Rm A1 A2 AR b1 b2 bR) = bR.
+Check Box_mRRmK : forall A1 A2 (AR : A1 -> A2 -> Type) (AM : Map4.Has AR), forall (b1 : Box A1) (b2 : Box A2) (bR : Box_R A1 A2 AR b1 b2),
+  Box_mR A1 A2 AR AM b1 b2 (Box_Rm A1 A2 AR AM b1 b2 bR) = bR.
 
 Elpi derive Option.
-Check Option_mRRmK : forall A1 A2 (AR : Param40.Rel A1 A2), forall o1 o2 oR, Option_mR A1 A2 AR o1 o2 (Option_Rm A1 A2 AR o1 o2 oR) = oR.
+Check Option_mRRmK : forall A1 A2 (AR : A1 -> A2 -> Type) (AM : Map4.Has AR), 
+  forall o1 o2 oR, Option_mR A1 A2 AR AM o1 o2 (Option_Rm A1 A2 AR AM o1 o2 oR) = oR.
 
 Elpi derive Prod.
-Check Prod_mRRmK : forall A1 A2 (AR : Param40.Rel A1 A2) B1 B2 (BR : Param40.Rel B1 B2), 
-  forall p1 p2 pR, Prod_mR A1 A2 AR B1 B2 BR p1 p2 (Prod_Rm A1 A2 AR B1 B2 BR p1 p2 pR) = pR.
+Check Prod_mRRmK : forall A1 A2 (AR : A1 -> A2 -> Type) (AM : Map4.Has AR) B1 B2 (BR : B1 -> B2 -> Type) (BM : Map4.Has BR), 
+  forall p1 p2 pR, Prod_mR A1 A2 AR AM B1 B2 BR BM p1 p2 (Prod_Rm A1 A2 AR AM B1 B2 BR BM p1 p2 pR) = pR.
 
 Elpi derive ThreeTypes.
 Check ThreeTypes_mRRmK : 
-forall A1 A2 (AR : Param40.Rel A1 A2), 
-forall B1 B2 (BR : Param40.Rel B1 B2), 
-forall C1 C2 (CR : Param40.Rel C1 C2), 
-  forall t1 t2 tR, ThreeTypes_mR A1 A2 AR B1 B2 BR C1 C2 CR t1 t2 (ThreeTypes_Rm A1 A2 AR B1 B2 BR C1 C2 CR t1 t2 tR) = tR.
+forall A1 A2 (AR : A1 -> A2 -> Type) (AM : Map4.Has AR),
+forall B1 B2 (BR : B1 -> B2 -> Type) (BM : Map4.Has BR),
+forall C1 C2 (CR : C1 -> C2 -> Type) (CM : Map4.Has CR),
+  forall t1 t2 tR, ThreeTypes_mR A1 A2 AR AM B1 B2 BR BM C1 C2 CR CM t1 t2 (ThreeTypes_Rm A1 A2 AR AM B1 B2 BR BM C1 C2 CR CM t1 t2 tR) = tR.
 
 Elpi derive List.
-Check List_mRRmK : forall A1 A2 (AR : Param40.Rel A1 A2), forall l1 t2 lR, List_mR A1 A2 AR l1 t2 (List_Rm A1 A2 AR l1 t2 lR) = lR.
+Check List_mRRmK : forall A1 A2 (AR : A1 -> A2 -> Type) (AM : Map4.Has AR), forall l1 t2 lR, List_mR A1 A2 AR AM l1 t2 (List_Rm A1 A2 AR AM l1 t2 lR) = lR.
