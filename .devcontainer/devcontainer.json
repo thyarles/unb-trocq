@@ -6,10 +6,8 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                // "ejgallego.coq-lsp",
-                // "gares.elpi-lang",
-                // "gares.coq-elpi-lang",
-                "coq-community.vscoq1"
+                "coq-community.vscoq1",
+                "shd101wyy.markdown-preview-enhanced"
             ]
         }
     }
