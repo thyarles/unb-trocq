@@ -9,9 +9,9 @@ namespace derive.umap {
 % TyArgs1
 % TyArgs2
 % ARArgs
-pred mk-umap-type-priv i:int, i:term, i:term, i:term, i:term, o:term.
-mk-umap-type-priv 0 _ IndL IndR Rel {{ @IsUMap lp:IndL lp:IndR lp:Rel}}.
-mk-umap-type-priv N (prod TN Ty t\ (Bo t)) IndL IndR Rel 
+pred mk-umap-type-priv i:int, i:term, i:term, i:term, i:term, i:term, o:term.
+mk-umap-type-priv 0 _ IndL IndR Rel MTy {{ lp:MTy lp:IndL lp:IndR lp:Rel}}.
+mk-umap-type-priv N (prod TN Ty t\ (Bo t)) IndL IndR Rel MTy
         (prod TN1 Ty t1\ prod TN2 Ty t2\ prod TRN (ARTy t1 t2) ar\ prod URN (UMTy t1 t2 ar) ur\ (R t1 t2 ar ur)) :-
   M is N - 1,
   gen-names-map TN TN1 TN2 TRN URN,
@@ -19,24 +19,24 @@ mk-umap-type-priv N (prod TN Ty t\ (Bo t)) IndL IndR Rel
   @pi-decl TN2 Ty t2\
   (ARTy t1 t2) = {{ lp:t1 -> lp:t2 -> Type }},
   @pi-decl TRN (ARTy t1 t2) ar\
-  (UMTy t1 t2 ar) = {{ @IsUMap lp:t1 lp:t2 lp:ar }},
+  (UMTy t1 t2 ar) = {{ lp:MTy lp:t1 lp:t2 lp:ar }},
   @pi-decl URN (UMTy t1 t2 ar) ur\
     coq.mk-app IndL [t1] (NIndL t1),
     coq.mk-app IndR [t2] (NIndR t2),
     coq.mk-app Rel [t1,t2,ar] (NRel t1 t2 ar),
-    mk-umap-type-priv M (Bo t1) (NIndL t1) (NIndR t2) (NRel t1 t2 ar) (R t1 t2 ar ur).
+    mk-umap-type-priv M (Bo t1) (NIndL t1) (NIndR t2) (NRel t1 t2 ar) MTy (R t1 t2 ar ur).
   
-% TyParamNo Arity Ind Rel
-pred mk-umap-type i:int, i:term, i:term, i:term, o:term.
-mk-umap-type TyParamNo Arity Ind Rel R :-
-  mk-umap-type-priv TyParamNo Arity Ind Ind Rel R.
+% TyParamNo Arity Ind MapTy Rel
+pred mk-umap-type i:int, i:term, i:term, i:term, i:term, o:term.
+mk-umap-type TyParamNo Arity Ind Rel MTy R :-
+  mk-umap-type-priv TyParamNo Arity Ind Ind Rel MTy R.
 
-% TyParamNo UMapTy IndL IndR Rel IndMap MR RM MRRMK 
-pred implement-umap i:int, i:term, i:term, i:term, i:term, i:term, i:term, i:term, i:term, o:term. 
+% TyParamNo UMapTy IndL IndR Rel listReqs IndMap MR RM MRRMK 
+pred implement-umap i:int, i:term, i:term, i:term, i:term, i: list term, i:term, o:term. 
 % implement-umap _ _ _ _ _ _ _ _ {{ Type }}.
-implement-umap 0 _ IndL IndR Rel IndMap MR RM MRRMK R :-
-  R = {{ @MkUMap lp:IndL lp:IndR lp:Rel lp:IndMap lp:MR lp:RM lp:MRRMK }}.
-implement-umap N (prod TN1 Ty1 t1\ prod TN2 Ty2 t2\ prod TRN (ARTy t1 t2) ar\ prod URN (UMTy t1 t2 ar) ur\ (Bo t1 t2 ar ur)) IndL IndR Rel IndMap MR RM MRRMK (fun TN1 Ty1 t1\ fun TN2 Ty2 t2\ fun TRN (ARTy t1 t2) ar\ fun URN (UMTy t1 t2 ar) ur\ (R t1 t2 ar ur)) :-
+implement-umap 0 _ IndL IndR Rel Reqs BH R :-
+  coq.mk-app BH [IndL,IndR,Rel | Reqs] R.
+implement-umap N (prod TN1 Ty1 t1\ prod TN2 Ty2 t2\ prod TRN (ARTy t1 t2) ar\ prod URN (UMTy t1 t2 ar) ur\ (Bo t1 t2 ar ur)) IndL IndR Rel Reqs BH (fun TN1 Ty1 t1\ fun TN2 Ty2 t2\ fun TRN (ARTy t1 t2) ar\ fun URN (UMTy t1 t2 ar) ur\ (R t1 t2 ar ur)) :-
   M is N - 1,
   @pi-decl TN1 Ty1 t1\
   @pi-decl TN2 Ty2 t2\
@@ -45,39 +45,60 @@ implement-umap N (prod TN1 Ty1 t1\ prod TN2 Ty2 t2\ prod TRN (ARTy t1 t2) ar\ pr
     coq.mk-app IndL [t1] (NIndL t1),
     coq.mk-app IndR [t2] (NIndR t2),
     coq.mk-app Rel [t1,t2,ar] (NRel t1 t2 ar),
-    coq.mk-app IndMap [t1, t2, ar, ur] (NIndMap t1 t2 ar ur),
-    coq.mk-app MR [t1,t2, ar, ur] (NMR t1 t2 ar ur),
-    coq.mk-app RM [t1,t2, ar, ur] (NRM t1 t2 ar ur),
-    coq.mk-app MRRMK [t1,t2, ar, ur] (NMRRMKR t1 t2 ar ur),
+    std.map Reqs (x\ r\ sigma TMP\ coq.mk-app x [t1,t2,ar,ur] TMP, r = TMP) (NewReqs t1 t2 ar ur),
     implement-umap M (Bo t1 t2 ar ur) (NIndL t1) (NIndR t2) (NRel t1 t2 ar) 
-                      (NIndMap t1 t2 ar ur) (NMR t1 t2 ar ur) (NRM t1 t2 ar ur) (NMRRMKR t1 t2 ar ur) (R t1 t2 ar ur).
+                      (NewReqs t1 t2 ar ur) BH (R t1 t2 ar ur).
 
+pred build-has-of i:map-class, o:gref.
+build-has-of M R :- 
+  coq.locate {calc ("Map" ^ {map-class.to_string M} ^ ".BuildHas")} R.
 
-func main inductive, string -> list prop.
-main GR Prefix Clauses :- std.do! [
+pred map-reqs i:map-class, i:term, o: list term.
+map-reqs map0 _ [].
+map-reqs map1 Ind [IndMap] :-
+  std.assert! (mymap-def Ind IndMap) "derive.umap: use derive.mymap before".
+map-reqs map2a Ind [MR | M1] :-
+  map-reqs map1 Ind M1,
+  std.assert! (mR-db Ind MR) "derive.umap: use derive.mR before".
+map-reqs map2b Ind [RM | M1] :-
+  map-reqs map1 Ind M1,
+  std.assert! (rm-db Ind RM) "derive.umap: use derive.Rm before".
+map-reqs map3 Ind [RM | M2a] :-
+  map-reqs map2a Ind M2a,
+  std.assert! (rm-db Ind RM) "derive.umap: use derive.Rm before".
+map-reqs map4 Ind [MRRMK | M3] :-
+  map-reqs map3 Ind M3,
+  std.assert! (mRRmK-db Ind MRRMK) "derive.umap: use derive.MRRMK before".
 
+pred implement-mapM i:map-class, i:inductive, o: term.
+implement-mapM M GR RUMap :-
   coq.env.indt GR _ TyParamNo _ Arity _ _,
   Ind = (global (indt GR)),
   std.assert! (param Ind Ind IndR) "derive.umap: use derive.param2 before",
-  std.assert! (mymap-def Ind IndMap) "derive.umap: use derive.mymap before",
-  std.assert! (mR-db Ind MR) "derive.umap: use derive.mR before",
-  std.assert! (rm-db Ind RM) "derive.umap: use derive.Rm before",
-  std.assert! (mRRmK-db Ind MRRMK) "derive.umap: use derive.MRRMK before",
-  mk-umap-type TyParamNo Arity Ind IndR UMapTySkel,
+  std.rev {map-reqs M Ind} Reqs,
+  trocq.db.map->class M UM,
+  build-has-of M BH4,
+  % todo: address universe polymorphism
+  mk-umap-type TyParamNo Arity Ind IndR (pglobal UM _) UMapTySkel,
   std.assert-ok! (coq.elaborate-skeleton UMapTySkel _ UMapTy) "derive.umap generates illtyped type",
-  coq.say "UMapTy" UMapTy,
-  implement-umap TyParamNo UMapTy Ind Ind IndR IndMap MR RM MRRMK RUMapSkel,
-  std.assert-ok! (coq.elaborate-skeleton RUMapSkel _ RUMap) "derive.umap generates illtyped term",
-  NameUMap is Prefix ^ "umap",
-  coq.ensure-fresh-global-id NameUMap FNameUMap,
-  %coq.env.add-const FNameUMap RUMap UMapTy _ CUMap,
-  % todo: check RUMap against UMapTy modulo universes
-  coq.env.add-const FNameUMap RUMap _ _ CUMap,
-  ClausesUMap = [umap-done GR, umap-db Ind (global (const CUMap))],
-  Clauses = ClausesUMap,
-  std.forall Clauses (x\
-    coq.elpi.accumulate _ "derive.umap.db" (clause _ _ x)
-  ),
+  implement-umap TyParamNo UMapTy Ind Ind IndR Reqs (pglobal BH4 _) RUMapSkel,
+  std.assert-ok! (coq.elaborate-skeleton RUMapSkel _ RUMap) "derive.umap generates illtyped term".
+
+func main inductive, string -> list prop.
+main GR Prefix Clauses :- std.do! [
+  Ind = (global (indt GR)),
+  std.fold {map-class.all-of-kind all} [] (M\ C\ C'\ sigma RUMap NameUMap FNameUMap CUMap Entry\
+    implement-mapM M GR RUMap,
+    NameUMap is Prefix ^ "map" ^ {map-class.to_string M},
+    coq.ensure-fresh-global-id NameUMap FNameUMap,
+    coq.env.add-const FNameUMap RUMap _ _ CUMap,
+    Entry = trocq.db.map-ind Ind M (global (const CUMap)),
+    coq.elpi.accumulate _ "trocq.db" (clause _ _ Entry),
+    C' = [Entry | C]
+  ) MClauses,
+  DEntry = (trocq.db.map-ind-done GR),
+  coq.elpi.accumulate _ "trocq.db" (clause _ _ DEntry),
+  Clauses = [DEntry | MClauses],
 ].
 
 }

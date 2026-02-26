@@ -18,52 +18,70 @@ refine-Lsym [A1, A2, AR | L2] [_,_,_,Refined | L2Ref] Refiner Acc R :-
   std.append Acc [A1, A2, AR, RefinedContra] NewAcc,
   refine-Lsym L2 L2Ref Refiner NewAcc R.
 
-% TyargNo, rel44 Type, mapi, eq_map, rsymK, list of args
-pred implement-rel44 i:int, i:term, i:term, i:term, i:term, i:term, i:term, i:term, i:list term, o:term.
+% TyargNo, rel44 Type, mapnCov, mapmContra, eq_map, rsymK, list of args
+pred implement-rel44 i:int, i:term, i:term, i:term, i:term, i:term, i:term, i:term, i:term, i:list term, o:term.
 implement-rel44 0 _ 
-  Mapi Eq_map RsymK CovariantNN ContravariantNN BuildNN LRev R :-
+  MapNCov MapMContra Eq_map RsymK CovariantNN ContravariantNN BuildNN LRev R :-
   !,
   std.rev LRev L,
   refine-covariant-tyargs L CovariantNN [] LCo,
   sym-tyargs L LSym,
   refine-Lsym LSym LCo ContravariantNN [] LContra,
-  coq.mk-app Mapi LCo MapCovariant,
-  coq.mk-app Mapi LContra MapContravariant,
+  coq.mk-app MapNCov LCo MapCovariant,
+  coq.mk-app MapMContra LContra MapContravariant,
   coq.mk-app RsymK LSym RsymKSym,
-  R = {{ lp:BuildNN lp:MapCovariant (lp:Eq_map lp:RsymKSym lp:MapContravariant )}}.
+  R = {{ lp:BuildNN _ _ _ lp:MapCovariant (lp:Eq_map lp:RsymKSym lp:MapContravariant )}}.
 implement-rel44 N (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 a2) ar\ (Bo a1 a2 ar)) 
-  Mapi Eq_map RsymK CovariantNN ContravariantNN BuildNN L
+  MapNCov MapMContra Eq_map RsymK CovariantNN ContravariantNN BuildNN L
   (fun AN1 ATy1 a1\ fun AN2 ATy2 a2\ fun ARN (ARTy a1 a2) ar\ (R a1 a2 ar)) :-
   M is N - 1,
   @pi-decl AN1 ATy1 a1\ %A1 : Type
   @pi-decl AN2 ATy2 a2\ %A2 : Type
-  @pi-decl ARN (ARTy a1 a2) ar\ % AR : Param00.Rel A1 A2
+  @pi-decl ARN (ARTy a1 a2) ar\ % AR : ParamNM.Rel A1 A2
     sigma NewL\
       std.append [ar,a2,a1] L NewL,
-      implement-rel44 M (Bo a1 a2 ar) Mapi Eq_map RsymK CovariantNN ContravariantNN BuildNN NewL (R a1 a2 ar).
+      implement-rel44 M (Bo a1 a2 ar) MapNCov MapMContra Eq_map RsymK CovariantNN ContravariantNN BuildNN NewL (R a1 a2 ar).
 
+pred get-eq-map i:map-class, o:term.
+get-eq-map map0  {{ eq_Map0 }}.
+get-eq-map map1  {{ eq_Map1 }}.
+get-eq-map map2a {{ eq_Map2a }}.
+get-eq-map map2b {{ eq_Map2b }}.
+get-eq-map map3  {{ eq_Map3 }}.
+get-eq-map map4  {{ eq_Map4 }}.
+
+pred generate-relNM i:inductive, i:param-class, o: term, o: term.
+generate-relNM GR (pc N M as PC) ReTy Re :-
+  coq.env.indt GR _ TyParamNo _ _ KNs KTys,
+  Ind = (global (indt GR)),
+  std.assert! (param Ind Ind TR) "derive.relNM: use derive.param2 before",
+  coq.typecheck TR TRTy _,
+  trocq.db.rel PC PRelNM BuildNM _ CovNM ContraNM,
+  mk-mR-type-rel44 TyParamNo TRTy TR (pglobal PRelNM _) RTy,
+  std.assert-ok! (coq.elaborate-skeleton RTy _ ReTy) "derive.relNM generates illtyped type",
+  std.assert! (trocq.db.map-ind Ind N UmapNCov) "derive.relNM: use derive.umap before",
+  std.assert! (trocq.db.map-ind Ind M UmapMContra) "derive.relNM: use derive.umap before",
+  std.assert! (rsymK-db Ind RSymKInd) "derive.relNM: use derive.rsymK before",
+  get-eq-map M Eq_map,
+  implement-rel44 TyParamNo ReTy UmapNCov UmapMContra Eq_map RSymKInd (pglobal CovNM _) (pglobal ContraNM _) (pglobal BuildNM _) [] R,
+  std.assert-ok! (coq.elaborate-skeleton R ReTy Re) "derive.relNM generates illtyped term".
 
 func main inductive, string -> list prop.
 main GR Prefix Clauses :- std.do! [
-
-  coq.env.indt GR _ TyParamNo _ _ KNs KTys,
-  Ind = (global (indt GR)),
-  std.assert! (param Ind Ind TR) "derive.rel44: use derive.param2 before",
-  coq.typecheck TR TRTy _,
-  mk-mR-type-rel44 TyParamNo TRTy TR SymKTy,
-  std.assert-ok! (coq.elaborate-skeleton SymKTy _ SymKTyE) "derive.rel44 generates illtyped type",
-  std.assert! (umap-db Ind UmapI) "derive.rel44: use derive.umap before",
-  std.assert! (rsymK-db Ind RSymKInd) "derive.rel44: use derive.rsymK before",
-  Eq_map = {{ eq_Map4 }},
-  implement-rel44 TyParamNo SymKTyE UmapI Eq_map RSymKInd (pglobal {{:gref Param44.covariant }} _) (pglobal {{:gref Param44.contravariant }} _) {{ MkUParam }} [] R,
-  std.assert-ok! (coq.elaborate-skeleton R SymKTyE Re) "derive.rel44 generates illtyped term",
-  Name is Prefix ^ "rel44",
-  coq.ensure-fresh-global-id Name FName,
-  coq.env.add-const FName Re SymKTyE _ C,
   I = global (indt GR),
-  Clauses = [rel44-done GR, rel44-db I (global (const C))],
+  std.fold {param-class.all-of-kind all} [] 
+  (PC\ Cls\ Cls'\ 
+    sigma N M C ReTy Re Name FName\
+    (pc N M) = PC,
+    generate-relNM GR PC ReTy Re,
+    Name is Prefix ^ "rel" ^ {map-class.to_string N} ^ {map-class.to_string M},
+    coq.ensure-fresh-global-id Name FName,
+    coq.env.add-const FName Re ReTy _ C,
+    Cls' = [trocq.db.param-ind I PC (global (const C))| Cls]) 
+    RCls,
+  Clauses = [trocq.db.param-ind-done GR | RCls],
   std.forall Clauses (x\
-    coq.elpi.accumulate _ "derive.rel44.db" (clause _ _ x)
+    coq.elpi.accumulate _ "trocq.db" (clause _ _ x)
   ),
 ].
 

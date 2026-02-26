@@ -23,6 +23,19 @@ pred map->class o:map-class, o:gref.
 % Given the class M, obtain {{indc_mapM}}
 pred map-class->indc-class o:map-class, o:gref.
 
+% Given an inductive I and class M, obtain a proof that M has [|I|]
+pred map-ind i:term, i:map-class, o:term.
+
+% Given an inductive I and class M, checks if M has [|I|] has been derived
+pred map-ind-done o:inductive.
+
+% Given an inductive I and ParamNM, obtain a proof that 
+% given Tys1 NM related Tys2 then I Tys2 is NM related to I Tys2
+pred param-ind i:term, i:param-class, o:term.
+
+% Given an inductive and class M, checks if M has [|I|] has been derived
+pred param-ind-done o:inductive.
+
 % Given the class M, obtain {{Id_MapM}}
 pred id-map o:map-class, o:constant.
 
