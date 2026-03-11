@@ -36,3 +36,12 @@ examples/Vector_tuple.v
 examples/misc.v
 
 STLC_SuccNat/Maps.v
+STLC_SuccNat/Presence_Conditions.v
+STLC_SuccNat/STLC_SuccNat.v
+STLC_SuccNat/Lifted_STLC_SuccNat.v
+STLC_SuccNat/Environments.v
+STLC_SuccNat/Norm.v
+STLC_SuccNat/Lifted_Norm.v
+STLC_SuccNat/LR.v
+STLC_SuccNat/Examples.v
+STLC_SuccNat/Trocq_Showcase.v

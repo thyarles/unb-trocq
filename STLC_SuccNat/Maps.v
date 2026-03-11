@@ -1,5 +1,14 @@
 (** * Maps: Total and Partial Maps *)
 
+From Coq Require Import Init.Prelude.
+From Coq Require Import Arith.
+From Coq Require Import Bool.
+From Coq Require Export Strings.String.
+From Coq Require Import FunctionalExtensionality.
+From Coq Require Import List.
+Import ListNotations.
+Set Default Goal Selector "!".
+
 (** _Maps_ (or _dictionaries_) are ubiquitous data structures both in
     ordinary programming and in the theory of programming languages;
     we're going to need them in many places in the coming chapters.
@@ -28,14 +37,6 @@
     much difference, though, because we've been careful to name our
     own definitions and theorems the same as their counterparts in the
     standard library, wherever they overlap. *)
-
-From Coq Require Import Arith.
-From Coq Require Import Bool.
-From Coq Require Export Strings.String.
-From Coq Require Import FunctionalExtensionality.
-From Coq Require Import List.
-Import ListNotations.
-Set Default Goal Selector "!".
 
 (** Documentation for the standard library can be found at
     https://coq.inria.fr/library/.
@@ -68,16 +69,12 @@ Print Init.Nat.add.
 (** To compare strings, we use the function [eqb] from the [String]
     module in the standard library. *)
 
-Check String.eqb_refl :
-  forall x : string, (x =? x)%string = true.
+Check String.eqb_refl.
 
 (** We will often use a few basic properties of string equality... *)
-Check String.eqb_eq :
-  forall n m : string, (n =? m)%string = true <-> n = m.
-Check String.eqb_neq :
-  forall n m : string, (n =? m)%string = false <-> n <> m.
-Check String.eqb_spec :
-  forall x y : string, reflect (x = y) (String.eqb x y).
+Check String.eqb_eq.
+Check String.eqb_neq.
+Check String.eqb_spec.
 
 (* ################################################################# *)
 (** * Total Maps *)

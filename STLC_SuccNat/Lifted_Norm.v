@@ -1,16 +1,17 @@
+From Coq Require Import Init.Prelude.
 Require Import String List Maps.
 Import ListNotations.
 Require Import STLC_SuccNat.
 Require Import Lifted_STLC_SuccNat.
 Require Import Environments.
 
-Hint Constructors multi : core.
-Hint Constructors value' : core.
-Hint Constructors step' : core.
-Hint Constructors has_type' : core.
+#[global] Hint Constructors multi : core.
+#[global] Hint Constructors value' : core.
+#[global] Hint Constructors step' : core.
+#[global] Hint Constructors has_type' : core.
 
-Hint Extern 2 (has_type' _ (app' _ _) _) => eapply T_App'; auto : core.
-Hint Extern 2 (_ = _) => compute; reflexivity : core.
+#[global] Hint Extern 2 (has_type' _ (app' _ _) _) => eapply T_App'; auto : core.
+#[global] Hint Extern 2 (_ = _) => compute; reflexivity : core.
 
 Definition halts' t' : Prop := exists t1', multi step' t' t1' /\ value' t1'.
 
@@ -34,7 +35,7 @@ Inductive appears_free_in' : string -> tm' -> Prop :=
   (* nats*)
   |afi_succ' : forall x t1', appears_free_in' x t1' -> appears_free_in' x (succ' t1').
 
-Hint Constructors appears_free_in' : core.
+#[global] Hint Constructors appears_free_in' : core.
 
 Definition closed' (t':tm') :=
   forall x, ~ appears_free_in' x t'.
