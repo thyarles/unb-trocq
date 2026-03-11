@@ -1,6 +1,7 @@
 From Coq Require Import String List.
 From Coq Require Import FunctionalExtensionality.
-Require Import Presence_Conditions.
+From Arthur Require Import Maps.
+From Arthur Require Import Presence_Conditions.
 Require Import Maps.
 Require Import STLC_SuccNat.
 Require Import Lifted_STLC_SuccNat.

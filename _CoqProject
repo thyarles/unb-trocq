@@ -4,6 +4,7 @@
 -R theories/ Trocq
 -R elpi/ Trocq.Elpi
 -R examples/ Trocq_examples
+-R STLC_SuccNat/ Arthur
 
 theories/HoTT_additions.v
 theories/Hierarchy.v
@@ -33,3 +34,5 @@ examples/summable.v
 examples/trocq_setoid_rewrite.v
 examples/Vector_tuple.v
 examples/misc.v
+
+STLC_SuccNat/Maps.v
