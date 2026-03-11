@@ -8,8 +8,8 @@ From Trocq_examples Require Import N.
     Coq does not allow Type to be of type Type. Instead, it uses a hidden, infinite hierarchy of
     universes: Type@{0} has type Type@{1}, which has type Type@{2}, and so on.
 
-    The line Set Universe Polymorphism. changes this behavior. It tells Coq to treat universes as
-    local, bound variables rather than fixed global constraints. This allows us to write more 
+    The command "Set Universe Polymorphism" changes this behavior. It tells Coq to treat universes
+    as local, bound variables rather than fixed global constraints. This allows us to write more 
     general code that can work across different universe levels without having to specify them 
     explicitly.
 *)
