@@ -70,7 +70,7 @@ Proof.
   induction lR; simpl.
   - apply nilR.
   - apply consR.
-    + apply (fR a a' aR).
+    + apply (fR a1 a2 a_R).
     + apply IHlR.
 Defined.
 

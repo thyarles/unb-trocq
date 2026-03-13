@@ -18,104 +18,59 @@ Set Universe Polymorphism.
 Unset Universe Minimization ToSet.
 
 Import HoTTNotations.
+Require Import Database.
+From Trocq Require Import Rel44. 
+Elpi derive option.
 
-Inductive optionR (A A' : Type) (AR : A -> A' -> Type) :
-  option A -> option A' -> Type :=
-    | someR :
-      forall (a : A) (a' : A'), AR a a' ->
-        optionR A A' AR (Some a) (Some a')
-    | noneR : optionR A A' AR None None.
+Check option_R : forall A1 A2 (AR : A1 -> A2 -> Type), option A1 -> option A2 -> Type.
+Check option_mymap : forall A1 A2 (AR : A1 -> A2 -> Type), Map1.Has AR-> option A1 -> option A2. 
+Check option_mR : forall A1 A2 (AR : A1 -> A2 -> Type) (AM: Map2a.Has AR), 
+  forall l1 l2, option_mymap _ _ _ AM l1 = l2 -> option_R _ _ AR l1 l2.
+Check option_Rm : forall A1 A2 (AR : A1 -> A2 -> Type) (AM: Map2b.Has AR), 
+  forall l1 l2, option_R _ _ AR l1 l2 -> option_mymap _ _ _ AM l1 = l2.
+Check option_mRRmK : forall A1 A2 (AR : A1 -> A2 -> Type) (AM: Map4.Has AR), 
+  forall l1 l2 lR, option_mR _ _ _ AM _ _ (option_Rm _ _ _ AM _ _ lR) = lR. 
+Check option_sym : forall A1 A2 (A_R : A1 -> A2 -> Type) l1 l2, option_R A1 A2 A_R l1 l2 ->
+option_R A2 A1 (sym_rel A_R) l2 l1. 
 
-Definition option_map :
-forall (A A' : Type) (AR : Param10.Rel A A'), option A -> option A' :=
-  fun A A' AR =>
-    fun oa =>
-      match oa in option _ return option A' with
-      | Some a => Some (map AR a)
-      | None => None
-      end.
+Check option_symK : forall (A1 A2 : Type) (A_R : A1 -> A2 -> Type) (s1 : option A1)
+(s2 : option A2) (IR : option_R A1 A2 A_R s1 s2),
+  option_sym A2 A1 (sym_rel A_R) s2 s1 (option_sym A1 A2 A_R s1 s2 IR) =
+  IR. 
+Check option_rsymK : forall (A1 A2 : Type) (A_R : A1 -> A2 -> Type) (s1 : option A1)
+  (s2 : option A2),
+  option_R A2 A1 (sym_rel A_R) s2 s1 <->> option_R A1 A2 A_R s1 s2.
+Check option_rel44 :
+     forall A1 A2 : Type, (A1 <=> A2)%P -> (option A1 <=> option A2)%P. 
+     
+Check option_map2a : forall (A1 A2 : Type) (AR : A1 -> A2 -> Type),
+Map2a.Has AR -> Map2a.Has (option_R A1 A2 AR).
 
-Definition some_inj1 :
-forall (A : Type) (a1 a2 : A), Some a1 = Some a2 -> a1 = a2 :=
-  fun A a1 a2 e =>
-    let proj1 (oa : option A) :=
-      match oa with
-      | Some a => a
-      | None => a1
-      end
-    in ap proj1 e.
+Check option_map2b : forall (A1 A2 : Type) (AR : A1 -> A2 -> Type),
+Map2b.Has AR -> Map2b.Has (option_R A1 A2 AR).
 
-Definition exfalso_option_some_none :
-  forall (T : Type) (A : Type) (a : A), Some a = None -> T :=
-    fun T A a e =>
-      match e in @paths _ _ t
-      return
-        match t with
-        | Some _ => Unit
-        | _ => T
-        end
-      with
-      | idpath => tt
-      end.
+Check option_map3 : forall (A1 A2 : Type) (AR : A1 -> A2 -> Type),
+Map3.Has AR -> Map3.Has (option_R A1 A2 AR).
 
-Definition exfalso_option_none_some :
-  forall (T : Type) (A : Type) (a : A), None = Some a -> T :=
-    fun T A a e =>
-      match e in @paths _ _ t
-      return
-        match t with
-        | None => Unit
-        | Some _ => T
-        end
-      with
-      | idpath => tt
-      end.
+Check option_map4 : forall (A1 A2 : Type) (AR : A1 -> A2 -> Type),
+Map4.Has AR -> Map4.Has (option_R A1 A2 AR).
 
-Definition option_map_in_R :
-  forall (A A' : Type) (AR : Param2a0.Rel A A')
-         (oa : option A) (oa' : option A'),
-    option_map A A' AR oa = oa' -> optionR A A' AR oa oa' :=
-  fun A A' AR =>
-    fun oa oa' =>
-      match oa with
-      | Some a =>
-        match oa' with
-        | Some a' =>
-          fun e =>
-            someR A A' AR a a' (map_in_R AR a a' (some_inj1 A' (map AR a) a' e))
-        | None =>
-          fun e =>
-            exfalso_option_some_none (optionR A A' AR (Some a) (None))
-              A' (map AR a) e
-        end
-      | None =>
-        match oa' with
-        | Some a' =>
-          fun e =>
-            exfalso_option_none_some (optionR A A' AR (None) (Some a'))
-              A' a' e
-        | None => fun e => noneR A A' AR
-        end
-      end.
+Check option_rel00 : forall A1 A2 : Type,
+Param00.Rel A1 A2 -> Param00.Rel (option A1) (option A2).
 
-Definition option_R_in_map :
-  forall (A A' : Type) (AR : Param2b0.Rel A A')
-         (oa : option A) (oa' : option A'),
-    optionR A A' AR oa oa' -> option_map A A' AR oa = oa'
-    :=
-  fun A A' AR =>
-    fun oa oa' oaR =>
-      match oaR in optionR _ _ _ oa oa' return option_map A A' AR oa = oa' with
-      | @someR _ _ _ a a' aR =>
-        @transport A' (fun t => Some t = Some a')
-          a' (map AR a) (R_in_map AR a a' aR)^
-            idpath
-      | @noneR _ _ _ => idpath
-      end.
+Check option_rel42a : forall A1 A2 : Type,
+Param42a.Rel A1 A2 -> Param42a.Rel (option A1) (option A2).
 
-Definition option_R_in_mapK (A A' : Type) (AR : Param40.Rel A A')
-         (oa : option A) (oa' : option A') (oaR : optionR A A' AR oa oa') :
-    option_map_in_R A A' AR oa oa' (option_R_in_map A A' AR oa oa' oaR) = oaR.
-Proof.
-by case: oaR => [a a' aR|]//=; elim/(ind_map AR): _; rewrite transport_1.
-Qed.
+Check option_rel42b : forall A1 A2 : Type,
+Param42b.Rel A1 A2 -> Param42b.Rel (option A1) (option A2).
+
+Check option_rel2a4 : forall A1 A2 : Type,
+Param2a4.Rel A1 A2 -> Param2a4.Rel (option A1) (option A2).
+
+Check option_rel2b4 : forall A1 A2 : Type,
+Param2b4.Rel A1 A2 -> Param2b4.Rel (option A1) (option A2).
+
+Check option_rel33 : forall A1 A2 : Type,
+Param33.Rel A1 A2 -> Param33.Rel (option A1) (option A2).
+
+Check option_rel44 : forall (A A' : Type) (AR : Param44.Rel A A'), Param44.Rel (option A) (option A').

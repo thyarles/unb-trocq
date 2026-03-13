@@ -29,9 +29,6 @@ Inductive Option (A : Type) : Type :=
 Inductive Prod (A B : Type) : Type :=
 | PR : A -> B -> Prod A B. 
 
-Inductive Mix (A : Type) : Type :=
-| Con : A -> Unit -> Mix A.
-
 Inductive ThreeTypes (A B C : Type) :=
 | C1 : A -> ThreeTypes A B C
 | C2 : B -> ThreeTypes A B C

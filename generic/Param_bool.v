@@ -19,69 +19,25 @@ Unset Universe Minimization ToSet.
 
 Import HoTTNotations.
 
-Inductive BoolR : Bool -> Bool -> Type :=
-  | falseR : BoolR false false
-  | trueR : BoolR true true.
+Require Import Database.
+From Trocq Require Import Rel44. 
+Elpi derive Bool.
+Definition BoolR := bool_R.
+Definition trueR := true_R.
 
-Definition map_Bool : Bool -> Bool := idmap.
+Check bool_R : Bool -> Bool -> Type.
+Check bool_mymap : Bool -> Bool. 
+Check bool_mR : forall (b b' : Bool) (e : bool_mymap b = b'), bool_R b b'. 
+Check bool_Rm : forall (b b' : Bool) (bR : bool_R b b'), bool_mymap b = b'.
+Check bool_mRRmK : forall (b b' : Bool) (bR : bool_R b b'), bool_mR _ _  (bool_Rm _ _  bR) = bR.
+Check bool_sym : forall (b b' : Bool) (bR : bool_R b b'), bool_R b' b.
+Check bool_symK : forall (b b' : Bool) (bR : bool_R b b'), bool_sym _ _ (bool_sym _ _ bR) = bR.
+Check bool_rsymK : forall (b b' : Bool), sym_rel bool_R b b' <->> bool_R b b'.
+Check bool_map4 : Map4.Has bool_R.
+Check bool_rel44 : Param44.Rel Bool Bool.
 
-Definition map_in_R_Bool {b b' : Bool} (e : map_Bool b = b') : BoolR b b' :=
-  match e with
-  | idpath =>
-    match b with
-    | false => falseR
-    | true => trueR
-    end
-  end.
-
-Definition R_in_map_Bool {b b' : Bool} (bR : BoolR b b') : map_Bool b = b' :=
-  match bR with
-  | falseR => idpath
-  | trueR => idpath
-  end.
-
-Definition R_in_mapK_Bool {b b' : Bool} (bR : BoolR b b') :
-  map_in_R_Bool (R_in_map_Bool bR) = bR :=
-    match bR with
-    | falseR => idpath
-    | trueR => idpath
-    end.
-
-Definition Param_Bool_sym {b b' : Bool} (bR : BoolR b b') : BoolR b' b :=
-  match bR with
-  | falseR => falseR
-  | trueR => trueR
-  end.
-
-Definition Param_Bool_sym_inv {b b' : Bool} (bR : BoolR b b') :
-  Param_Bool_sym (Param_Bool_sym bR) = bR :=
-    match bR with
-    | falseR => idpath
-    | trueR => idpath
-    end.
-
-Definition BoolR_sym : forall (b b' : Bool), sym_rel BoolR b b' <->> BoolR b b'.
-Proof.
-  intros b b'; unshelve eexists _,_ .
-  - apply Param_Bool_sym.
-  - apply Param_Bool_sym.
-  - intro bR. apply Param_Bool_sym_inv.
-Defined.
-
-Definition Map4_Bool : Map4.Has BoolR.
-Proof.
-  unshelve econstructor.
-  - exact map_Bool.
-  - exact @map_in_R_Bool.
-  - exact @R_in_map_Bool.
-  - exact @R_in_mapK_Bool.
-Defined.
-
-Definition Param44_Bool : Param44.Rel Bool Bool.
-Proof.
-  unshelve econstructor.
-  - exact BoolR.
-  - exact Map4_Bool.
-  - apply (fun e => @eq_Map4 _ _ (sym_rel BoolR) BoolR e Map4_Bool).
-    apply BoolR_sym.
-Defined.
+Definition Param44_Bool := bool_rel44.
+Set Printing All.
+Set Printing Universes.
+Print bool_rel44.
+Print Universes Subgraph (bool_rel44.u0  bool_rel44.u1).

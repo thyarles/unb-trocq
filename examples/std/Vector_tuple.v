@@ -15,6 +15,7 @@ From mathcomp Require Import ssreflect ssrfun.
 From Trocq Require Import Trocq.
 
 Set Universe Polymorphism.
+Unset Universe Minimization ToSet.
 
 (* iterated tuple type *)
 
@@ -349,6 +350,9 @@ Proof.
   - exact (@R_in_mapK_bv_bnat k).
 Defined.
 
+
+(* Set Printing All.
+Set Printing Universes. *)
 Definition Param44_bnat_bv_d {k : nat} :
   Param44.Rel (bounded_nat k) (bitvector k).
 Proof.
@@ -357,7 +361,6 @@ Proof.
   - exact (@Map4_bnat_bv k).
   - exact (@Map4_bv_bnat k).
 Defined.
-
 Definition Param44_bnat_bv (k k' : nat) (kR : natR k k') :
   Param44.Rel (bounded_nat k) (bitvector k').
 Proof.
