@@ -6,6 +6,32 @@ From Arthur Require Import STLC_SuccNat.
 From Arthur Require Import Lifted_STLC_SuccNat.
 From Trocq Require Import Trocq.
 
+(* Ir por partes: 
+   1. Quando pega uma ferramenta tem que entender em exemplo simples, não adianta tentar usar direto.
+   2. Deve-se entender não apenas exemplos, mas coisas que fazemos na mão:
+      - Aplicar em parametrização de uma lista e generalização dessas propriedades
+      - Criar uma lista de naturais (length, append) prova esse teorema
+      - Novo exemplo, mas com lista polimorfica (length, append) prova esse teorema
+      - Observe a diferença da primeira prova e a segunda, e o que mudou
+      - Faça o mesmo processo usando o ProofObjects, e observe o que mudou
+      - Faça o mesmo processo usando o Trocq, e observe o que mudou
+   3. O objetivo é entender o processo de generalização, e como o Trocq pode automatizar isso. 
+      O processo de generalização é o que torna possível transferir provas entre representações diferentes,
+      e o Trocq é uma ferramenta que automatiza esse processo.
+      O Trocq é uma ferramenta que automatiza a generalização de provas,
+      permitindo que você transfira provas entre representações diferentes de um mesmo conceito. 
+      O processo de generalização envolve identificar as partes de uma prova que dependem de uma
+      representação específica, e generalizar essas partes para que possam ser aplicadas a outras representações.
+  4. Relação com a IA: IA simbólica (princípio de relação, classificação, etc) é o processo de generalização, e o Trocq é uma ferramenta que automatiza esse processo. 
+     O Trocq pode ser visto como uma ferramenta de IA simbólica que automatiza a generalização de provas, permitindo que você transfira provas entre representações diferentes de um mesmo conceito. 
+     O processo de generalização é fundamental para a IA simbólica, pois permite que os sistemas de IA generalizem a partir de exemplos específicos para conceitos mais amplos. 
+     O Trocq é uma ferramenta que automatiza esse processo, permitindo que você transfira provas entre representações diferentes de um mesmo conceito, o que é essencial para a generalização em IA simbólica.
+  5. Uma das fases do projeto de engenharia de software para IA:
+     - Vander está na fase de verificação
+     - Detecção de bad smell nas provas usando IA
+     - Refatoração de provas usando IA
+*)
+
 (* ========================================== *)
 (* STEP 1: RELATING THE AST TYPES             *)
 (* ========================================== *)
