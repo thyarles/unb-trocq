@@ -2,88 +2,96 @@
 (*                 Tutorial: Listas, Parametrização e Trocq                  *)
 (*                         — Passo a Passo —                                 *)
 (*                                                                           *)
-(*  Objetivo: entender como a parametrização de tipos nos permite reutilizar *)
-(*  provas, e como o Trocq automatiza essa reutilização.                     *)
+(*  Objetivo: entender como a parametrização de tipos permite reutilizar     *)
+(*  provas e como o Trocq pode automatizar essa reutilização.                *)
 (*                                                                           *)
-(*  Estrutura do arquivo:                                                    *)
+(*  Expectativa:                                                             *)
 (*    Parte 0  — Conceito central: o que é parametrização?                   *)
 (*    Parte 1  — Lista de naturais (monomórfica): length, append, teorema    *)
 (*    Parte 2  — Lista polimórfica: mesmas funções, mesmo teorema            *)
 (*    Parte 3  — Comparando as provas (estilo tática)                        *)
 (*    Parte 4  — ProofObjects: vendo as provas como termos lambda            *)
-(*    Parte 5  — Conectando os dois mundos (preview do Trocq)                *)
-(*                                                                           *)
+(*    Parte 5  — Transferência manual                                        *)
+(*    Parte 6  — Utilizando o Trocq                                          *)
 (*****************************************************************************)
 
-
-From Coq Require Import ssreflect.
+(** TODO: entender melhor o papel da biblioteca HoTT *)
 From HoTT Require Import HoTT.
-
-Set Universe Polymorphism.
-
-(** Abre o escopo de nat para que literais como 0, 1, 2, 3 sejam
-    interpretados como números naturais por padrão. *)
+(** Abre o escopo de nat para que literais como 0, 1, 2, 3 sejam interpretados 
+    como números naturais por padrão. Provido pelo import ssreflect do Coq. *)
+From Coq Require Import ssreflect.
 Local Open Scope nat_scope.
 
-(**
-  ══════════════════════════════════════════════════════════════════════
-  PARTE 0 — Conceito central: o que é parametrização?
-  ══════════════════════════════════════════════════════════════════════
+(** O Rocq não permite tipo de tipo. Para tanto, utiliza uma hierarquia escondida
+    de universos: Type@{0} tem tipo Type{1}, que tem tipo Type@{2}...
+    
+    O comando "Set Universe Polymorphism" muda esse comportamento e diz ao Rocq
+    para considerar o universo como local, o que permite código mais genérico. *)
+Set Universe Polymorphism.
 
-  Imagine que você precisa de listas de naturais, listas de booleanos,
-  listas de strings, etc.  Sem parametrização, você teria que definir
-  um tipo separado para cada um e reescrever TODAS as funções (length,
-  append, reverse...) e TODAS as provas uma segunda vez.
+(* PARTE 0 — Conceito central: o que é parametrização?
+------------------------------------------------------------------------------
+  Imagine que você precisa de listas de naturais, listas de booleanos, listas
+  de strings, etc. Sem parametrização, você teria que definir um tipo separado
+  para cada um e reescrever TODAS as funções (length, append, reverse...) e 
+  TODAS as provas uma segunda vez.
 
-  Com parametrização (ou polimorfismo paramétrico), você define as
-  operações UMA VEZ para um tipo A genérico, e toda instância (nat,
-  bool, string...) herda automaticamente as propriedades provadas.
+  Com parametrização (ou polimorfismo paramétrico), você define as operações
+  UMA VEZ para um tipo A genérico, e toda instância (nat, bool, string...) 
+  herda automaticamente as propriedades provadas.
 
   A ideia fundamental:
 
-      "Propriedades que dependem apenas da ESTRUTURA da lista (e não do
-       TIPO dos seus elementos) são automaticamente válidas para qualquer
-       instância."
+    "Propriedades que dependem apenas da ESTRUTURA da lista (e não do TIPO dos
+    seus elementos) são automaticamente válidas para qualquer instância." *)
 
-  Este tutorial demonstra isso de forma concreta, começando do zero.
-*)
+(* PARTE 1 — Lista de naturais (monomórfica): length, append, teorema
+------------------------------------------------------------------------------
+  Definimos um tipo de lista para nat, como se ainda não conhecêssemos o poli-
+  morfismo. Isso é o "ponto de partida" sem generalização:
+  a) um tipo, b) implementação e c) prova. *)
 
-
-(**
-  ══════════════════════════════════════════════════════════════════════
-  PARTE 1 — Lista de naturais (monomórfica)
-
-  Definimos um tipo de lista específico para nat, como se ainda não
-  conhecêssemos o polimorfismo.  Isso é exatamente o "ponto de partida"
-  sem generalização: um tipo, uma implementação, uma prova.
-  ══════════════════════════════════════════════════════════════════════
-*)
-
-(** O tipo: uma lista de naturais é ou vazia (NNil) ou um nat seguido
-    de outra lista (NCons h t). *)
+(** a) o tipo: uma lista de naturais é ou vazia (NNil) ou um nat seguido de 
+       outra lista (NCons h t). *)
 Inductive NatList : Type :=
   | NNil  : NatList
   | NCons : nat -> NatList -> NatList.
 
-(** Notações para escrever listas de forma legível. *)
+(** Notações para escrever listas de forma legível. 
+    ":n:" quer dizer "lista de naturais" *)
 Notation "x :n: l" := (NCons x l) (at level 60, right associativity).
 Notation "[[]]"    := NNil.
 
-(** Comprimento da lista: conta o número de elementos. *)
+(** Teste de notação *)
+Compute [[]] : NatList.
+Compute 1 :n: [[]] : NatList.
+Compute 1 :n: 2 :n: 3 :n: [[]] : NatList.
+
+(** b) Implementação
+       Comprimento da lista: conta o número de elementos. *)
 Fixpoint nlength (l : NatList) : nat :=
   match l with
   | NNil       => O
   | NCons _ t  => S (nlength t)
   end.
 
-(** Concatenação: põe os elementos de l1 antes dos de l2. *)
+(** Teste de comprimento *)
+Compute nlength [[]] = 0.
+Compute nlength (1 :n: 2 :n: 3 :n: [[]]) = 3.
+
+(** b) Implementação
+       Concatenação: põe os elementos de l1 antes dos de l2. *)
 Fixpoint napp (l1 l2 : NatList) : NatList :=
   match l1 with
   | NNil       => l2
   | NCons h t  => NCons h (napp t l2)
   end.
 
-(** Verificações rápidas *)
+(** Teste de concatenação *)
+Compute napp ([[]]) ([[]]) = [[]].
+Compute napp (1 :n: 2 :n: [[]]) (3 :n: 4 :n: [[]]) = (1 :n: 2 :n: 3 :n: 4 :n: [[]]).
+
+(** Provas rápidas *)
 Example nlength_ex1 : nlength [[]] = O.
 Proof. simpl. reflexivity. Qed.
 
@@ -98,14 +106,14 @@ Example napp_ex :
        (3 :n: 4 :n: [[]]) = (1 :n: 2 :n: 3 :n: 4 :n: [[]]).
 Proof. simpl. reflexivity. Qed.
 
-(** ── Teorema principal (Parte 1) ────────────────────────────────────
+(** c) Teorema principal (parte 1)
 
     "O comprimento da concatenação é a soma dos comprimentos."
 
-    Este é o teorema que vamos provar de 3 formas diferentes ao longo
-    deste arquivo: por tática, como ProofObject e via Trocq.
+    Este é o teorema que vamos provar de 3 formas diferentes:
+    por tática, como ProofObject e via Trocq.
 *)
-Theorem nlength_napp :
+Theorem nlength_napp : 
   forall (l1 l2 : NatList),
     nlength (napp l1 l2) = nlength l1 + nlength l2.
 Proof.
@@ -113,15 +121,15 @@ Proof.
   (** Indução na estrutura de l1 — a variável l2 fica fixa. *)
   induction l1 as [| h t IH].
   - (** Caso base: l1 = NNil
-        Ambos os lados reduzem a  [nlength l2]  por computação.
+        Ambos os lados reduzem a [nlength l2] por computação.
         [simpl] expande as definições de napp e nlength:
           nlength (napp NNil l2)  = nlength l2
-          nlength NNil + nlength l2 = 0 + nlength l2 = nlength l2  *)
+          nlength NNil + nlength l2 = 0 + nlength l2 = nlength l2 *)
     simpl. reflexivity.
   - (** Passo indutivo: l1 = NCons h t
         Hipótese indutiva (IH): nlength (napp t l2) = nlength t + nlength l2
         Meta após [simpl]:
-          S (nlength (napp t l2)) = S (nlength t + nlength l2)    *)
+          S (nlength (napp t l2)) = S (nlength t + nlength l2) *)
     simpl.
     (** [rewrite IH] substitui o lado esquerdo de IH no goal, deixando:
           S (nlength t + nlength l2) = S (nlength t + nlength l2)  *)
@@ -129,29 +137,33 @@ Proof.
     reflexivity.
 Qed.
 
+(* PARTE 2 — Lista polimórfica (paramétrica)
+------------------------------------------------------------------------------
+  Agora generalizamos: em vez de fixar o tipo dos elementos como nat, tornamos
+  o tipo um PARÂMETRO "A : Type". 
+  
+  Observe que a definição e as funções são estruturalmente idênticas às da 
+  Parte 1.  A única diferença é o parâmetro A. *)
 
-(**
-  ══════════════════════════════════════════════════════════════════════
-  PARTE 2 — Lista polimórfica (paramétrica)
-
-  Agora generalizamos: em vez de fixar o tipo dos elementos como nat,
-  tornamos o tipo um PARÂMETRO  A : Type.
-
-  Observe que a definição e as funções são estruturalmente idênticas
-  às da Parte 1.  A única diferença é o parâmetro A.
-  ══════════════════════════════════════════════════════════════════════
-*)
-
-(** O tipo polimórfico — [A] é o tipo dos elementos. *)
+(** O tipo polimórfico "A" é o tipo dos elementos. *)
 Inductive PList (A : Type) : Type :=
   | PNil  : PList A
   | PCons : A -> PList A -> PList A.
 
+(** Como é um tipo novo, temos que definir os argumentos *)
 Arguments PNil  {A}.
 Arguments PCons {A} _ _.
 
+(** Notação para listas polimórficas ":p:" *)
 Notation "x :p: l" := (PCons x l) (at level 60, right associativity).
 Notation "{{}}"    := PNil.
+
+(** Teste de notação *)
+From Coq Require Import String.  (* Para usar strings como exemplo de tipo *)
+Compute {{}} : PList string.
+Compute 1 :p: {{}} : PList nat.
+(* Compute "a" :p: "b" :p: {{}} : PList string. *)
+(* Não consegue montar uma lista de strings diretamente com a notação ":p:" *)
 
 (** Comprimento — idêntico em estrutura a [nlength]; A é implícito. *)
 Fixpoint plength {A : Type} (l : PList A) : nat :=
@@ -160,6 +172,9 @@ Fixpoint plength {A : Type} (l : PList A) : nat :=
   | PCons _ t  => S (plength t)
   end.
 
+(** Teste de comprimento *)
+Compute plength (1 :p: 2 :p: 3 :p: {{}}) = 3.
+
 (** Concatenação — o tipo dos elementos passa por implicitamente. *)
 Fixpoint papp {A : Type} (l1 l2 : PList A) : PList A :=
   match l1 with
@@ -167,8 +182,10 @@ Fixpoint papp {A : Type} (l1 l2 : PList A) : PList A :=
   | PCons h t  => PCons h (papp t l2)
   end.
 
-(** ── Verificações ───────────────────────────────────────────────── *)
+(** Teste de concatenação *)
+Compute papp (1 :p: 2 :p: {{}}) (3 :p: 4 :p: {{}}) = (1 :p: 2 :p: 3 :p: 4 :p: {{}}).
 
+(** Provas rápidas *)
 Example plength_ex : plength (1 :p: 2 :p: 3 :p: {{}}) = 3.
 Proof. simpl. reflexivity. Qed.
 
@@ -177,30 +194,22 @@ Example papp_ex :
        (3 :p: 4 :p: {{}}) = (1 :p: 2 :p: 3 :p: 4 :p: {{}}).
 Proof. simpl. reflexivity. Qed.
 
-(** ── Teorema principal (Parte 2) ────────────────────────────────────
+(** c) Teorema principal (parte 2)
 
-    O mesmo enunciado, mas agora para qualquer tipo A.
-
-    *** PARE E COMPARE com nlength_napp acima! ***
-    A prova é PALAVRA POR PALAVRA a mesma.
-    A única diferença é o [intros A] inicial.
-*)
+    O mesmo enunciado, mas agora para qualquer tipo A. *)
 Theorem plength_papp :
   forall {A : Type} (l1 l2 : PList A),
     plength (papp l1 l2) = plength l1 + plength l2.
 Proof.
-  intros A l1 l2.                       (* ← nova linha; o resto é igual! *)
+  intros A l1 l2.                       (* Tipo A na linha; o resto é igual! *)
   induction l1 as [| h t IH].
   - simpl. reflexivity.
   - simpl. rewrite IH. reflexivity.
 Qed.
 
-
-(**
-  ══════════════════════════════════════════════════════════════════════
-  PARTE 3 — Observando a diferença — e o que NÃO mudou
-
-  Coloque as duas provas lado a lado:
+(* PARTE 3 — Observando as diferenças e igualdades
+------------------------------------------------------------------------------
+  Observe as provas lado a lado:
 
       nlength_napp            plength_papp
       ─────────────────────   ─────────────────────────
@@ -210,27 +219,23 @@ Qed.
       - simpl. rewrite IH.    - simpl. rewrite IH.
         reflexivity.            reflexivity.
 
-  A única diferença estrutural é [intros A].
-
-  Por quê?
-    A propriedade depende apenas de COMO a lista é construída
-    (nenhum elemento / um elemento à frente), não do TIPO dos
-    elementos.  O tipo entra apenas na definição, não na prova.
+  A única diferença estrutural é [intros A]. 
+  
+  "Por quê?" A propriedade depende apenas de COMO a lista é construída (nenhum 
+  elemento / um elemento à frente), não do TIPO dos elementos. O tipo entra 
+  apenas na definição, não na prova.
 
   Consequência prática:
     [plength_papp] é estritamente mais geral que [nlength_napp].
     Se instanciamos A := nat, obtemos exatamente o mesmo enunciado.
 
-  O PROBLEMA é que NatList ≠ PList nat em Coq: são tipos *distintos*,
-  então não podemos aplicar [plength_papp] diretamente a um NatList.
-  Precisamos de uma *ponte* entre os dois tipos.
-  ══════════════════════════════════════════════════════════════════════
-*)
+  O PROBLEMA é que NatList ≠ PList nat: "são tipos distintos", então não pode-
+  mos aplicar [plength_papp] diretamente a um NatList. Precisamos de uma 
+  "ponte" entre os dois tipos. *)
 
-(** Para deixar isso explícito: o corolário monomórfico NÃO segue por
-    instanciação direta de [plength_papp], porque NatList ≠ PList nat. *)
-
-(** Mas podemos verificar que ambas as provas têm o mesmo poder: *)
+(** Para deixar isso explícito: o corolário monomórfico NÃO segue por instan-
+    ciação direta de [plength_papp], porque NatList ≠ PList nat. Mas podemos 
+    verificar que ambas as provas têm o mesmo poder: *)
 Corollary nlength_napp_check :
   forall (l1 l2 : NatList),
     nlength (napp l1 l2) = nlength l1 + nlength l2.
@@ -240,18 +245,16 @@ Proof.
   exact nlength_napp.
 Qed.
 
+(* PARTE 4 — ProofObjects: a prova como um termo lambda
+------------------------------------------------------------------------------
+  Em Rocq, PROVAS SÃO TERMOS de tipos dependentes. Toda tática é apenas um ata-
+  lho para construir esse termo interativamente. Vamos escrever as mesmas pro-
+  vas diretamente como funções, usando o ELIMINADOR de cada tipo indutivo no 
+  lugar da tática [induction]. *)
 
-(**
-  ══════════════════════════════════════════════════════════════════════
-  PARTE 4 — ProofObjects: a prova como um termo lambda
+  (** ── Versão monomórfica como ProofObject ──────────────────────────
 
-  Em Coq, PROVAS SÃO TERMOS de tipos dependentes.  Toda tática é
-  apenas um atalho para construir esse termo interativamente.
-
-  Vamos escrever as mesmas provas diretamente como funções, usando
-  o ELIMINADOR de cada tipo indutivo no lugar da tática [induction].
-
-  Para NatList, Coq gera automaticamente:
+    Para NatList, o Rocq gera automaticamente:
 
       NatList_rect :
         ∀ (P : NatList → Type),
@@ -259,26 +262,21 @@ Qed.
           (∀ (h : nat) (t : NatList), P t → P (NCons h t)) →
           ∀ (l : NatList), P l
 
-  [P] é o *motivo* da indução — a propriedade que queremos provar.
-  O segundo argumento é a prova do caso base.
-  O terceiro é a prova do passo indutivo (recebe IH como argumento).
-  ══════════════════════════════════════════════════════════════════════
-*)
+    [P] é o motivo da indução — a propriedade que queremos provar.
+    O segundo argumento é a prova do caso base.
+    O terceiro é a prova do passo indutivo (recebe IH como argumento).
 
-(** ── Versão monomórfica como ProofObject ─────────────────────────── *)
+    [idpath] é o testemunho de [a = a] em HoTT (como eq_refl em Rocq padrão).
 
-(**
-    [idpath] é o testemunho de  [a = a]  em HoTT (como [eq_refl] em Coq
-    padrão).  Aqui ele prova o caso base porque ambos os lados da
-    igualdade reduzem DEFINITIVAMENTE para  [nlength l2].
+    Aqui ele prova o caso base porque ambos os lados da igualdade reduzem DEFINI-
+    TIVAMENTE para [nlength l2].
 
-    [ap S IH] usa o combinador de caminho:
-        ap : (A → B) → a = b → f a = f b
+    [ap S IH] usa o combinador de caminho: ap : (A → B) → a = b → f a = f b
+
     Para "levantar" o construtor S sobre a hipótese indutiva IH.
-    IH  :  nlength (napp t l2) = nlength t    + nlength l2
-    ap S IH :  S (nlength (napp t l2)) = S (nlength t + nlength l2)
-    que é exatamente a meta no passo indutivo (após expansão de defs).
-*)
+      IH  :  nlength (napp t l2) = nlength t + nlength l2
+      ap S IH :  S (nlength (napp t l2)) = S (nlength t + nlength l2)
+    que é exatamente a meta no passo indutivo (após expansão de defs). *)
 Definition nlength_napp_PO :
   forall (l1 l2 : NatList),
     nlength (napp l1 l2) = nlength l1 + nlength l2 :=
@@ -293,9 +291,8 @@ Definition nlength_napp_PO :
       (* argumento principal *)
       l1.
 
-(** ── Versão polimórfica como ProofObject ────────────────────────── *)
+(** ── Versão polimórfica como ProofObject ──────────────────────────
 
-(**
     Para PList, Coq gera:
 
         PList_rect :
@@ -324,54 +321,48 @@ Definition plength_papp_PO :
     ┌─────────────────────────────────────────────────────────────────┐
     │  COMPARE os dois termos de prova:                               │
     │                                                                 │
-    │  nlength_napp_PO          plength_papp_PO                      │
+    │  nlength_napp_PO          plength_papp_PO                       │
     │  ──────────────────────   ──────────────────────                │
-    │  fun l1 l2 =>             fun A l1 l2 =>                       │
-    │    NatList_rect             PList_rect A                       │
-    │      (fun l1 => ...)        (fun l1 => ...)                    │
+    │  fun l1 l2 =>             fun A l1 l2 =>                        │
+    │    NatList_rect             PList_rect A                        │
+    │      (fun l1 => ...)        (fun l1 => ...)                     │
     │      idpath                 idpath                              │
-    │      (fun _ _ IH =>         (fun _ _ IH =>                     │
-    │        ap S IH)               ap S IH)                         │
+    │      (fun _ _ IH =>         (fun _ _ IH =>                      │
+    │        ap S IH)               ap S IH)                          │
     │      l1.                    l1.                                 │
     │                                                                 │
-    │  Diferença: NatList_rect  vs  PList_rect A                     │
+    │  Diferença: NatList_rect  vs  PList_rect A                      │
     │  O CORPO é completamente idêntico!                              │
     │                                                                 │
-    │  Isso não é coincidência.  Os dois tipos indutiveis têm a       │
+    │  Isso não é coincidência. Os dois tipos indutiveis têm a        │
     │  MESMA ESTRUTURA: zero construtores de base, um construtor      │
     │  recursivo com um campo "extra" (nat vs A) que não entra        │
-    │  na prova.  Tudo o que a prova usa é a estrutura da lista.      │
-    └─────────────────────────────────────────────────────────────────┘
-*)
+    │  na prova. Tudo o que a prova usa é a estrutura da lista.       │
+    └─────────────────────────────────────────────────────────────────┘ *)
 
-(** Nota: [nlength_napp_PO] e [nlength_napp] produzem resultados
-    computacionalmente iguais, mas Coq não pode comparar seus termos
-    internos via [reflexivity] porque as provas por tática são opacas
-    (terminadas com [Qed]).  Para verificar a equivalência, basta
-    computar ambas as provas num exemplo concreto — o resultado é o
-    mesmo:
+(** Nota: [nlength_napp_PO] e [nlength_napp] produzem resultados computacionalmente 
+          iguais, mas Coq não pode comparar seus termos internos via [reflexivity] 
+          porque as provas por tática são opacas (terminadas com [Qed]).  
+          Para verificar a equivalência, basta computar ambas as provas num exemplo 
+          concreto — o resultado é o mesmo: *)
 
-        Eval compute in nlength_napp_PO (1:n: [[]] ) ([[]]).
-        Eval compute in nlength_napp    (1:n: [[]] ) ([[]]).  *)
+Eval compute in nlength_napp_PO (1 :n: [[]]) ([[]]).
+Eval compute in nlength_napp    (1 :n: [[]]) ([[]]).
+Compute nlength_napp_PO (1 :n: [[]]) ([[]]) = nlength_napp (1 :n: [[]]) ([[]]).
 
-
-(**
-  ══════════════════════════════════════════════════════════════════════
-  PARTE 5 — Conectando os dois mundos (preview do Trocq)
-
+(* PARTE 5 — Transferência manual
+------------------------------------------------------------------------------
   Objetivo desta parte:
-    Mostrar como "transferir" plength_papp para NatList *na mão*,
-    construindo explicitamente as funções de conversão e os lemas
-    de compatibilidade.  Isso é exatamente o que o Trocq automatiza.
+    Mostrar como "transferir" plength_papp para NatList "na mão", construindo 
+    explicitamente as funções de conversão e os lemas de compatibilidade. Isso 
+    é exatamente o que o Trocq automatiza.
 
   O plano:
-    1. Definir  natlist_to_plist : NatList → PList nat
-    2. Definir  plist_to_natlist : PList nat → NatList
+    1. Definir "natlist_to_plist : NatList → PList nat"
+    2. Definir "plist_to_natlist : PList nat → NatList"
     3. Provar que são inversas (isomorfismo)
     4. Provar que preservam length e app
-    5. Usar essas pontes para derivar nlength_napp a partir de plength_papp
-  ══════════════════════════════════════════════════════════════════════
-*)
+    5. Usar essas pontes para derivar nlength_napp a partir de plength_papp *)
 
 (** ── 1 & 2: Funções de conversão ───────────────────────────────── *)
 
@@ -381,11 +372,15 @@ Fixpoint natlist_to_plist (l : NatList) : PList nat :=
   | NCons h t => PCons h (natlist_to_plist t)
   end.
 
+Compute natlist_to_plist (1 :n: 2 :n: 3 :n: [[]]) = (1 :p: 2 :p: 3 :p: {{}}).
+
 Fixpoint plist_to_natlist (l : PList nat) : NatList :=
   match l with
   | PNil      => NNil
   | PCons h t => NCons h (plist_to_natlist t)
   end.
+
+Compute plist_to_natlist (1 :p: 2 :p: 3 :p: {{}}) = (1 :n: 2 :n: 3 :n: [[]]).
 
 (** ── 3: Isomorfismo ─────────────────────────────────────────────── *)
 
@@ -395,7 +390,7 @@ Lemma natlist_plist_iso :
     plist_to_natlist (natlist_to_plist l) = l.
 Proof.
   induction l as [| h t IH].
-  - reflexivity.
+  - simpl. reflexivity.
   - simpl. rewrite IH. reflexivity.
 Qed.
 
@@ -405,7 +400,7 @@ Lemma plist_natlist_iso :
     natlist_to_plist (plist_to_natlist l) = l.
 Proof.
   induction l as [| h t IH].
-  - reflexivity.
+  - simpl. reflexivity.
   - simpl. rewrite IH. reflexivity.
 Qed.
 
@@ -417,7 +412,7 @@ Lemma nlength_eq_plength :
     plength (natlist_to_plist l) = nlength l.
 Proof.
   induction l as [| h t IH].
-  - reflexivity.
+  - simpl. reflexivity.
   - simpl. rewrite IH. reflexivity.
 Qed.
 
@@ -429,7 +424,7 @@ Lemma natlist_to_plist_app :
 Proof.
   intros l1 l2.
   induction l1 as [| h t IH].
-  - reflexivity.
+  - simpl. reflexivity.
   - simpl. rewrite IH. reflexivity.
 Qed.
 
@@ -439,7 +434,7 @@ Qed.
     Estratégia para provar [nlength_napp] usando [plength_papp]:
 
       nlength (napp l1 l2)
-        = plength (natlist_to_plist (napp l1 l2))      [nlength_eq_plength]
+        = plength (natlist_to_plist (napp l1 l2))       [nlength_eq_plength]
         = plength (papp (natlist_to_plist l1)           [natlist_to_plist_app]
                        (natlist_to_plist l2))
         = plength (natlist_to_plist l1)                 [plength_papp]
@@ -464,38 +459,32 @@ Proof.
   reflexivity.
 Qed.
 
-(**
-    ┌─────────────────────────────────────────────────────────────────┐
-    │  OBSERVAÇÃO CRUCIAL:                                            │
-    │                                                                 │
-    │  Para fazer a transferência "na mão", precisamos de:           │
+(** ┌─────────────────────────────────────────────────────────────────┐
+    │  Para fazer a transferência "na mão", precisamos de:            │
     │    • 2 funções de conversão                                     │
     │    • 2 provas de isomorfismo                                    │
-    │    • 2 lemas de compatibilidade (length e app)                 │
-    │    • 1 prova de "cola" (nlength_napp_via_plist)                │
-    │  = 7 itens ao todo para transferir 1 teorema.                  │
+    │    • 2 lemas de compatibilidade (length e app)                  │
+    │    • 1 prova de "cola" (nlength_napp_via_plist)                 │
+    │  = 7 itens ao todo para transferir 1 teorema.                   │
     │                                                                 │
     │  Com o Trocq:                                                   │
-    │    • Registramos a relação UMA vez:                            │
-    │        Trocq Use R_NatList_PList                               │
-    │        Trocq Use R_NNil_PNil                                   │
+    │    • Registramos a relação UMA vez:                             │
+    │        Trocq Use R_NatList_PList                                │
+    │        Trocq Use R_NNil_PNil                                    │
     │        Trocq Use R_NCons_PCons                                  │
-    │    • Depois, para cada novo teorema:                           │
-    │        trocq. exact plength_papp.   ← pronto!                 │
+    │    • Depois, para cada novo teorema:                            │
+    │        trocq. exact plength_papp.   ← pronto!                   │
     │                                                                 │
-    │  O Trocq constrói automaticamente os lemas de compatibilidade  │
-    │  e a prova de cola, usando a estrutura registrada.             │
-    └─────────────────────────────────────────────────────────────────┘
-*)
+    │  O Trocq constrói automaticamente os lemas de compatibilidade   │
+    │  e a prova de cola, usando a estrutura registrada.              │
+    └─────────────────────────────────────────────────────────────────┘ *)
 
-
-(**
-  ══════════════════════════════════════════════════════════════════════
-  PARTE 6 — Usando o Trocq
-
+(* PARTE 6 — Usando o Trocq
+------------------------------------------------------------------------------
   Agora implementamos o que foi esboçado na Parte 5.
 
   O Trocq trabalha com um banco de dados de "relações paramétricas".
+
   Para usar a tática [trocq], precisamos de:
 
     (a) A relação entre os TIPOS  NatList ~ PList nat
@@ -513,8 +502,7 @@ From Trocq Require Import Trocq.
 From Trocq Require Import Param_nat. (* natR, Param44_nat, Param_add,
                                          map_in_R_nat, R_in_map_nat   *)
 
-(**
-  ── Passo (a): Relação entre os tipos ────────────────────────────────
+(**── Passo (a): Relação entre os tipos ────────────────────────────────
 
   O Trocq usa "relações paramétricas" em vez de simples bijeções.  A
   mais forte é Param44 (isomorfismo completo, com provas em ambas as
@@ -549,8 +537,7 @@ Defined.
   conversão.  Isso simplifica enormemente o raciocínio abaixo.
 *)
 
-(**
-  ── Passo (b): Relação entre os construtores ─────────────────────────
+(**── Passo (b): Relação entre os construtores ─────────────────────────
 
   Para cada construtor, provamos que ele "respeita" a relação R_NatList.
   Mesmo que os construtores não apareçam diretamente no teorema que
@@ -580,8 +567,7 @@ Definition R_NCons
   (* ap (PCons · l') h_eq   : PCons h l'         = PCons h' l'             *)
   ap (PCons h) lR @ ap (fun x => PCons x l') (R_in_map_nat hR).
 
-(**
-  ── Passo (c): Relação entre as funções ──────────────────────────────
+(**── Passo (c): Relação entre as funções ──────────────────────────────
 
   Para cada função que aparece no teorema-alvo, fornecemos um termo
   de tipo:  ∀ entradas relacionadas → saídas relacionadas.
@@ -629,8 +615,7 @@ Definition R_napp
   @ ap (fun x => papp x (natlist_to_plist l2)) l1R
   @ ap (papp l1') l2R.
 
-(**
-  ── Passo (d): Registrar no banco de dados do Trocq ──────────────────
+(**── Passo (d): Registrar no banco de dados do Trocq ──────────────────
 
   Ordem sugerida: tipo → construtores → funções auxiliares → funções
   do domínio → igualdade.
@@ -659,8 +644,7 @@ Trocq Use Param_add.
     uma igualdade [=] entre valores [nat]. *)
 Trocq Use Param01_paths.
 
-(**
-  ── Passo (e): O teorema via Trocq ───────────────────────────────────
+(**── Passo (e): O teorema via Trocq ───────────────────────────────────
 
   Agora a prova tem DUAS linhas:
     1. [trocq.] — transforma o goal de NatList para PList nat
@@ -686,25 +670,24 @@ Proof.
   (* exact plength_papp. *)
 Abort.
 
-(**
-    ┌─────────────────────────────────────────────────────────────────┐
+(*  ┌─────────────────────────────────────────────────────────────────┐
     │  RESUMO DA PARTE 6                                              │
     │                                                                 │
-    │  Registro (feito UMA vez para o par NatList/PList nat):        │
+    │  Registro (feito UMA vez para o par NatList/PList nat):         │
     │    R_NatList   — tipo-alvo                                      │
     │    R_NNil      — construtor base                                │
     │    R_NCons     — construtor recursivo                           │
     │    R_nlength   — função de comprimento                          │
     │    R_napp      — função de concatenação                         │
-    │    Param44_nat, Param_add, Param01_paths — aritmética/=        │
+    │    Param44_nat, Param_add, Param01_paths — aritmética/=         │
     │                                                                 │
-    │  Custo: ~8 registros + ~5 definições.                          │
+    │  Custo: ~8 registros + ~5 definições.                           │
     │                                                                 │
     │  Ganho: para QUALQUER novo teorema sobre NatList usando         │
     │         nlength e napp, a prova é:                              │
-    │           trocq. exact <teorema_para_PList>.                   │
+    │           trocq. exact <teorema_para_PList>.                    │
     │                                                                 │
-    │  Comparação com a abordagem manual (Parte 5):                  │
+    │  Comparação com a abordagem manual (Parte 5):                   │
     │    • Manual: 7 lemas intermediários + 1 prova de cola           │
     │              → repetidos para CADA novo teorema                 │
     │    • Trocq:  registro único + 2 linhas por novo teorema         │
