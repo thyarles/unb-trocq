@@ -150,8 +150,11 @@ Inductive PList (A : Type) : Type :=
   | PNil  : PList A
   | PCons : A -> PList A -> PList A.
 
-(** Como é um tipo novo, temos que definir os argumentos *)
+(** Indica para o Rocq inferir o tipo em vez de fornecer explicitamente.
+    Sem isso, teríamos que escrever @PNil nat ou @PCons nat 1 l nos comandos. *)
 Arguments PNil  {A}.
+(** ao escrever PCons h t, Rocq deduz A a partir do tipo de h; os dois _ indicam 
+    que os demais argumentos (o elemento e a cauda) permanecem explícitos. *)
 Arguments PCons {A} _ _.
 
 (** Notação para listas polimórficas ":p:" *)
@@ -159,11 +162,8 @@ Notation "x :p: l" := (PCons x l) (at level 60, right associativity).
 Notation "{{}}"    := PNil.
 
 (** Teste de notação *)
-From Coq Require Import String.  (* Para usar strings como exemplo de tipo *)
-Compute {{}} : PList string.
 Compute 1 :p: {{}} : PList nat.
-(* Compute "a" :p: "b" :p: {{}} : PList string. *)
-(* Não consegue montar uma lista de strings diretamente com a notação ":p:" *)
+Compute true :p: false :p: true :p: {{}} : PList Bool.
 
 (** Comprimento — idêntico em estrutura a [nlength]; A é implícito. *)
 Fixpoint plength {A : Type} (l : PList A) : nat :=
@@ -174,6 +174,7 @@ Fixpoint plength {A : Type} (l : PList A) : nat :=
 
 (** Teste de comprimento *)
 Compute plength (1 :p: 2 :p: 3 :p: {{}}) = 3.
+Compute plength (false :p: true :p: {{}}) = 2.
 
 (** Concatenação — o tipo dos elementos passa por implicitamente. *)
 Fixpoint papp {A : Type} (l1 l2 : PList A) : PList A :=
@@ -184,14 +185,15 @@ Fixpoint papp {A : Type} (l1 l2 : PList A) : PList A :=
 
 (** Teste de concatenação *)
 Compute papp (1 :p: 2 :p: {{}}) (3 :p: 4 :p: {{}}) = (1 :p: 2 :p: 3 :p: 4 :p: {{}}).
+Compute papp (true :p: {{}}) (false :p: {{}}) = (true :p: false :p: {{}}).
 
 (** Provas rápidas *)
 Example plength_ex : plength (1 :p: 2 :p: 3 :p: {{}}) = 3.
 Proof. simpl. reflexivity. Qed.
 
 Example papp_ex :
-  papp (1 :p: 2 :p: {{}})
-       (3 :p: 4 :p: {{}}) = (1 :p: 2 :p: 3 :p: 4 :p: {{}}).
+  papp (true :p: true :p: {{}})
+       (false :p: false :p: {{}}) = (true :p: true :p: false :p: false :p: {{}}).
 Proof. simpl. reflexivity. Qed.
 
 (** c) Teorema principal (parte 2)
