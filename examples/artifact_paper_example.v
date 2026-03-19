@@ -36,6 +36,13 @@ Trocq Use RN0. Trocq Use RNS. (* registering related constants *)
 Lemma N_Srec : forall (P : N -> Type), P 0%N ->
     (forall n, P n -> P (N.succ n)) -> forall n, P n.
 Proof. trocq. (* replaces N by nat in the goal *) exact nat_rect. Defined.
+(* 
+
+forall P : N    -> Type, P 0%N               -> (forall n : N,   P n    -> P  (n.+1)%N)    -> forall n  : N,   P n 
+
+forall P' : nat -> PType map1 map1, P' 0%nat -> (forall n' : nat, P' n' -> P' (n'.+1)%nat) -> forall n' : nat, P' n'
+
+*)
 
 (** Inspecting the proof term actually reveals that univalence was not needed in
     the proof of `N_Srec`. The `example` directory of the artifact provides more

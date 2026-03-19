@@ -283,6 +283,7 @@ Definition nlength_napp_PO :
   forall (l1 l2 : NatList),
     nlength (napp l1 l2) = nlength l1 + nlength l2 :=
   fun l1 l2 =>
+    (* TODO: Printar rect e ind, analisar a diferença entre els *)
     NatList_rect
       (* motivo P *)
       (fun l1 => nlength (napp l1 l2) = nlength l1 + nlength l2)
@@ -325,8 +326,8 @@ Definition plength_papp_PO :
     │                                                                 │
     │  nlength_napp_PO          plength_papp_PO                       │
     │  ──────────────────────   ──────────────────────                │
-    │  fun l1 l2 =>             fun A l1 l2 =>                        │
-    │    NatList_rect             PList_rect A                        │
+    │  fun l1 l2 =>             fun A l1 l2 =>     TODO: Seria possível trocar A por _?                   │
+    │    NatList_rect             PList_rect A           Comparar os dois da linha 330.                │
     │      (fun l1 => ...)        (fun l1 => ...)                     │
     │      idpath                 idpath                              │
     │      (fun _ _ IH =>         (fun _ _ IH =>                      │
@@ -499,11 +500,23 @@ Qed.
   ══════════════════════════════════════════════════════════════════════
 *)
 
+Search (_ + _).
+Check Peano.plus.
+Print "+".
+
 (** Imports específicos do Trocq — não são necessários para as Partes 1–5. *)
 From Trocq Require Import Trocq.
 From Trocq Require Import Param_nat. (* natR, Param44_nat, Param_add,
                                          map_in_R_nat, R_in_map_nat   *)
+Print "+".
 
+Fixpoint add' (n m : nat) : nat :=
+  match n with
+  | O => m
+  | S n' => S (add' n' m)
+  end.
+
+                                       
 (**── Passo (a): Relação entre os tipos ────────────────────────────────
 
   O Trocq usa "relações paramétricas" em vez de simples bijeções.  A
@@ -522,6 +535,7 @@ From Trocq Require Import Param_nat. (* natR, Param44_nat, Param_add,
 (**
   Usamos [apply Iso.toParam; unshelve econstructor] para construir o
   isomorfismo e a relação em um único passo (padrão do projeto Trocq).
+  TODO: Entender e explicar melhor essa definição.
 *)
 Definition R_NatList : Param44.Rel NatList (PList nat).
 Proof.
@@ -531,6 +545,7 @@ Proof.
   - exact natlist_plist_iso.   (* mapK  : comap ∘ map = id *)
   - exact plist_natlist_iso.   (* comapK: map ∘ comap = id *)
 Defined.
+
 
 (**
   Noção chave: [rel R_NatList l l'] é definicionalmente igual a
@@ -655,13 +670,17 @@ Trocq Use Param01_paths.
   Trocq faz internamente todo o trabalho que fizemos à mão na Parte 5
   (construir a ponte, chamar nlength_eq_plength, natlist_to_plist_app,
   etc.), mas de forma completamente automática.
+  TODO: Uma vez que tem a prova da teoria concreta, obter o mais fácil possível
+        a teoria geral. O Trocq deve ser usado na prova do teorema geral e não aqui.
+
+        Refazer daqui para frente.
 *)
-Theorem nlength_napp_trocq :
+(* Theorem nlength_napp_trocq :
   forall (l1 l2 : NatList),
     nlength (napp l1 l2) = nlength l1 + nlength l2.
 Proof.
   trocq.
-  (** [trocq] transformou o goal:
+  (** [trocq] transforma o goal:
         NatList → PList nat
         napp    → papp
         nlength → plength
@@ -670,7 +689,20 @@ Proof.
           plength (papp l1' l2') = plength l1' + plength l2'
       Que é exatamente plength_papp! *)
   (* exact plength_papp. *)
-Abort.
+Abort. *)
+(* Theorem plength_papp' :
+  forall {A : Type} (l1 l2 : PList A),
+    plength (papp l1 l2) = plength l1 + plength l2.
+Proof.
+  Troqc.
+Qed. *)
+Theorem plength_papp' :
+  forall {A : Type} (l1 l2 : PList A),
+    plength (papp l1 l2) =  add' (plength l1) (plength l2).
+Proof.
+  trocq.
+Qed. 
+ 
 
 (*  ┌─────────────────────────────────────────────────────────────────┐
     │  RESUMO DA PARTE 6                                              │
