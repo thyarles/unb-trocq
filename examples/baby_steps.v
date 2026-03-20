@@ -6,13 +6,13 @@
 (*  provas e como o Trocq pode automatizar essa reutilização.                *)
 (*                                                                           *)
 (*  Expectativa:                                                             *)
-(*    Parte 0  — Conceito central: o que é parametrização?                   *)
-(*    Parte 1  — Lista de naturais (monomórfica): length, append, teorema    *)
-(*    Parte 2  — Lista polimórfica: mesmas funções, mesmo teorema            *)
-(*    Parte 3  — Comparando as provas (estilo tática)                        *)
-(*    Parte 4  — ProofObjects: vendo as provas como termos lambda            *)
-(*    Parte 5  — Transferência manual                                        *)
-(*    Parte 6  — Utilizando o Trocq                                          *)
+(*    Parte 0 — Conceito central: o que é parametrização?                    *)
+(*    Parte 1 — Lista de naturais (monomórfica): length, append, teorema     *)
+(*    Parte 2 — Lista polimórfica: mesmas funções, mesmo teorema             *)
+(*    Parte 3 — Comparando as provas (estilo tática)                         *)
+(*    Parte 4 — ProofObjects: vendo as provas como termos lambda             *)
+(*    Parte 5 — Transferência manual                                         *)
+(*    Parte 6 — Utilizando o Trocq                                           *)
 (*****************************************************************************)
 
 (** TODO: entender melhor o papel da biblioteca HoTT *)
@@ -500,23 +500,11 @@ Qed.
   ══════════════════════════════════════════════════════════════════════
 *)
 
-Search (_ + _).
-Check Peano.plus.
-Print "+".
-
 (** Imports específicos do Trocq — não são necessários para as Partes 1–5. *)
 From Trocq Require Import Trocq.
 From Trocq Require Import Param_nat. (* natR, Param44_nat, Param_add,
                                          map_in_R_nat, R_in_map_nat   *)
-Print "+".
-
-Fixpoint add' (n m : nat) : nat :=
-  match n with
-  | O => m
-  | S n' => S (add' n' m)
-  end.
-
-                                       
+                                                                                
 (**── Passo (a): Relação entre os tipos ────────────────────────────────
 
   O Trocq usa "relações paramétricas" em vez de simples bijeções.  A
@@ -696,9 +684,20 @@ Abort. *)
 Proof.
   Troqc.
 Qed. *)
+
+(* As the import of Trocq breaks the "+" operator, we need to create ours *)
+(* Print "+". *)
+
+Fixpoint add' (n m : nat) : nat :=
+  match n with
+  | O => m
+  | S n' => S (add' n' m)
+  end.
+Notation "n :+: m" := (add' n m) (at level 60, right associativity).
+
 Theorem plength_papp' :
   forall {A : Type} (l1 l2 : PList A),
-    plength (papp l1 l2) =  add' (plength l1) (plength l2).
+    plength (papp l1 l2) =  plength l1 :+: plength l2.
 Proof.
   trocq.
 Qed. 
@@ -735,3 +734,7 @@ Qed.
 (* apenas uma equivalência de tipos).                                  *)
 (* ------------------------------------------------------------------ *)
 Print Assumptions nlength_napp_trocq.
+
+(* O que foi registrado, qual o nível de detalhe. 
+   
+*)
