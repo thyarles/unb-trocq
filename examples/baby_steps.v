@@ -397,6 +397,28 @@ Set Universe Polymorphism.
           reflexivity.
         Qed.
 
+        (* Some examples *)
+        Example test_transfer_normal :
+          nlength (napp (1 :n: 2 :n: [[]]) (3 :n: [[]])) =
+          nlength (1 :n: 2 :n: [[]]) + nlength (3 :n: [[]]).
+        Proof. reflexivity. Qed.
+
+        Example test_transfer_empty_l :
+          nlength (napp [[]] (1 :n: 2 :n: [[]])) =
+          nlength [[]] + nlength (1 :n: 2 :n: [[]]).
+        Proof. reflexivity. Qed.
+
+        Example test_transfer_empty_r :
+          nlength (napp (1 :n: 2 :n: [[]]) [[]]) =
+          nlength (1 :n: 2 :n: [[]]) + nlength [[]].
+        Proof. reflexivity. Qed.
+
+        (* Show the conversion bridge at work: both sides pass through PList nat. *)
+        Compute plength (natlist_to_plist (1 :n: 2 :n: 3 :n: [[]])).
+        (* => 3  ← same as nlength (1 :n: 2 :n: 3 :n: [[]])  [nlength_eq_plength] *)
+        Compute natlist_to_plist (napp (1 :n: 2 :n: [[]]) (3 :n: [[]])).
+        (* => 1 :p: 2 :p: 3 :p: {{}}  [natlist_to_plist distributes over napp] *)
+
     (*  ── 6: Take notes ─────────────────────────────────────────────────── *)
 
         (*  To perform the transfer "by hand" we used:
