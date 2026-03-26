@@ -321,6 +321,12 @@ Set Universe Polymorphism.
           end.
         (* Compute plist_to_natlist (1 :p: 2 :p: 3 :p: {{}}) = (1 :n: 2 :n: 3 :n: [[]]). *)
 
+        (* Show the conversion bridge at work: both sides pass through PList nat. *)
+        Compute plength (natlist_to_plist (1 :n: 2 :n: 3 :n: [[]])).
+        (* => 3  ← same as nlength (1 :n: 2 :n: 3 :n: [[]])  [nlength_eq_plength] *)
+        Compute natlist_to_plist (napp (1 :n: 2 :n: [[]]) (3 :n: [[]])).
+        (* => 1 :p: 2 :p: 3 :p: {{}}  [natlist_to_plist distributes over napp] *)
+
     (*  ── 3: Isomorphism ────────────────────────────────────────────────── *)
 
         (** Round trip (to PList and back): plist_to_natlist ∘ natlist_to_plist = id *)
@@ -331,7 +337,7 @@ Set Universe Polymorphism.
           induction l as [| h t IH].
           - simpl. reflexivity.
           - simpl. rewrite IH. reflexivity.
-        Qed.
+        Defined.
 
         (** Round trip (to NatList and back): natlist_to_plist ∘ plist_to_natlist = id *)
         Lemma plist_natlist_iso :
@@ -341,7 +347,7 @@ Set Universe Polymorphism.
           induction l as [| h t IH].
           - simpl. reflexivity.
           - simpl. rewrite IH. reflexivity.
-        Qed.
+        Defined.
 
     (*  ── 4: Compatibility with length and app ──────────────────────────── *)
 
@@ -353,7 +359,7 @@ Set Universe Polymorphism.
           induction l as [| h t IH].
           - simpl. reflexivity.
           - simpl. rewrite IH. reflexivity.
-        Qed.
+        Defined.
 
         (** The conversion distributes over concatenation. *)
         Lemma natlist_to_plist_app :
@@ -365,7 +371,7 @@ Set Universe Polymorphism.
           induction l1 as [| h t IH].
           - simpl. reflexivity.
           - simpl. rewrite IH. reflexivity.
-        Qed.
+        Defined.
 
     (*  ── 5: Manual transfer ────────────────────────────────────────────── *)
 
@@ -389,35 +395,32 @@ Set Universe Polymorphism.
           rewrite <- (nlength_eq_plength (napp l1 l2)).
           (*** Step 2: distribute the conversion over napp. *)
           rewrite natlist_to_plist_app.
-          (*** Step 3: apply the polymorphic theorem! *)
+          (*** Step 3: apply the polymorphic theorem *)
           rewrite plength_papp.
           (*** Step 4: convert the remaining plength back to nlength. *)
           rewrite nlength_eq_plength.
           rewrite nlength_eq_plength.
           reflexivity.
-        Qed.
+        Defined.
 
         (* Some examples *)
         Example test_transfer_normal :
           nlength (napp (1 :n: 2 :n: [[]]) (3 :n: [[]])) =
           nlength (1 :n: 2 :n: [[]]) + nlength (3 :n: [[]]).
-        Proof. reflexivity. Qed.
+        Proof. 
+          (* The proof actually uses the transferred theorem as its justification — the specific lists are witnesses to the universal statement ∀ l1 l2, nlength (napp l1 l2) = nlength l1 + nlength l2.*)
+          apply nlength_napp_via_plist.
+        Qed.
 
         Example test_transfer_empty_l :
           nlength (napp [[]] (1 :n: 2 :n: [[]])) =
           nlength [[]] + nlength (1 :n: 2 :n: [[]]).
-        Proof. reflexivity. Qed.
+        Proof. apply nlength_napp_via_plist. Qed.
 
         Example test_transfer_empty_r :
           nlength (napp (1 :n: 2 :n: [[]]) [[]]) =
           nlength (1 :n: 2 :n: [[]]) + nlength [[]].
-        Proof. reflexivity. Qed.
-
-        (* Show the conversion bridge at work: both sides pass through PList nat. *)
-        Compute plength (natlist_to_plist (1 :n: 2 :n: 3 :n: [[]])).
-        (* => 3  ← same as nlength (1 :n: 2 :n: 3 :n: [[]])  [nlength_eq_plength] *)
-        Compute natlist_to_plist (napp (1 :n: 2 :n: [[]]) (3 :n: [[]])).
-        (* => 1 :p: 2 :p: 3 :p: {{}}  [natlist_to_plist distributes over napp] *)
+        Proof. apply nlength_napp_via_plist. Qed.
 
     (*  ── 6: Take notes ─────────────────────────────────────────────────── *)
 
@@ -456,10 +459,13 @@ Set Universe Polymorphism.
     (f) Take notes *)
 
     (* Trocq-specific imports (it somehow breaks the "+" operator) *)
+    Check (fun n m : nat => n + m).  (* before Trocq: nat -> nat -> nat *)
     From Trocq Require Import Trocq.
+    (*Check (fun n m : nat => n + m).*)  (* after Trocq: breaks or changes *)
     From Trocq Require Import Param_nat. (* natR, Param44_nat, Param_add,
                                             map_in_R_nat, R_in_map_nat  *)
-    (* As the import of Trocq breaks the "+" operator, we need to create ours *)
+    (* As the import of Trocq breaks the "+" operator, we need to create ours
+    Local Notation "n + m" := (Nat.add n m). *)
     Fixpoint add' (n m : nat) : nat :=
       match n with
       | O => m
@@ -599,6 +605,23 @@ Set Universe Polymorphism.
           contains an equality = between nat values. *)
         Trocq Use Param01_paths.
 
+        (*  TODO:
+            Relation added to fix the map error from Trocq, as the add' isn't a Rocq
+            core relation.
+        *)
+        Definition R_add' :
+          forall (n1 n1' : nat) (n1R : natR n1 n1') (n2 n2' : nat) (n2R : natR n2 n2'),
+            natR (add' n1 n2) (add' n1' n2').
+        Proof.
+          intros n1 n1' n1R n2 n2' n2R.
+          induction n1R as [| n1 n1' n1R IHn1R].
+          - (* OR case: add' O n2 = n2 by definition *)
+            simpl. exact n2R.
+          - (* SR case: add' (S n1) n2 = S (add' n1 n2) by definition *)
+            simpl. apply SR. exact IHn1R.
+        Defined.
+        Trocq Use R_add'.
+
     (*  ── Step (e): The theorem via Trocq ───────────────────────────────── *)
 
         (* The proof now has TWO lines:
@@ -630,6 +653,24 @@ Set Universe Polymorphism.
           (* exact plength_papp. *)
         Abort. *)
 
+        (*  TODO:
+            The error reveals a conceptual mismatch. trocq is being called on a goal that is already in the target language (PList, plength, papp). Trocq tries to translate plength away — but only R_nlength is registered, which maps nlength (source) → plength (target). There is no registered relation that goes out of plength, so it can't find it at the requested class. 
+            
+            The correct use is the other direction: start with a NatList goal (using nlength and napp), then trocq transforms it into a PList goal that you close with plength_papp. That's exactly the commented-out theorem above it:
+        *)
+
+        Theorem nlength_napp_trocq :
+          forall (l1 l2 : NatList),
+            nlength (napp l1 l2) = nlength l1 :+: nlength l2.
+        Proof.
+          trocq.         (* transforms: NatList→PList nat, napp→papp, nlength→plength *)
+          exact plength_papp.
+        Qed.
+
+        (*  TODO:
+            The plength_papp' theorem has the goal backwards for what Trocq was set up to do. trocq is a source → target rewriter, and here PList/plength is the target — you can't re-translate the target into itself with the current registrations.
+        *)
+
         Theorem plength_papp' :
           forall {A : Type} (l1 l2 : PList A),
             plength (papp l1 l2) =  plength l1 :+: plength l2.
@@ -660,3 +701,5 @@ Set Universe Polymorphism.
           Comparison with the manual approach (PART 5):
           - Manual: 7 intermediate lemmas + 1 glue proof → repeated for EACH new theorem                    │
           - Trocq : one-time registration + 2 lines per new theorem *)
+
+(** END OF THE EVALUATION *)
