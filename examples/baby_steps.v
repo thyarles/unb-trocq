@@ -117,12 +117,13 @@ Set Universe Polymorphism.
     Inductive PList (A : Type) : Type :=
       | PNil  : PList A
       | PCons : A -> PList A -> PList A.
-    Arguments PNil  {A}.     (* Tells Rocq to infer A rather than requiring it
+    (* TODO: Drop the arguments and try to not infere them *)
+    (* Arguments PNil  {A}.     (* Tells Rocq to infer A rather than requiring it
                                 to be supplied explicitly. Without it we would
                                 have to write [@PNil nat] or [@PCons nat 1 l]. *)
     Arguments PCons {A} _ _. (* When writing [PCons h t], Rocq deduces A from
                                 the type of h; the two underscores _ indicate
-                                that the element and tail remain explicit. *)
+                                that the element and tail remain explicit. *) *)
     Notation "x :p: l" := (PCons x l) (at level 60, right associativity).
     Notation "{{}}"    := PNil.
 
@@ -622,6 +623,7 @@ Set Universe Polymorphism.
         Defined.
         Trocq Use R_add'.
 
+
     (*  ── Step (e): The theorem via Trocq ───────────────────────────────── *)
 
         (* The proof now has TWO lines:
@@ -703,3 +705,31 @@ Set Universe Polymorphism.
           - Trocq : one-time registration + 2 lines per new theorem *)
 
 (** END OF THE EVALUATION *)
+
+(** TODO: Specifically, within the context of the Calculus of Inductive Constructions, we evaluate the trade-offs between representing proof scripts versus proof objects and identify the transformation primitives necessary for generalization. Finally, we discuss how these transformations impact underlying proof assistant mechanisms, including type checking, unification, and resolution.
+          https://waisiv.cin.ufpe.br/jnamaral.github.io/WAISIV/program/speakers/index.html
+
+          Ajudar na apresentação:
+          1. Motivação (hoje faz na mão)
+          2. Intuição (trocq é uma "máquina de transferências" que automatiza o processo de generalização)
+          3. Mostra como funciona (exemplo simples)
+          4. Pegar do Canvas (Arthur) e fazer no Google Drive
+
+
+          XYZ: Ideia do Selo -> Rastrear o experimento e rastrear os dados
+               Pega um estudo empírico e certifica o estudo (olhar Festival de Artefatos)
+               Professora Fernanda entende os desafios de automatizar esses processos
+               Oportunidade de pesquisa: criar um modelo para certificar um estudo empírico
+
+               Eneas deu um passo importante. Aluno do Ayala provou quatro ou cinco teoremas, mas não entrou
+               no artigo. Não só mostrar a rastreabilidade, mas ter um modelo que contemple diferentes tipos de
+               artefatos e diferentes tipo de evidências (alguém pode atestar ou o resultado de uma função
+               computando algo). DSL: pode usar Llama o trabalho do Eneas. Nos modelos, o importante é rastrear
+               os dados. A evidência pode ser heterogência, mas podemos documentar as que não sejam empíricas.
+
+               O que se espera: modelo formal para especificar experimentos. O modelo tem que ter rastreabilidade
+               dos resultados, tem que contemplar tratamentos de programas e não programas e, neste caso, deveria
+               ter alguma forma de validar a evidência. Pode ser adaptado ou estendido para estudos de IA.
+
+               Ver as apresentações do professor para ver quem está interessado.
+*)

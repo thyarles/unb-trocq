@@ -7,3 +7,4 @@
 *~
 .*.d
 Makefile.coq*
+.DS_Store
