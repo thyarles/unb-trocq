@@ -13,3 +13,6 @@
 /_CoqProject
 # Symlink to /tests/_CoqProject.std or /tests/_CoqProject.hott
 /tests/_CoqProject
+
+# Website
+website/_site/

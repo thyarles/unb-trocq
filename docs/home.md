@@ -1,4 +1,4 @@
-<p style="text-align: center"><a href="https://github.com/coq-community/trocq"><img src="trocq-logo-text.png" alt="Trocq logo" width="50%" /></a></p>
+<p style="text-align: center"><a href="https://github.com/coq-community/trocq"><img src="trocq_logo_text.svg" alt="Trocq logo" width="50%" /></a></p>
 
 [![GitHub repository][github-shield]][github-link]
 [![Contributing][contributing-shield]][contributing-link]

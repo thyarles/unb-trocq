@@ -13,6 +13,8 @@
 % -----------------------------------------------------------------------------
 % definition of the constraint graph
 % -----------------------------------------------------------------------------
+accumulate "Trocq.Elpi.constraints/simple-graph".
+accumulate "Trocq.Elpi/data".
 
 % in the constraint graph, parametricity classes are represented with integers (it is easier to
 % index on this type than on variables of type param-class)
@@ -125,8 +127,7 @@ instantiate ID Class (constraint-graph G) (constraint-graph G') :-
   std.map.find ID G (pr LowerNodes HigherNodes), !, std.do! [
   internal.filter-var LowerNodes LowerIDs,
   util.unless (LowerIDs = [])
-    (coq.error
-      "wrong instantiation order: trying to instantiate" ID "before lower variables" LowerIDs),
+    (trocq.error "wrong instantiation order: trying to instantiate" ID "before lower variables" LowerIDs),
   std.fold HigherNodes G (instantiate.aux ID Class) G1,
   std.map.remove ID G1 G'
   ].
@@ -136,8 +137,7 @@ pred instantiate.aux
   i:class-id, i:param-class, i:node, i:constraint-graph-content, o:constraint-graph-content.
 instantiate.aux ID Class (node.const C) G G :-
   util.unless (param-class.geq C Class)
-    (coq.error
-      "constraint not respected: instantiating" ID "at class" Class "despite upper bound" C).
+    (trocq.error "constraint not respected: instantiating" ID "at class" Class "despite upper bound" C).
 instantiate.aux ID Class (node.var ct.pi [IDA, IDB]) G G' :- std.do![
   util.map.update IDA (internal.remove-lower-node (node.var ct.pi [ID])) G G1,
   util.map.update IDB (internal.remove-lower-node (node.var ct.pi [ID])) G1 G2,
@@ -167,7 +167,7 @@ instantiate.aux ID Class (node.var (ct.gref GR T Tm' GRR) IDs) G G' :- std.do! [
       G1,
   aterm.util.classes T TCs _,
   % find the output constant and proof, as well as the required classes Cs
-  trocq.db.gref GR Class Cs GR' GRR, !,
+  trocq.data.gref GR Class Cs GR' GRR, !,
   coq.env.global GR' Tm',
   % make sure the classes are consistent
   instantiate.gref IDs TCs Cs G1 G'

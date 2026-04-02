@@ -10,10 +10,12 @@
 %                        |_| %   GNU Lesser General Public License Version 3  %
 %                            % (see LICENSE file for the text of the license) %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 % -----------------------------------------------------------------------------
 % parametricity translation
 % -----------------------------------------------------------------------------
+
+accumulate "Trocq.Elpi/annot".
+accumulate "Trocq.Elpi/data".
 
 % We traverse a binder with name N having annotated type AT
 % Then we call F with parameters ax x' xR
@@ -98,7 +100,7 @@ param
    std.do! [
       logging.debug (coq.say "[param] Rule arrow :" T "@" AT),
       cstr.dep-arrow C CA CB,
-      (annot.typecheck A (asort SortA _); coq.error "[param/arrow] Cannot typecheck A with a sort"),
+      (annot.typecheck A (asort SortA _); trocq.error "[param/arrow] Cannot typecheck" A "with a sort"),
       param A (asort SortA CA) A' AR,
       param B (asort Sort CB) B' BR,
       coq.mk-app {trocq.data.arrow C} [{aterm->term A}, A', AR, {aterm->term B}, B', BR] Witness,
@@ -116,7 +118,7 @@ param
 
     cstr.dep-pi C CA CB,
 
-    (annot.typecheck A (asort SortA _); coq.error "[param/forall] Cannot typecheck A with a sort"),
+    (annot.typecheck A (asort SortA _); trocq.error "[param/forall] Cannot typecheck" A "with a sort"),
     param A (asort SortA CA) A' AR,
     (@param-pi-decl N A (ax\ x'\ xR\
       param (B ax) (asort Sort CB) (B' x') (BR {aterm->term ax} x' xR)
@@ -153,10 +155,10 @@ param.args (aprod _ T Bk) B [X|Xs] [X'|Xs'] [X_T, X', XR|XRs] B0 :- !,
   aterm->term X X_T.
 
 param.args FunTy AB L _ _ _ :-
-  coq.error "[param.args] unsupported combination:" FunTy "&" AB "&" L.
+  trocq.error "[param.args] unsupported combination:" FunTy "&" AB "&" L.
 
 param X T _ _ :-
-  coq.error "[param] unsupported combination:" X "@" T.
+  trocq.error "[param] unsupported combination:" X "@" T.
 
 % ==================================================================================================
 
@@ -182,14 +184,14 @@ weakener (aapp [ (afun _ _ AF),AX1|AXs]) (aapp [(afun _ _ AF'),AX1'|AXs']) W :- 
   % We beta-reduce
   weakener (aapp [(AF AX1) | AXs]) (aapp [(AF' AX1') | AXs']) W.
 weakener (aapp [X|_] as T) (aapp [_|_]) W :- !,
-  (name X ; X = aglobal _ ; X = apglobal _ _ ; coq.error "[weakener] Input" T "is not a type"), !,
+  (name X ; X = aglobal _ ; X = apglobal _ _ ; trocq.error "[weakener] Input" T "is not a type"), !,
   % because sub-type T T', we have that eq AXs AXs', and as names and globals are not annotated, all annotations are the same
   W = fun _ _ t\ fun _ _ t'\ fun _ _ tr\ tr.
 weakener X _ W :- (name X ; X = aglobal _ ; X = apglobal _ _ ), !,
   % names and globals are not annotated, so weakener is identity
   W = fun _ _ t\ fun _ _ t'\ fun _ _ tr\ tr.
 weakener X _ _ :- !,
-  coq.error "[weakener] Cannot weaken" X.
+  trocq.error "[weakener] Cannot weaken" X.
 
 
 % weaken A A' t t' tr tr' is ⇓^A_A' {t} {t'} tr = tr'

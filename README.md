@@ -101,7 +101,3 @@ And four commands:
   Subsequent calls to `trocq R` will be able to use the translations `t1`,
   `t2`, ...
 - `Trocq Logging "off"|"info"|"debug"|"trace"` to set the verbosity level.
-
-## ESOP 2024 artifact documentation
-
-The ESOP 2024 artifact documentation files can be found in the `artifact-doc` directory, except for `INSTALL.md` that can be found in the current directory.

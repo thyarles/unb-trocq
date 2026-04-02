@@ -14,6 +14,8 @@
 % utility predicates related to Rocq
 % -----------------------------------------------------------------------------
 
+accumulate "Trocq.Elpi/util".
+
 % Some of the Coq native predicates raise errors in Elpi, stopping all
 % ongoing computations. Adding a custom flag like do-not-fail gives us an
 % extra catch-all case in the native predicate, when this flag is active,
@@ -21,13 +23,33 @@
 :before "term->gref:fail"
 coq.term->gref _ _ :- do-not-fail, !, false.
 
+func trocq.error -> any.. .
+trocq.error _ :- do-not-fail, !, false.
+trocq.error X1 :- !, coq.error X1, !.
+trocq.error _ _ :- do-not-fail, !, false.
+trocq.error X1 X2 :- !, coq.error X1 X2, !.
+trocq.error _ _ _ :- do-not-fail, !, false.
+trocq.error X1 X2 X3 :- !, coq.error X1 X2 X3, !.
+trocq.error _ _ _ _ :- do-not-fail, !, false.
+trocq.error X1 X2 X3 X4:- !, coq.error X1 X2 X3 X4, !.
+trocq.error _ _ _ _ _ :- do-not-fail, !, false.
+trocq.error X1 X2 X3 X4 X5 :- !, coq.error X1 X2 X3 X4 X5, !.
+trocq.error _ _ _ _ _ _ :- do-not-fail, !, false.
+trocq.error X1 X2 X3 X4 X5 X6 :- !, coq.error X1 X2 X3 X4 X5 X6, !.
+trocq.error _ _ _ _ _ _ _ :- do-not-fail, !, false.
+trocq.error X1 X2 X3 X4 X5 X6 X7 :- !, coq.error X1 X2 X3 X4 X5 X6 X7, !.
+trocq.error _ _ _ _ _ _ _ _ :- do-not-fail, !, false.
+trocq.error X1 X2 X3 X4 X5 X6 X7 X8 :- !, coq.error X1 X2 X3 X4 X5 X6 X7 X8, !.
+trocq.error _ _ _ _ _ _ _ _ _ :- do-not-fail, !, false.
+trocq.error X1 X2 X3 X4 X5 X6 X7 X8 X9 :- !, coq.error X1 X2 X3 X4 X5 X6 X7 X8 X9, !.
+
 % subst-gref T GR' T'
 % substitutes GR for GR' in T if T = (global GR) or (pglobal GR I)
 pred subst-gref i:term, i:gref, o:term.
 subst-gref (global _) GR' Tm' :- !, coq.env.global GR' Tm'.
 subst-gref (pglobal _ I) GR' Tm' :- !,
   @uinstance! I => coq.env.global GR' Tm'.
-subst-gref T _ _ :- coq.error T "is not a gref".
+subst-gref T _ _ :- trocq.error T "is not a gref".
 
 pred subst-univ i:univ, i:term, o:term.
 subst-univ U T T' :-
@@ -84,7 +106,7 @@ named-coe GR1 GR2 Coe Depth :-
     named-coe.rec (indt Rec1) ProjMap1 Projs2 [] (indc Build2) Ty1 Coe Depth
   ].
 named-coe Rec1 Rec2 _ _ :-
-  coq.error "Either of the following are not records: " Rec1 Rec2.
+  trocq.error "Either of the following are not records: " Rec1 Rec2.
 
 pred named-coe.rec i:gref, i:std.string.map gref, i:list gref, i:list term,
   i:gref, i:term, o:term, o:int.
@@ -126,7 +148,7 @@ add-named-coe Name GR1 GR2 C :-
       (coercion (const C) Depth GR1 (grefclass GR2))
   ].
 add-named-coe _ GR1 GR2 _ :-
-  coq.error GR1 "and" GR2 "do not have the same number of universe variables, or is different from 1".
+  trocq.error GR1 "and" GR2 "do not have the same number of universe variables, or is different from 1".
 
 func mk-app term, list term -> term.
 mk-app HD [] HD :- !.

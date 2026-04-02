@@ -11,6 +11,8 @@
 %                            % (see LICENSE file for the text of the license) %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+accumulate "Trocq.Elpi/param".
+
 :before "coq-assign-evar-raw"
 evar _ _ _ :- !.
 
@@ -60,7 +62,7 @@ solve InitialGoal NewGoals :- std.do! [
 ].
 
 pred translate-goal i:list prop, i:term, i:term, i:param-class, o:term, o:term.
-translate-goal DB (sort S as Ty) G (pc M N) G' GR' :- DB => std.do! [
+translate-goal DB (sort S) G (pc M N) G' GR' :- DB => std.do! [
   cstr.init,
   T = asort S (pc M N),
   logging.debug (coq.say "[translate-goal] will translate" G "at level" T),

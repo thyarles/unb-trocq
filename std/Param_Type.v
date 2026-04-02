@@ -14,7 +14,6 @@
 From elpi Require Import elpi.
 Require Import Stdlib Hierarchy Database.
 
-From Trocq.Elpi Extra Dependency "class.elpi" as class.
 From Trocq.Elpi.generation Extra Dependency "param-type.elpi" as param_type_generation.
 
 Set Universe Polymorphism.

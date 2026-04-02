@@ -17,24 +17,11 @@ Require Export Database.
 Require Import Hierarchy.
 Require Export Param_Type Param_arrow Param_forall.
 
-From Trocq.Elpi Extra Dependency "aterm.elpi" as aterm.
-From Trocq.Elpi Extra Dependency "annot.elpi" as annot.
-From Trocq.Elpi Extra Dependency "util-rocq.elpi" as util_rocq.
-From Trocq.Elpi Extra Dependency "class.elpi" as class.
-From Trocq.Elpi Extra Dependency "param-class-util.elpi" as param_class_util.
-From Trocq.Elpi Extra Dependency "param.elpi" as param.
-From Trocq.Elpi.constraints Extra Dependency "simple-graph.elpi" as simple_graph.
-From Trocq.Elpi.constraints Extra Dependency "constraint-graph.elpi" as constraint_graph.
-From Trocq.Elpi.constraints Extra Dependency "constraints.elpi" as constraints.
-From Trocq.Elpi.constraints Extra Dependency "constraints-impl.elpi" as constraints_impl.
 From Trocq.Elpi.generation Extra Dependency "pparam-type.elpi" as pparam_type_generation.
 From Trocq.Elpi Extra Dependency "tactic.elpi" as tactic.
 
 Set Universe Polymorphism.
 Unset Universe Minimization ToSet.
-
-Elpi Command genpparam.
-Elpi Accumulate Db trocq.db.
 
 Elpi Command genpparamtype.
 Elpi Accumulate Db trocq.db.
@@ -56,15 +43,6 @@ Elpi Query lp:{{
 
 Elpi Tactic trocq.
 Elpi Accumulate Db trocq.db.
-Elpi Accumulate File aterm.
-Elpi Accumulate File simple_graph.
-Elpi Accumulate File constraints.
-Elpi Accumulate File annot.
-Elpi Accumulate File constraint_graph.
-Elpi Accumulate File constraints_impl.
-Elpi Accumulate File util_rocq.
-Elpi Accumulate File param_class_util.
-Elpi Accumulate File param.
 Elpi Accumulate File tactic.
 
 Tactic Notation "trocq" ident_list(l) := elpi trocq ltac_string_list:(l).

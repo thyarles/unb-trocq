@@ -11,6 +11,8 @@
 %                            % (see LICENSE file for the text of the license) %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+accumulate "Trocq.Elpi/util-rocq".
+
 % Populate trocq.db.map->class from registered `trocq.mapM` global references.
 pred register-map-classes.
 register-map-classes :-

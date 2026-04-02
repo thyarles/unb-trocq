@@ -13,6 +13,8 @@
 
 % See constraints.elpi for the predicate definitions
 
+accumulate "Trocq.Elpi.constraints/constraint-graph".
+
 namespace cstr {
 
 init :-
@@ -67,7 +69,7 @@ dep-gref GR AT Tm' GRR :-
     std.map TCs internal.link? IDs,
     declare_constraint (internal.c.dep-gref ID GR AT Tm' GRR IDs) [_]
   ) (
-    trocq.db.gref GR Out Cs GR' GRR, !,
+    trocq.data.gref GR Out Cs GR' GRR, !,
     coq.env.global GR' Tm', !,
     std.forall2 TCs Cs eq
   ).
@@ -216,7 +218,7 @@ reduce [ID|IDs] ConstraintGraph [pr ID MinClass|FinalValues] :- std.do! [
   logging.trace (coq.say "[reduce] min value" MinClass "for" ID),
   cstr-graph.maximal-class ID ConstraintGraph MaxClass,
   logging.trace (coq.say "[reduce] max value" MaxClass "for" ID),
-  util.unless (param-class.geq MaxClass MinClass) (coq.error "no solution for variable" ID),
+  util.unless (param-class.geq MaxClass MinClass) (trocq.error "no solution for variable" ID),
   reduce IDs {cstr-graph.instantiate ID MinClass ConstraintGraph} FinalValues
 ].
 

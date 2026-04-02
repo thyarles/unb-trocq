@@ -14,7 +14,7 @@
 % API accessible to the rest of the plugin to handle the constraint graph
 % -----------------------------------------------------------------------------
 
-typeabbrev class-id int.
+accumulate "Trocq.Elpi/aterm".
 
 namespace cstr {
 

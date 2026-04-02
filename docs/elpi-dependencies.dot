@@ -1,0 +1,54 @@
+digraph {
+
+    # STYLE
+    rankdir=TB; # Dependencies are from top to bottom
+
+    ## ELPI FILES
+    "class" [shape=box, URL="https://github.com/rocq-community/trocq/blob/master/elpi/class.elpi"];
+    "util" [shape=box, URL="https://github.com/rocq-community/trocq/blob/master/elpi/util.elpi"];
+    "util-rocq" [URL="https://github.com/rocq-community/trocq/blob/master/elpi/util-rocq.elpi"];
+    "database" [shape=box, URL="https://github.com/rocq-community/trocq/blob/master/elpi/database.elpi"];
+    "aterm" [URL="https://github.com/rocq-community/trocq/blob/master/elpi/aterm.elpi"];
+    "constraints" [URL="https://github.com/rocq-community/trocq/blob/master/elpi/constraints/constraints.elpi"];
+    "simple-graph" [URL="https://github.com/rocq-community/trocq/blob/master/elpi/constraints/simple-graph.elpi"];
+    "constraint-graph" [URL="https://github.com/rocq-community/trocq/blob/master/elpi/constraints/constraint-graph.elpi"];
+    "constraints-impl" [URL="https://github.com/rocq-community/trocq/blob/master/elpi/constraints/constraints-impl.elpi"];
+    "annot" [URL="https://github.com/rocq-community/trocq/blob/master/elpi/annot.elpi"];
+    "data" [URL="https://github.com/rocq-community/trocq/blob/master/elpi/data.elpi"];
+    "param-class-util" [URL="https://github.com/rocq-community/trocq/blob/master/elpi/param-class-util.elpi"];
+    "param" [URL="https://github.com/rocq-community/trocq/blob/master/elpi/param.elpi"];
+    "tactic" [URL="https://github.com/rocq-community/trocq/blob/master/elpi/tactic.elpi"];
+    "vernac" [URL="https://github.com/rocq-community/trocq/blob/master/elpi/vernac.elpi"];
+
+    ## DEPENDENCIES
+    "util" -> "util-rocq";
+    "util-rocq" -> {"data" "param-class-util" "simple-graph"};
+    "class" -> "database";
+    "class" -> "aterm" [style="dashed"];
+    "database" -> {"data" "param-class-util"} [style="dashed"];
+    "aterm" -> "constraints";
+    "constraints" -> "simple-graph";
+    "simple-graph" -> "constraint-graph";
+    "constraint-graph" -> "constraints-impl";
+    "constraints-impl" -> "annot";
+    "annot" -> "param";
+    "data" -> {"param"  "constraint-graph"};
+    "param-class-util" -> "vernac";
+    "param" -> "tactic";
+
+    ## CLUSTERS
+    subgraph cluster_trocqdb {
+        label="trocq.db";
+        style=filled;
+        fillcolor="#dffdc0";
+        "class" "database";
+    }
+    subgraph cluster_constraints {
+        labelloc="r";
+        label="constraints";
+        style=filled;
+        fillcolor=lightyellow;
+        URL="https://github.com/rocq-community/trocq/tree/master/elpi/constraints";
+        "constraints" "simple-graph" "constraint-graph" "constraints-impl";
+    }
+}

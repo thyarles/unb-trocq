@@ -20,14 +20,11 @@ Unset Universe Minimization ToSet.
 Set Polymorphic Inductive Cumulativity.
 
 Import HoTTNotations.
-From Trocq.Elpi Extra Dependency "util.elpi" as util.
-From Trocq.Elpi Extra Dependency "util-rocq.elpi" as util_rocq.
 From Trocq.Elpi Extra Dependency "class.elpi" as class.
 From Trocq.Elpi.generation Extra Dependency "hierarchy.elpi" as hierarchy_generation.
 
 Elpi Command genhierarchy.
 Elpi Accumulate Db trocq.db.
-Elpi Accumulate File util_rocq.
 Elpi Accumulate File hierarchy_generation.
 
 (* Coq representation of the hierarchy *)
@@ -126,7 +123,6 @@ Elpi Accumulate lp:{{
     ).
 }}.
 
-#[synterp] Elpi Accumulate File util.
 #[synterp] Elpi Accumulate File class.
 #[synterp] Elpi Accumulate lp:{{
   main-synterp [] _ :-

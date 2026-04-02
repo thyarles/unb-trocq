@@ -14,6 +14,7 @@
 % Links annotated terms with the constraint graph
 % -----------------------------------------------------------------------------
 
+accumulate "Trocq.Elpi.constraints/constraints-impl".
 
 macro @annot-pi-decl N AT F :- pi ax\ annot.adecl ax N AT => F ax.
 
@@ -58,11 +59,11 @@ sub-type (aapp [ (afun _ _ AF),AX1|AXs]) (aapp [(afun _ _ AF'),AX1'|AXs']) :- !,
   % We beta-reduce
   sub-type (aapp [(AF AX1) | AXs]) (aapp [(AF' AX1') | AXs']).
 sub-type (aapp [X|AXs] as T) (aapp [X|AXs']) :- !,
-  (name X ; X = aglobal _ ; X = apglobal _ _ ; coq.error "[sub-type] Input" T "is not a type"), !,
+  (name X ; X = aglobal _ ; X = apglobal _ _ ; trocq.error "[sub-type] Input" T "is not a type"), !,
   std.forall2 AXs AXs' eq.
 % SubConv
 sub-type X X :- (name X ; X = aglobal _ ; X = apglobal _ _), !.
-sub-type X Y :- coq.error "[annot/sub-type] " X "vs" Y.
+sub-type X Y :- trocq.error "[annot/sub-type]" X "is not a sub-type of" Y.
 
 % syntactic term equality, taking care of adding annotation equalities in the constraint graph
 % This should only be called between two types
@@ -88,6 +89,6 @@ pred unify-eq i:aterm i:aterm o:diagnostic.
 % This is not implemented right now, and is replaced with term equality
 unify-eq AT AT' ok :- AT = AT'.
 unify-eq AT AT' ok :- coq.unify-eq {aterm->term AT} {aterm->term AT'} ok.
-unify-eq AT AT' _ :- coq.error "Could not unify" AT "with" AT'.
+unify-eq AT AT' _ :- trocq.error "[annot/unify-eq] Could not unify" AT "with" AT'.
 
 } % annot

@@ -21,7 +21,6 @@
     "rocq-9.1" = {
       rocqPackages = { rocq-core.override.version = "9.1"; };
       coqPackages = common-bundles // {
-        coq-elpi.override.elpi-version = "3.4.2";
         coq.override.version = "9.1";
         HoTT.override.version = "master"; # HoTT isn't available yet for 9.1
       };
