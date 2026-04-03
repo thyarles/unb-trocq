@@ -90,10 +90,26 @@ Set Universe Polymorphism.
         Iso.toParam f : Param44.Rel A B 
 
         We use apply "Iso.toParam; unshelve econstructor" to build the isomorphism
-        and the relation in a single step (standard Trocq project pattern).
+        and the relation in a single step (standard Trocq project pattern). *)
 
-        TODO: Review this definition. *)
-        Definition R_NatList : Param44.Rel NatList (PList nat).
+        (* Two problems arise when using universe-polymorphic functions like
+           [papp], [plength], [PNil], [PCons] directly with Trocq:
+
+           1. [PList : Type → Type] as the sort causes a universe error.
+
+           2. Trocq confuses the implicit [{A : Type}] argument with the
+              translated list variable, generating [papp l1'] where l1' is
+              passed as the type A instead of as the first list argument.
+
+           Fix: define monomorphic aliases specialised to [nat] so that
+           Trocq sees functions whose types contain no implicit sort argument.
+        *)
+        Definition NPList   : Type                       := PList nat.
+        Definition nPNil    : NPList                     := @PNil nat.
+        Definition nPCons   : nat -> NPList -> NPList    := @PCons nat.
+        Definition nplength : NPList -> nat              := @plength nat.
+        Definition npapp    : NPList -> NPList -> NPList := @papp nat.
+        Definition R_NatList: Param44.Rel NatList NPList.
         Proof.
           apply Iso.toParam; unshelve econstructor.
           - exact natlist_to_plist.    (* map   : NatList → PList nat *)
@@ -113,8 +129,8 @@ Set Universe Polymorphism.
            prove, registering them lets Trocq reason about the TYPE NatList in general
            (e.g. in induction instances). *)
 
-        (* [NNil ~ PNil]: natlist_to_plist NNil = PNil (true by definition). *)
-        Definition R_NNil : rel R_NatList NNil PNil := eq_refl.
+        (* [NNil ~ nPNil]: natlist_to_plist NNil = nPNil (true by definition). *)
+        Definition R_NNil : rel R_NatList NNil nPNil := eq_refl.
 
         (* [NCons ~ PCons]: given h ~ h' (diagonal relation on nat, [natR h h'])
            and l ~ l' (list relation), we have [NCons h l ~ PCons h' l'].
@@ -126,12 +142,12 @@ Set Universe Polymorphism.
           [R_in_map_nat hR : h = h'] extracts the equality from the natR relation. *)
         Definition R_NCons
           (h h' : nat) (hR : natR h h')
-          (l : NatList) (l' : PList nat) (lR : rel R_NatList l l') :
-          rel R_NatList (NCons h l) (PCons h' l') :=
-          (* natlist_to_plist (NCons h l) ≡ PCons h (natlist_to_plist l) (by def.) *)
-          (* ap (PCons h) lR         : PCons h (nat2p l) = PCons h  l'            *)
-          (* ap (PCons · l') h_eq   : PCons h l'         = PCons h' l'            *)
-          eq_trans (ap (PCons h) lR) (ap (fun x => PCons x l') (R_in_map_nat hR)).
+          (l : NatList) (l' : NPList) (lR : rel R_NatList l l') :
+          rel R_NatList (NCons h l) (nPCons h' l') :=
+          (* natlist_to_plist (NCons h l) ≡ nPCons h (natlist_to_plist l) (by def.) *)
+          (* ap (nPCons h) lR           : nPCons h (nat2p l) = nPCons h  l'         *)
+          (* ap (nPCons · l') h_eq      : nPCons h l'        = nPCons h' l'         *)
+          eq_trans (ap (nPCons h) lR) (ap (fun x => nPCons x l') (R_in_map_nat hR)).
 
     (*  ── Step (c): Relation between the functions ──────────────────────── *)
 
@@ -153,12 +169,11 @@ Set Universe Polymorphism.
               = plength (natlist_to_plist l)   (by nlength_eq_plength)^
               = plength l'                     (ap plength lR) *)
         Definition R_nlength
-          (l : NatList) (l' : PList nat) (lR : rel R_NatList l l') :
-          natR (nlength l) (plength l') :=
-          (* map_in_R_nat converts (n = n') → natR n n'                *)
-          (* map_nat = id by definition, so the goal of map_in_R_nat   *)
-          (* is simply: nlength l = plength l'                         *)
-          map_in_R_nat (eq_trans (eq_sym (nlength_eq_plength l)) (ap plength lR)).
+          (l : NatList) (l' : NPList) (lR : rel R_NatList l l') :
+          natR (nlength l) (nplength l') :=
+          (* map_in_R_nat converts (n = n') → natR n n'                       *)
+          (* nplength = @plength nat, so the goal is: nlength l = nplength l' *)
+          map_in_R_nat (eq_trans (eq_sym (nlength_eq_plength l)) (ap nplength lR)).
 
         (* [napp ~ papp]:
            Given l1 ~ l1' and l2 ~ l2', prove
@@ -170,14 +185,14 @@ Set Universe Polymorphism.
                 = papp l1'                   (natlist_to_plist l2)  [ap ... l1R]
                 = papp l1'                   l2'                    [ap ... l2R] *)
         Definition R_napp
-            (l1 : NatList) (l1' : PList nat) (l1R : rel R_NatList l1 l1')
-            (l2 : NatList) (l2' : PList nat) (l2R : rel R_NatList l2 l2') :
-            rel R_NatList (napp l1 l2) (papp l1' l2') :=
+            (l1 : NatList) (l1' : NPList) (l1R : rel R_NatList l1 l1')
+            (l2 : NatList) (l2' : NPList) (l2R : rel R_NatList l2 l2') :
+            rel R_NatList (napp l1 l2) (npapp l1' l2') :=
           eq_trans
             (natlist_to_plist_app l1 l2)
             (eq_trans
-              (ap (fun x => papp x (natlist_to_plist l2)) l1R)
-              (ap (papp l1') l2R)).
+              (ap (fun x => npapp x (natlist_to_plist l2)) l1R)
+              (ap (npapp l1') l2R)).
 
     (*  ── Step (d): Register in Trocq's database ────────────────────────── *)
 
@@ -232,38 +247,13 @@ Set Universe Polymorphism.
                 ∀ l1' l2' : PList nat,
                   plength (papp l1' l2') = plength l1' + plength l2'
               Which is exactly [plength_papp]! *)
-          (* exact plength_papp. *)
-        Abort.
-
-        (*  TODO:
-            The error reveals a conceptual mismatch. trocq is being called on a goal that is already in the target language (PList, plength, papp). Trocq tries to translate plength away — but only R_nlength is registered, which maps nlength (source) → plength (target). There is no registered relation that goes out of plength, so it can't find it at the requested class. 
-            
-            The correct use is the other direction: start with a NatList goal (using nlength and napp), then trocq transforms it into a PList goal that you close with plength_papp. That's exactly the commented-out theorem above it:
-        *)
-
-        (* Theorem nlength_napp_trocq :
-          forall (l1 l2 : NatList),
-            nlength (napp l1 l2) = nlength l1 + nlength l2.
-        Proof.
-          trocq.         (* transforms: NatList→PList nat, napp→papp, nlength→plength *)
           exact plength_papp.
-        Qed. *)
+        Qed.
 
-        (*  TODO:
-            The plength_papp' theorem has the goal backwards for what Trocq was set up to do. trocq is a source → target rewriter, and here PList/plength is the target — you can't re-translate the target into itself with the current registrations.
-        *)
-
-        Theorem plength_papp' :
-          forall {A : Type} (l1 l2 : PList A),
-            plength (papp l1 l2) =  plength l1 + plength l2.
-        Proof.
-          trocq.
-        Abort. 
- 
-        (* Print Assumptions plength_papp' shows the axioms assumed by the proof.
+        (* Print Assumptions nlength_napp_trocq shows the axioms assumed by the proof.
            Univalence is not needed here because the relation between NatList and
            PList nat is an isomorphism, not merely a type equivalence. *)
-        Print Assumptions plength_papp'.
+        Print Assumptions nlength_napp_trocq.
 
     (*  ── Step (f): Take notes ───────────────────────────────── *)
 
@@ -281,35 +271,5 @@ Set Universe Polymorphism.
            the proof is: trocq. exact <theorem_for_PList>.
 
           Comparison with the manual approach (PART 5):
-          - Manual: 7 intermediate lemmas + 1 glue proof → repeated for EACH new theorem                    │
+          - Manual: 7 intermediate lemmas + 1 glue proof → repeated for EACH new theorem
           - Trocq : one-time registration + 2 lines per new theorem *)
-
-(** END OF THE EVALUATION *)
-
-(** TODO: Specifically, within the context of the Calculus of Inductive Constructions, we evaluate the trade-offs between representing proof scripts versus proof objects and identify the transformation primitives necessary for generalization. Finally, we discuss how these transformations impact underlying proof assistant mechanisms, including type checking, unification, and resolution.
-          https://waisiv.cin.ufpe.br/jnamaral.github.io/WAISIV/program/speakers/index.html
-
-          Ajudar na apresentação:
-          1. Motivação (hoje faz na mão)
-          2. Intuição (trocq é uma "máquina de transferências" que automatiza o processo de generalização)
-          3. Mostra como funciona (exemplo simples)
-          4. Pegar do Canvas (Arthur) e fazer no Google Drive
-
-
-          XYZ: Ideia do Selo -> Rastrear o experimento e rastrear os dados
-               Pega um estudo empírico e certifica o estudo (olhar Festival de Artefatos)
-               Professora Fernanda entende os desafios de automatizar esses processos
-               Oportunidade de pesquisa: criar um modelo para certificar um estudo empírico
-
-               Eneas deu um passo importante. Aluno do Ayala provou quatro ou cinco teoremas, mas não entrou
-               no artigo. Não só mostrar a rastreabilidade, mas ter um modelo que contemple diferentes tipos de
-               artefatos e diferentes tipo de evidências (alguém pode atestar ou o resultado de uma função
-               computando algo). DSL: pode usar Llama o trabalho do Eneas. Nos modelos, o importante é rastrear
-               os dados. A evidência pode ser heterogência, mas podemos documentar as que não sejam empíricas.
-
-               O que se espera: modelo formal para especificar experimentos. O modelo tem que ter rastreabilidade
-               dos resultados, tem que contemplar tratamentos de programas e não programas e, neste caso, deveria
-               ter alguma forma de validar a evidência. Pode ser adaptado ou estendido para estudos de IA.
-
-               Ver as apresentações do professor para ver quem está interessado.
-*)

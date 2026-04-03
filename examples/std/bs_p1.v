@@ -40,4 +40,4 @@ Proof.
     simpl. reflexivity.
     - (* Inductive step: l1 = NCons h t. *)
     simpl. rewrite IH. reflexivity.
-Qed.
+Defined.
