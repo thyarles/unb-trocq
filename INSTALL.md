@@ -107,3 +107,22 @@ In file `artifact_paper_example.v`, this amounts to putting the pointer on line
 on line 38 column 14 and checking the updated goal is the expected one (in this
 particular case, featuring `nat` in the associated goal instead of `N` in the
 initial goal).
+
+# Charles' notes to install wihtout Docker
+
+1. opam --version
+   - Mine is 2.5.0
+2. opam init
+3. opam repo add rocq-released https://rocq-prover.org/opam/released
+4. opam update
+5. opam install --deps-only ./coq-trocq.opam
+6. opam pin add coq-core 9.1.1
+   - To avoid let it be changed by another package installation
+7. Install language server plus VSRocq extension
+   - Extension: https://marketplace.visualstudio.com/items?itemName=rocq-prover.vsrocq
+   - pam pin add vsrocq-language-server 2.3.4 (should match with extension version)
+8. Install trocq (if you prefer hott, change std to hott)
+   - make install-std
+9. Install the examples
+   - opam pin add coq-trocq-std .
+   - opam install --deps-only ./coq-trocq-std-examples.opam
