@@ -7,6 +7,7 @@ artifact_paper_example.v
 bs_p1.v
 bs_p2.v
 bs_p3.v
+bs_p4.v
 # flt3_step.v
 # int_to_Zp.v
 list_option.v

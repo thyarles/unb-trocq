@@ -34,6 +34,18 @@ Example papp_ex : papp (true :p: {{}}) (false :p: false :p: {{}})
                         = (true :p: false :p: false :p: {{}}).
 Proof. simpl. reflexivity. Qed.
 
+Theorem plength_papp :
+    forall {A : Type} (l1 l2 : PList A),
+    plength (papp l1 l2) = plength l1 + plength l2.
+Proof.
+    intros A l1 l2.
+    induction l1 as [| h t IH].
+    - (* Base case: l1 = NNil. *)
+      simpl. reflexivity.
+    - (* Inductive step: l1 = NCons h t. *)
+      simpl. rewrite IH. reflexivity.
+Qed.
+
 (** EXPL B — Comparing the proofs: differences and similarities
 
     nlength_napp                             plength_papp

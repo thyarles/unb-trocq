@@ -66,6 +66,8 @@ Definition plength_papp_PO :
         (fun _h _t IH => f_equal S IH)
         (* main argument *)
         l1.
+
+Check nlength_napp_PO (1 :n: [[]]) ([[]]) = nlength_napp (1 :n: [[]]) ([[]]).
         
 (** EXPL C — Coparing the proofs (lambda terms) 
 

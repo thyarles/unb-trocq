@@ -20,15 +20,24 @@ Fixpoint napp (l1 l2 : NatList) : NatList :=
     | NNil       => l2
     | NCons h t  => NCons h (napp t l2)
     end.
-
+    
 Example nlength_ex1 : nlength [[]] = O.
 Proof. simpl. reflexivity. Qed.
 
-Example nlength_ex2 : nlength (S O :n: S (S O) :n: S (S (S O)) :n: [[]]) = S (S (S O)).
-Proof. simpl. reflexivity. Qed.
-
-Example nlength_ex3 : nlength (1 :n: 2 :n: 3 :n: [[]]) = 3.
+Example nlength_ex2 : nlength (1 :n: 2 :n: 3 :n: [[]]) = 3.
 Proof. simpl. reflexivity. Qed.
 
 Example napp_ex : napp (1 :n: 2 :n: [[]]) (3 :n: 4 :n: [[]]) = (1 :n: 2 :n: 3 :n: 4 :n: [[]]).
 Proof. simpl. reflexivity. Qed.
+
+Theorem nlength_napp :
+    forall (l1 l2 : NatList),
+    nlength (napp l1 l2) = nlength l1 + nlength l2.
+Proof.
+    intros l1 l2.
+    induction l1 as [| h t IH].
+    - (* Base case: l1 = NNil. *)
+    simpl. reflexivity.
+    - (* Inductive step: l1 = NCons h t. *)
+    simpl. rewrite IH. reflexivity.
+Qed.
