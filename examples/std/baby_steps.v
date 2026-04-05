@@ -14,8 +14,8 @@
 (*             Expl C — Comparing the proofs (lambda terms)                  *)
 (*    Part 4 — Manual transfer                                               *)
 (*             Expl D - Notes about manual transfer                          *)
-(*    Part 5 — Using Trocq                                                   *)
-(*    Part 6 — Applying Trocq to other types                                 *)
+(*    Part T — Using Trocq (all on this file)                                *)
+(*    Part 5 — Applying Trocq to other types                                 *)
 (*****************************************************************************)
 
 From Coq Require Import ssreflect.
@@ -55,7 +55,7 @@ Set Universe Polymorphism.
 (** PART 4 — Manual transfer *)
     Require Import Trocq_examples.bs_p4.
 
-(** PART 5 — Using Trocq *)
+(** PART T — Using Trocq *)
 
     (* Trocq works with a database of "parametric relations".
 
@@ -219,11 +219,6 @@ Set Universe Polymorphism.
         Trocq Use R_napp.
         Trocq Use Param_add.
 
-        (* Equality: Param01_paths transforms a = b : A into a' = b' : A'
-          when A ~ A' and a ~ a', b ~ b'. It is needed because the goal
-          contains an equality = between nat values. *)
-        Trocq Use Param01_paths.
-
     (*  ── Step (e): The theorem via Trocq ───────────────────────────────── *)
 
         (* The proof now has TWO lines:
@@ -270,165 +265,8 @@ Set Universe Polymorphism.
           - Trocq : one-time registration + 2 lines per new theorem *)
 
 (** PART 6 — Applying Trocq to other types *)
+    Require Import Trocq_examples.bs_p5.
 
     (* The same five-step pattern from Part 5 applies to any monomorphic type
        that is isomorphic to a PList specialisation. Here we do it for
        BolList ~ PList bool. *)
-
-    (*  ── Base definitions ──────────────────────────────────────────────── *)
-
-    Inductive BolList : Type :=
-        | BNil  : BolList
-        | BCons : bool -> BolList -> BolList.
-    Notation "x :b: l" := (BCons x l) (at level 60, right associativity).
-    Notation "[bb]"    := BNil.
-
-    Fixpoint blength (l : BolList) : nat :=
-        match l with
-        | BNil       => O
-        | BCons _ t  => S (blength t)
-        end.
-
-    Fixpoint bapp (l1 l2 : BolList) : BolList :=
-        match l1 with
-        | BNil       => l2
-        | BCons h t  => BCons h (bapp t l2)
-        end.
-
-    (* Monomorphic aliases for PList bool — same reason as NPList in Part 5:
-       avoids Trocq confusing the implicit sort argument with a list variable. *)
-    Definition NBPList   : Type                          := PList bool.
-    Definition nbPNil    : NBPList                       := @PNil bool.
-    Definition nbPCons   : bool -> NBPList -> NBPList    := @PCons bool.
-    Definition nbplength : NBPList -> nat                := @plength bool.
-    Definition nbpapp    : NBPList -> NBPList -> NBPList := @papp bool.
-
-    (*  ── Conversion functions ──────────────────────────────────────────── *)
-
-    Fixpoint bollist_to_plist (l : BolList) : NBPList :=
-      match l with
-      | BNil      => @PNil bool
-      | BCons h t => @PCons bool h (bollist_to_plist t)
-      end.
-
-    Fixpoint plist_to_bollist (l : NBPList) : BolList :=
-      match l with
-      | @PNil _      => BNil
-      | @PCons _ h t => BCons h (plist_to_bollist t)
-      end.
-
-    (*  ── Bridge lemmas  ───────────────────────────────────────────────── *)
-
-    Lemma blength_eq_nbplength :
-        forall (l : BolList),
-        nbplength (bollist_to_plist l) = blength l.
-    Proof.
-        unfold nbplength.
-        induction l; simpl.
-        - reflexivity.
-        - rewrite IHl. reflexivity.
-    Defined.
-
-    Lemma bollist_to_plist_app :
-        forall (l1 l2 : BolList),
-        bollist_to_plist (bapp l1 l2) =
-        nbpapp (bollist_to_plist l1) (bollist_to_plist l2).
-    Proof.
-        unfold nbpapp.
-        intros l1 l2.
-        induction l1; simpl.
-        - reflexivity.
-        - rewrite IHl1. reflexivity.
-    Defined.
-
-    (*  ── Mutual inverses ──────────────────────────────────────────────── *)
-
-    Lemma bollist_plist_iso :
-        forall (l : BolList),
-        plist_to_bollist (bollist_to_plist l) = l.
-    Proof.
-        induction l; simpl.
-        - reflexivity.
-        - rewrite IHl. reflexivity.
-    Defined.
-
-    Lemma plist_bollist_iso :
-        forall (l : NBPList),
-        bollist_to_plist (plist_to_bollist l) = l.
-    Proof.
-        induction l; simpl.
-        - reflexivity.
-        - rewrite IHl. reflexivity.
-    Defined.
-
-    (*  ── Relation between the types ───────────────────────────────────── *)
-
-    Definition R_BolList : Param44.Rel BolList NBPList.
-    Proof.
-        apply Iso.toParam; unshelve econstructor.
-        - exact bollist_to_plist.   (* map   : BolList → NBPList *)
-        - exact plist_to_bollist.   (* comap : NBPList → BolList *)
-        - exact bollist_plist_iso.  (* mapK  : comap ∘ map = id  *)
-        - exact plist_bollist_iso.  (* comapK: map ∘ comap = id  *)
-    Defined.
-
-    (*  ── Relation between the constructors ────────────────────────────── *)
-
-    Definition R_BNil : rel R_BolList BNil nbPNil := eq_refl.
-
-    (* [BCons ~ nbPCons]:
-         given h ~ h' (BoolR h h') and l ~ l',
-         conclude BCons h l ~ nbPCons h' l'. 
-    *)
-    Definition R_BCons
-        (h h' : bool) (hR : BoolR h h')
-        (l : BolList) (l' : NBPList) (lR : rel R_BolList l l') :
-        rel R_BolList (BCons h l) (nbPCons h' l') :=
-        eq_trans (ap (nbPCons h) lR) (ap (fun x => nbPCons x l') (R_in_map_Bool hR)).
-
-    (*  ── Relation between the functions ───────────────────────────────── *)
-
-    (* [blength ~ nbplength]:
-       Chain: blength l
-            = nbplength (bollist_to_plist l)   (eq_sym blength_eq_nbplength)
-            = nbplength l'                     (ap nbplength lR)            *)
-    Definition R_blength
-        (l : BolList) (l' : NBPList) (lR : rel R_BolList l l') :
-        natR (blength l) (nbplength l') :=
-        map_in_R_nat
-            (eq_trans (eq_sym (blength_eq_nbplength l)) (ap nbplength lR)).
-
-    (* [bapp ~ nbpapp]:
-       Chain: bollist_to_plist (bapp l1 l2)
-            = nbpapp (bollist_to_plist l1) (bollist_to_plist l2)  (bollist_to_plist_app)
-            = nbpapp l1'                   (bollist_to_plist l2)  (ap … l1R)
-            = nbpapp l1'                   l2'                    (ap … l2R) *)
-    Definition R_bapp
-        (l1 : BolList) (l1' : NBPList) (l1R : rel R_BolList l1 l1')
-        (l2 : BolList) (l2' : NBPList) (l2R : rel R_BolList l2 l2') :
-        rel R_BolList (bapp l1 l2) (nbpapp l1' l2') :=
-        eq_trans
-            (bollist_to_plist_app l1 l2)
-            (eq_trans
-                (ap (fun x => nbpapp x (bollist_to_plist l2)) l1R)
-                (ap (nbpapp l1') l2R)).
-
-    (*  ── Register in Trocq's database ─────────────────────────────────── *)
-
-    Trocq Use R_BolList.
-    Trocq Use Param44_Bool.   (* diagonal relation for the bool elements *)
-    Trocq Use R_BNil.
-    Trocq Use R_BCons.
-    Trocq Use R_blength.
-    Trocq Use R_bapp.
-    (* Param_add and Param01_paths were already registered in Part 5
-       and remain in Trocq's global database. *)
-
-    (*  ── The theorem via Trocq ────────────────────────────────────────── *)
-
-    Theorem blength_bapp_trocq : forall (l1 l2 : BolList),
-        blength (bapp l1 l2) = blength l1 + blength l2.
-    Proof.
-        trocq.
-        apply plength_papp.
-    Qed.
