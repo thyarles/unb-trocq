@@ -108,7 +108,7 @@ on line 38 column 14 and checking the updated goal is the expected one (in this
 particular case, featuring `nat` in the associated goal instead of `N` in the
 initial goal).
 
-# Charles' notes to install wihtout Docker
+## Charles' notes to install without Docker
 
 1. opam --version
    - Mine is 2.5.0
@@ -123,6 +123,6 @@ initial goal).
    - pam pin add vsrocq-language-server 2.3.4 (should match with extension version)
 8. Install trocq (if you prefer hott, change std to hott)
    - make install-std
-9. Install the examples
+9. Install the STD examples
    - opam pin add coq-trocq-std .
    - opam install --deps-only ./coq-trocq-std-examples.opam
