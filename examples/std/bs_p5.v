@@ -90,8 +90,8 @@ Lemma plist_bollist_iso :
     bollist_to_plist (plist_to_bollist l) = l.
 Proof.
     induction l; simpl.
-    - reflexivity.
-    - rewrite IHl. reflexivity.
+    - unfold nbPNil. reflexivity.
+    - rewrite IHl. unfold nbPCons. reflexivity.
 Defined.
 
 (*  ── Relation between the types ───────────────────────────────────── *)
@@ -99,10 +99,10 @@ Defined.
 Definition R_BolList : Param44.Rel BolList NBPList.
 Proof.
     apply Iso.toParam; unshelve econstructor.
-    - apply bollist_to_plist.   (* map   : BolList → NBPList *)
-    - apply plist_to_bollist.   (* comap : NBPList → BolList *)
-    - apply bollist_plist_iso.  (* mapK  : comap ∘ map = id  *)
-    - apply plist_bollist_iso.  (* comapK: map ∘ comap = id  *)
+    - apply bollist_to_plist.   (* map   : BolList     → PList bool *)
+    - apply plist_to_bollist.   (* comap : PList bool  → BolList    *)
+    - apply bollist_plist_iso.  (* mapK  : comap ∘ map = id         *)
+    - apply plist_bollist_iso.  (* comapK: map ∘ comap = id         *)
 Defined.
 
 (*  ── Relation between the functions ───────────────────────────────── *)
@@ -133,7 +133,6 @@ Trocq Use Param44_nat.      (* from Trocq *)
 Trocq Use Param_add.        (* from Trocq *)
 
 (*  ── The theorem via Trocq ────────────────────────────────────────── *)
-
 Theorem blength_bapp_trocq : forall (l1 l2 : BolList),
     blength (bapp l1 l2) = blength l1 + blength l2.
 Proof.
