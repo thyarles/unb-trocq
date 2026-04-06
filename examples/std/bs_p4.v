@@ -1,32 +1,25 @@
 From Stdlib Require Import ssreflect.
 Require Import Trocq_examples.bs_p1.
 Require Import Trocq_examples.bs_p2.
-Require Import Trocq_examples.bs_p3.
 Local Open Scope nat_scope.
 
 Set Universe Polymorphism.
 
-(*  Show how to "transfer" length_papp to NatList by hand, explicitly
+(*  Show how to "transfer" nlength_napp to PList nat by hand, explicitly
     building the conversion functions and the compatibility lemmas.
     I think this is what Trocq automates.
 
     The plan:
 
-        1. Define natlist_to_plist : NatList → PList nat
-        2. Define plist_to_natlist : PList nat → NatList
+        1. Define plist_to_natlist : PList nat → NatList
+        2. Define natlist_to_plist : NatList → PList nat
         3. Prove they are inverses (isomorphism)
         4. Prove they preserve length and append
-        5. Use these bridges to derive nlength_napp from plength_papp 
+        5. Use these bridges to derive plength_papp_via_natlist from nlength_napp
         6. Notes
 *)
 
 (*  ── 1 & 2: Conversion functions ──────────────────────────────────-── *)
-
-Fixpoint natlist_to_plist (l : NatList) : PList nat :=
-    match l with
-    | NNil      => @PNil nat
-    | NCons h t => @PCons nat h (natlist_to_plist t)
-    end.
 
 Fixpoint plist_to_natlist (l : PList nat) : NatList :=
     match l with
@@ -34,97 +27,93 @@ Fixpoint plist_to_natlist (l : PList nat) : NatList :=
     | @PCons _ h t => NCons h (plist_to_natlist t)
     end.
 
-(* Show the conversion bridge at work: both sides pass through PList nat. *)
-Compute plength (natlist_to_plist (1 :n: 2 :n: 3 :n: [[]])).
-Compute natlist_to_plist (napp (1 :n: 2 :n: [[]]) (3 :n: [[]])).
-Compute natlist_to_plist (1 :n: 2 :n: 3 :n: [[]]) = (1 :p: 2 :p: 3 :p: {{}}).
-Compute plist_to_natlist (1 :p: 2 :p: 3 :p: {{}}) = (1 :n: 2 :n: 3 :n: [[]]).
+Fixpoint natlist_to_plist (l : NatList) : PList nat :=
+    match l with
+    | NNil      => @PNil nat
+    | NCons h t => @PCons nat h (natlist_to_plist t)
+    end.
+
+(* Show the conversion bridge at work: both sides pass through NatList. *)
+Goal nlength (plist_to_natlist (1 :p: 2 :p: 3 :p: {{}})) = 3. reflexivity.
+Goal plist_to_natlist (papp (1 :p: {{}}) (2 :p: {{}})) = 1 :n: 2 :n: [[]]. reflexivity.
+Goal plist_to_natlist (1 :p: 2 :p: {{}}) = (1 :n: 2 :n: [[]]). reflexivity.
+Goal natlist_to_plist (1 :n: 2 :n: [[]]) = (1 :p: 2 :p: {{}}). reflexivity.
 
 (*  ── 3: Isomorphism ────────────────────────────────────────────────── *)
 
-    (** Round trip (to PList and back): plist_to_natlist ∘ natlist_to_plist = id *)
-    Lemma natlist_plist_iso :
-        forall (l : NatList),
-        plist_to_natlist (natlist_to_plist l) = l.
-    Proof.
-        induction l as [| h t IH].
-        - simpl. reflexivity.
-        - simpl. rewrite IH. reflexivity.
-    Defined.
+(** Round trip (to NatList and back): natlist_to_plist ∘ plist_to_natlist = id *)
+Lemma plist_natlist_iso : forall (l : PList nat),
+    natlist_to_plist (plist_to_natlist l) = l.
+Proof.
+    induction l as [| h t IH]; simpl.
+    - reflexivity.
+    - rewrite IH. reflexivity.
+Qed.
 
-    (** Round trip (to NatList and back): natlist_to_plist ∘ plist_to_natlist = id *)
-    Lemma plist_natlist_iso :
-        forall (l : PList nat),
-        natlist_to_plist (plist_to_natlist l) = l.
-    Proof.
-        induction l as [| h t IH].
-        - simpl. reflexivity.
-        - simpl. rewrite IH. reflexivity.
-    Defined.
+(** Round trip (to PList and back): plist_to_natlist ∘ natlist_to_plist = id *)
+Lemma natlist_plist_iso : forall (l : NatList),
+    plist_to_natlist (natlist_to_plist l) = l.
+Proof.
+    induction l as [| h t IH]; simpl.
+    - reflexivity.
+    - rewrite IH. reflexivity.
+Qed.
 
 (*  ── 4: Compatibility with length and app ──────────────────────────── *)
 
-    (* The conversion preserves the length. *)
-    Lemma nlength_eq_plength :
-        forall (l : NatList),
-        plength (natlist_to_plist l) = nlength l.
-    Proof.
-        induction l as [| h t IH].
-        - simpl. reflexivity.
-        - simpl. rewrite IH. reflexivity.
-    Defined.
+(* The conversion preserves the length. *)
+Lemma plength_eq_nlength : forall (l : PList nat),
+    nlength (plist_to_natlist l) = plength l.
+Proof.
+    induction l as [| h t IH].
+    - simpl. reflexivity.
+    - simpl. rewrite IH. reflexivity.
+Qed.
 
-    (** The conversion distributes over concatenation. *)
-    Lemma natlist_to_plist_app :
-        forall (l1 l2 : NatList),
-        natlist_to_plist (napp l1 l2) =
-        papp (natlist_to_plist l1) (natlist_to_plist l2).
-    Proof.
-        intros l1 l2.
-        induction l1 as [| h t IH].
-        - simpl. reflexivity.
-        - simpl. rewrite IH. reflexivity.
-    Defined.
+(** The conversion distributes over concatenation. *)
+Lemma plist_to_natlist_app : forall (l1 l2 : PList nat),
+    plist_to_natlist (papp l1 l2) =
+    napp (plist_to_natlist l1) (plist_to_natlist l2).
+Proof.
+    intros l1 l2.
+    induction l1 as [| h t IH]; simpl.
+    - reflexivity.
+    - rewrite IH. reflexivity.
+Qed.
 
 (*  ── 5: Manual transfer ────────────────────────────────────────────── *)
 
-    Theorem nlength_napp_via_plist :
-        forall (l1 l2 : NatList),
-        nlength (napp l1 l2) = nlength l1 + nlength l2.
-    Proof.
-        (*** Step 0: Introduces the variables. *)
-        intros l1 l2.
-        (*** Step 1: rewrite the left-hand side using nlength_eq_plength. *)
-        rewrite <- (nlength_eq_plength (napp l1 l2)).
-        (*** Step 2: distribute the conversion over napp. *)
-        rewrite natlist_to_plist_app.
-        (*** Step 3: apply the polymorphic theorem *)
-        rewrite plength_papp.
-        (*** Step 4: convert the remaining plength back to nlength. *)
-        rewrite nlength_eq_plength.
-        rewrite nlength_eq_plength.
-        reflexivity.
-    Defined.
+Theorem plength_papp_via_natlist : forall (l1 l2 : PList nat),
+    plength (papp l1 l2) = plength l1 + plength l2.
+Proof.
+    (*** Step 0: Introduces the variables. *)
+    intros l1 l2.
+    (*** Step 1: rewrite the left-hand side using plength_eq_nlength. *)
+    rewrite <- (plength_eq_nlength (papp l1 l2)).
+    (*** Step 2: distribute the conversion over papp. *)
+    rewrite plist_to_natlist_app.
+    (*** Step 3: apply the monomorphic theorem *)
+    rewrite nlength_napp.
+    (*** Step 4: convert the remaining nlength back to plength. *)
+    rewrite plength_eq_nlength.
+    rewrite plength_eq_nlength.
+    reflexivity.
+Qed.
 
-    Example test_transfer_normal :
-        nlength (napp (1 :n: 2 :n: [[]]) (3 :n: [[]])) =
-        nlength (1 :n: 2 :n: [[]]) + nlength (3 :n: [[]]).
-    Proof. 
-        (* The proof actually uses the transferred theorem as its justification:
-           the specific lists are witnesses to the universal statement ∀ l1 l2,
-           nlength (napp l1 l2) = nlength l1 + nlength l2. *)
-        apply nlength_napp_via_plist.
-    Qed.
+Goal plength (papp (1 :p: 2 :p: {{}}) (3 :p: {{}})) =
+     plength (1 :p: 2 :p: {{}}) + plength (3 :p: {{}}).
+     (* The proof actually uses the transferred theorem as its justification:
+        the specific lists are witnesses to the universal statement ∀ l1 l2,
+        plength (papp l1 l2) = plength l1 + plength l2. *)
+    apply plength_papp_via_natlist.
 
-    Example test_transfer_empty_l :
-        nlength (napp [[]] (1 :n: 2 :n: [[]])) =
-        nlength [[]] + nlength (1 :n: 2 :n: [[]]).
-    Proof. apply nlength_napp_via_plist. Qed.
+Goal plength (papp ({{}} : PList nat) (1 :p: 2 :p: {{}})) =
+     plength ({{}} : PList nat) + plength (1 :p: 2 :p: {{}}).
+     apply plength_papp_via_natlist.
 
-    Example test_transfer_empty_r :
-        nlength (napp (1 :n: 2 :n: [[]]) [[]]) =
-        nlength (1 :n: 2 :n: [[]]) + nlength [[]].
-    Proof. apply nlength_napp_via_plist. Qed. 
+Goal plength (papp (1 :p: 2 :p: {{}}) ({{}} : PList nat)) =
+     plength (1 :p: 2 :p: {{}}) + plength ({{}} : PList nat).
+     apply plength_papp_via_natlist.
 
 (*  ── 7: Notes ───────────────────────────────────────────────────────── *)
 
@@ -134,7 +123,7 @@ Compute plist_to_natlist (1 :p: 2 :p: 3 :p: {{}}) = (1 :n: 2 :n: 3 :n: [[]]).
         + 2 conversion functions
         + 2 isomorphism proofs
         + 2 compatibility lemmas (length and app)
-        + 1 "glue" proof (nlength_napp_via_plist)
+        + 1 "glue" proof (plength_papp_via_natlist)
         -----------------------------------------
         = 7 items in total to transfer 1 theorem.
 
@@ -144,7 +133,7 @@ Compute plist_to_natlist (1 :p: 2 :p: 3 :p: {{}}) = (1 :n: 2 :n: 3 :n: [[]]).
             + Trocq Use R_NNil_PNil
             + Trocq Use R_NCons_PCons
         - Then, for each new theorem:
-            = trocq. exact plength_papp.   ← Done!
+            = trocq. apply nlength_napp.   ← Done!
 
         Trocq automatically builds the compatibility lemmas and the
         glue proof, using the registered structure. *)

@@ -37,7 +37,7 @@ Proof.
     intros l1 l2.
     induction l1 as [| h t IH].
     - (* Base case: l1 = NNil. *)
-    simpl. reflexivity.
+      simpl. reflexivity.
     - (* Inductive step: l1 = NCons h t. *)
-    simpl. rewrite IH. reflexivity.
+      simpl. rewrite IH. reflexivity.
 Defined.
