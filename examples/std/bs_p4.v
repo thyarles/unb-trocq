@@ -34,10 +34,14 @@ Fixpoint natlist_to_plist (l : NatList) : PList nat :=
     end.
 
 (* Show the conversion bridge at work: both sides pass through NatList. *)
-Goal nlength (plist_to_natlist (1 :p: 2 :p: 3 :p: {{}})) = 3. reflexivity.
-Goal plist_to_natlist (papp (1 :p: {{}}) (2 :p: {{}})) = 1 :n: 2 :n: [[]]. reflexivity.
-Goal plist_to_natlist (1 :p: 2 :p: {{}}) = (1 :n: 2 :n: [[]]). reflexivity.
-Goal natlist_to_plist (1 :n: 2 :n: [[]]) = (1 :p: 2 :p: {{}}). reflexivity.
+Goal nlength (plist_to_natlist (1 :p: 2 :p: 3 :p: {{}})) = 3.
+     reflexivity. Qed.
+Goal plist_to_natlist (papp (1 :p: {{}}) (2 :p: {{}})) = 1 :n: 2 :n: [[]].
+     reflexivity. Qed.
+Goal plist_to_natlist (1 :p: 2 :p: {{}}) = (1 :n: 2 :n: [[]]).
+     reflexivity. Qed.
+Goal natlist_to_plist (1 :n: 2 :n: [[]]) = (1 :p: 2 :p: {{}}).
+     reflexivity. Qed.
 
 (*  ── 3: Isomorphism ────────────────────────────────────────────────── *)
 
@@ -105,15 +109,15 @@ Goal plength (papp (1 :p: 2 :p: {{}}) (3 :p: {{}})) =
      (* The proof actually uses the transferred theorem as its justification:
         the specific lists are witnesses to the universal statement ∀ l1 l2,
         plength (papp l1 l2) = plength l1 + plength l2. *)
-    apply plength_papp_via_natlist.
+     apply plength_papp_via_natlist. Qed.
 
 Goal plength (papp ({{}} : PList nat) (1 :p: 2 :p: {{}})) =
      plength ({{}} : PList nat) + plength (1 :p: 2 :p: {{}}).
-     apply plength_papp_via_natlist.
+     apply plength_papp_via_natlist. Qed.
 
 Goal plength (papp (1 :p: 2 :p: {{}}) ({{}} : PList nat)) =
      plength (1 :p: 2 :p: {{}}) + plength ({{}} : PList nat).
-     apply plength_papp_via_natlist.
+     apply plength_papp_via_natlist. Qed.
 
 (*  ── 7: Notes ───────────────────────────────────────────────────────── *)
 
