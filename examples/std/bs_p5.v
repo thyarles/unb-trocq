@@ -92,22 +92,81 @@ Defined.
 
 (*  ── Relation between the functions ────────────────────────────────── *)
 
-Definition R_npnlength
-    (l : NPNatList)
-    (l': NatList)
-    (lR: rel R_NatList l l'): natR (npnlength l) (nlength l') :=
-    map_in_R_nat
-        (eq_trans (npnlength_eq_nlength l) (ap nlength lR)).
+(** Notes:
+    [rel R l l']  => l and l' are related; unfolds to [map R l = l']
+                     (i.e., the isomorphism's forward map applied to l equals l')
+    natR n m      => Trocq's parametric relation for nat, essentially n = m
+    eq_trans p q  => Chains a = b and b = c into a = c
+    ap f p        => Lifts equality a = b through a function (f a = f b)
+    map_in_R_nat  => Converts a plain = on nat into a natR witness
+*)
 
-Definition R_npnapp
+(* Definition R_npnlength
+    (** In plain English:
+        If a NPNatList (l) and a NatList (l') are related,
+        then their lengths are related nats. *)
+    (l : NPNatList) (l' : NatList) (lR : rel R_NatList l l') :
+    (* rel R_NatList l l' === plist_to_natlist l = l' *)
+    natR (npnlength l) (nlength l') :=
+    map_in_R_nat
+        (eq_trans (npnlength_eq_nlength l) (ap nlength lR)). *)
+
+Lemma R_npnlength
+    (l : NPNatList) (l' : NatList) (lR : rel R_NatList l l') :
+    natR (npnlength l) (nlength l').
+Proof.
+    change (plist_to_natlist l = l') in lR.
+    (* normalize lR's type *)
+    apply map_in_R_nat.
+    (* reduce to: npnlength l = nlength l' *)
+    rewrite npnlength_eq_nlength. 
+    (* goal: nlength (plist_to_natlist l) = nlength l' *)
+    rewrite lR.
+    (* goal: nlength l' = nlength l' *)        
+    reflexivity.
+Defined.
+
+(* Definition R_npnapp
+    (** In plain English:
+        If (l1 ~ l1') and (l2 ~ l2') are two pairs of related lists,
+        then their appended lists are also related. *)
     (l1 : NPNatList) (l1' : NatList) (l1R : rel R_NatList l1 l1')
+    (* l1R : plist_to_natlist l1 = l1' *)
     (l2 : NPNatList) (l2' : NatList) (l2R : rel R_NatList l2 l2') :
+    (* l2R : plist_to_natlist l2 = l2' *)
     rel R_NatList (npnapp l1 l2) (napp l1' l2') :=
+    (* goal: plist_to_natlist (npnapp l1 l2) = napp l1' l2' *)
     eq_trans
         (plist_to_natlist_app l1 l2)
+        (* step 1: plist_to_natlist (npnapp l1 l2)
+                 = napp (plist_to_natlist l1) (plist_to_natlist l2)      *)
         (eq_trans
             (ap (fun x => napp x (plist_to_natlist l2)) l1R)
+            (* step 2: napp (plist_to_natlist l1) (plist_to_natlist l2)
+                     = napp l1'                   (plist_to_natlist l2)  *)
             (ap (napp l1') l2R)).
+            (* step 3: napp l1' (plist_to_natlist l2)
+                     = napp l1' l2'                                      *) *)
+
+Lemma R_npnapp
+    (l1 : NPNatList) (l1' : NatList) (l1R : rel R_NatList l1 l1')
+    (l2 : NPNatList) (l2' : NatList) (l2R : rel R_NatList l2 l2') :
+    rel R_NatList (npnapp l1 l2) (napp l1' l2').
+Proof.
+    change (plist_to_natlist l1 = l1') in l1R. 
+    (* normalize hypotheses *)
+    change (plist_to_natlist l2 = l2') in l2R.
+    (* normalize hypotheses *)
+    change (plist_to_natlist (npnapp l1 l2) = napp l1' l2').
+    (* normalize goal *)
+    rewrite plist_to_natlist_app.
+    (* unfold the append conversion *)
+    rewrite l1R.
+    (* substitute plist_to_natlist l1 → l1' *)
+    rewrite l2R.
+    (* substitute plist_to_natlist l2 → l2' *)
+    reflexivity.
+Defined.
 
 (*  ── Register in Trocq's database ──────────────────────────────────── *)
 
