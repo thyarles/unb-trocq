@@ -116,14 +116,19 @@ Lemma R_npnlength
     natR (npnlength l) (nlength l').
 Proof.
     change (plist_to_natlist l = l') in lR.
+    Show Proof. 
     (* normalize lR's type *)
     apply map_in_R_nat.
+    Show Proof.
     (* reduce to: npnlength l = nlength l' *)
-    rewrite npnlength_eq_nlength. 
+    rewrite npnlength_eq_nlength.
+    Show Proof. 
     (* goal: nlength (plist_to_natlist l) = nlength l' *)
     rewrite lR.
+    Show Proof.
     (* goal: nlength l' = nlength l' *)        
     reflexivity.
+    Show Proof.
 Defined.
 
 (* Definition R_npnapp

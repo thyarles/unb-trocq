@@ -30,14 +30,13 @@ Proof. simpl. reflexivity. Qed.
 Example napp_ex : napp (1 :n: 2 :n: [[]]) (3 :n: 4 :n: [[]]) = (1 :n: 2 :n: 3 :n: 4 :n: [[]]).
 Proof. simpl. reflexivity. Qed.
 
-Theorem nlength_napp :
-    forall (l1 l2 : NatList),
+Theorem nlength_napp : forall (l1 l2 : NatList),
     nlength (napp l1 l2) = nlength l1 + nlength l2.
 Proof.
     intros l1 l2.
-    induction l1 as [| h t IH].
+    induction l1 as [| h t IH]; simpl.
     - (* Base case: l1 = NNil. *)
-      simpl. reflexivity.
+      reflexivity.
     - (* Inductive step: l1 = NCons h t. *)
-      simpl. rewrite IH. reflexivity.
+      rewrite IH. reflexivity.
 Defined.

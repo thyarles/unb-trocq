@@ -39,11 +39,11 @@ Theorem plength_papp :
     plength (papp l1 l2) = plength l1 + plength l2.
 Proof.
     intros A l1 l2.
-    induction l1 as [| h t IH].
+    induction l1 as [| h t IH]; simpl.
     - (* Base case: l1 = NNil. *)
-      simpl. reflexivity.
+      reflexivity.
     - (* Inductive step: l1 = NCons h t. *)
-      simpl. rewrite IH. reflexivity.
+      rewrite IH. reflexivity.
 Defined.
 
 (** EXPL B — Comparing the proofs: differences and similarities
