@@ -51,3 +51,14 @@ Proof.
     rewrite nlength_napp.
     lia.
 Defined.
+
+Theorem napp_assoc : forall (l1 l2 l3 : NatList),
+    napp (napp l1 l2) l3 = napp l1 (napp l2 l3).
+Proof.
+    intros l1 l2 l3.
+    induction l1 as [| h t IH]; simpl.
+    - (* Base case: l1 = NNil. *)
+      reflexivity.
+    - (* Inductive step: l1 = NCons h t. *)
+      rewrite IH. reflexivity.
+Defined.

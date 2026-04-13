@@ -201,6 +201,15 @@ Qed.
 
 Print Assumptions npnlength_npnapp_comm_trocq.
 
+Theorem npnapp_assoc_trocq : forall (l1 l2 l3 : NPNatList),
+    npnapp (npnapp l1 l2) l3 = npnapp l1 (npnapp l2 l3).
+Proof.
+    trocq.
+    apply napp_assoc.
+Qed.
+
+Print Assumptions npnapp_assoc_trocq.
+
 (** EXPL D — Notes about Trocq *)
 
 (* Trocq works with a database of "parametric relations".
