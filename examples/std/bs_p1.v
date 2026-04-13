@@ -40,3 +40,14 @@ Proof.
     - (* Inductive step: l1 = NCons h t. *)
       rewrite IH. reflexivity.
 Defined.
+
+(* Import that solves [a + b = b + a] directly *)
+From Stdlib Require Import Lia.
+
+Theorem napp_length_comm : forall (l1 l2 : NatList),
+    nlength (napp l1 l2) = nlength l2 + nlength l1.
+Proof.
+    intros l1 l2.
+    rewrite nlength_napp.
+    lia.
+Defined.

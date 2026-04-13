@@ -21,7 +21,7 @@ Definition npPCons     : nat -> NPNatList -> NPNatList       := @PCons nat.
 Definition npnlength   : NPNatList -> nat                    := @plength nat.
 Definition npnapp      : NPNatList -> NPNatList -> NPNatList := @papp nat.
 
-(*  ── Conversion functions ──────────────────────────────────────────── *)
+(*  ── Relation between the constructors ────────────────────────────── *)
 
 Fixpoint plist_to_natlist (l : NPNatList) : NatList :=
     match l with
@@ -192,23 +192,32 @@ Qed.
 
 Print Assumptions npnlength_npnapp_trocq.
 
+Theorem npnlength_npnapp_comm_trocq : forall (l1 l2 : NPNatList),
+    npnlength (npnapp l1 l2) = npnlength l2 + npnlength l1.
+Proof.
+    trocq.
+    apply napp_length_comm.
+Qed.
+
+Print Assumptions npnlength_npnapp_comm_trocq.
+
 (** EXPL D — Notes about Trocq *)
 
 (* Trocq works with a database of "parametric relations".
 
     To use the trocq tactic we need:
 
-    (a) The relation between the TYPES
-        NatList ~ PList nat
-    (b) The relation between the CONSTRUCTORS
+    (a) The relation between the CONSTRUCTORS
         NNil ~ PNil  and  NCons ~ PCons
+    (b) The relation between the TYPES
+        NatList ~ PList nat
     (c) The relation between the FUNCTIONS
         nlength ~ plength  and  napp ~ papp
     (d) Register everything with Trocq Use
     (e) The main theorem via trocq
 *)
                                                                             
-(*  ── Step (a): Relation between the types ──────────────────────────── *)
+(*  ── Step (b): Relation between the types ──────────────────────────── *)
 
     (* Trocq uses "parametric relations" instead of simple bijections. The
     strongest class is Param44 (full isomorphism, with proofs in both
@@ -243,7 +252,7 @@ Print Assumptions npnlength_npnapp_trocq.
                 Every relational proof reduces to an equality over the conversion function,
                 which greatly simplifies the reasoning. *)
 
-(*  ── Step (b): Relation between the constructors ───────────────────── *)
+(*  ── Step (a): Relation between the constructors ───────────────────── *)
 
     (* For each constructor we prove that it "respects" the relation R_NatList.
         Even if the constructors do not appear directly in the theorem we want to
