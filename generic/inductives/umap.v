@@ -1,7 +1,7 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
-From Trocq Extra Dependency "algo/elpi/umap.elpi" as umap.
-From Trocq Extra Dependency "algo/elpi/common_algo.elpi" as common.
-From Trocq Extra Dependency "algo/elpi/utils.elpi" as algo_utils.
+From Trocq.Elpi Extra Dependency "inductives/umap.elpi" as umap.
+From Trocq.Elpi Extra Dependency "inductives/common_algo.elpi" as common.
+From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as algo_utils.
 From Trocq Require Import map4.
 Require Import Database.
 Unset Uniform Inductive Parameters. 

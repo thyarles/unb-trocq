@@ -1,7 +1,7 @@
 
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
-From Trocq Extra Dependency "algo/elpi/injK.elpi" as injK.
-From Trocq Extra Dependency "algo/elpi/utils.elpi" as algo_utils.
+From Trocq.Elpi Extra Dependency "inductives/injK.elpi" as injK.
+From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as algo_utils.
 From Trocq Require Export injection_lemmas. 
 
 From elpi Require Import elpi.

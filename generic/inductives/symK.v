@@ -1,9 +1,9 @@
 
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
 From elpi.apps.derive.elpi Extra Dependency "derive_synterp_hook.elpi" as derive_synterp_hook.
-From Trocq Extra Dependency "algo/elpi/common_algo.elpi" as common. 
-From Trocq Extra Dependency "algo/elpi/utils.elpi" as utils. 
-From Trocq Extra Dependency "algo/elpi/symK.elpi" as symK.
+From Trocq.Elpi Extra Dependency "inductives/common_algo.elpi" as common. 
+From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as utils. 
+From Trocq.Elpi Extra Dependency "inductives/symK.elpi" as symK.
 From Trocq Require Import sym. 
 (* Extra Dependency "algo/elpi/sym.elpi" as sym.  *)
 
