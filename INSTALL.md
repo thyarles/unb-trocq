@@ -117,10 +117,10 @@ initial goal).
 4. opam update
 5. opam install --deps-only ./coq-trocq.opam
 6. opam pin add coq-core 9.1.1
-   - To avoid let it be changed by another package installation
+   - To avoid it to be changed by another package installation
 7. Install language server plus VSRocq extension
    - Extension: https://marketplace.visualstudio.com/items?itemName=rocq-prover.vsrocq
-   - pam pin add vsrocq-language-server 2.3.4 (should match with extension version)
+   - opam pin add vsrocq-language-server 2.3.4 (should match with extension version)
 8. Install trocq (if you prefer hott, change std to hott)
    - make install-std
 9. Install the STD examples
