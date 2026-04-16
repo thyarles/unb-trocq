@@ -15,44 +15,43 @@ Require Import Trocq_examples.bs_p2.
 
 (* Monomorphic aliases for PList nat avoids Trocq confusing the implicit
    sort argument with a list variable. *)
-Definition NPNatList   : Type                                := PList nat.
-Definition npPNil      : NPNatList                           := @PNil nat.
-Definition npPCons     : nat -> NPNatList -> NPNatList       := @PCons nat.
-Definition npnlength   : NPNatList -> nat                    := @plength nat.
-Definition npnapp      : NPNatList -> NPNatList -> NPNatList := @papp nat.
+Definition _PList   : Type                       := PList nat.
+Definition _PNil    : _PList                     := @PNil nat.
+Definition _PCons   : nat -> _PList -> _PList    := @PCons nat.
+Definition _plength : _PList -> nat              := @plength nat.
+Definition _papp    : _PList -> _PList -> _PList := @papp nat.
 
 (*  ── Relation between the constructors ────────────────────────────── *)
 
-Fixpoint plist_to_natlist (l : NPNatList) : NatList :=
+Fixpoint plist_2_nlist (l : _PList) : NatList :=
     match l with
     | @PNil _      => NNil
-    | @PCons _ h t => NCons h (plist_to_natlist t)
+    | @PCons _ h t => NCons h (plist_2_nlist t)
     end.
 
-Fixpoint natlist_to_plist (l : NatList) : NPNatList :=
+Fixpoint nlist_2_plist (l : NatList) : _PList :=
     match l with
-    | NNil      => npPNil
-    | NCons h t => npPCons h (natlist_to_plist t)
+    | NNil      => _PNil
+    | NCons h t => _PCons h (nlist_2_plist t)
     end.
 
 (*  ── Bridge lemmas  ────────────────────────────────────────────────── *)
 
-Lemma npnlength_eq_nlength :
-    forall (l : NPNatList),
-    npnlength l = nlength (plist_to_natlist l).
+Lemma _plength_eq_nlength :
+    forall (l : _PList),
+        _plength l = nlength (plist_2_nlist l).
 Proof.
-    unfold npnlength.
+    unfold _plength.
     induction l; simpl.
     - reflexivity.
     - rewrite IHl. reflexivity.
 Defined.
 
-Lemma plist_to_natlist_app :
-    forall (l1 l2 : NPNatList),
-    plist_to_natlist (npnapp l1 l2) =
-    napp (plist_to_natlist l1) (plist_to_natlist l2).
+Lemma plist_2_nlist_app :
+    forall (l1 l2 : _PList), plist_2_nlist (_papp l1 l2) =
+        napp (plist_2_nlist l1) (plist_2_nlist l2).
 Proof.
-    unfold npnapp.
+    unfold _papp.
     intros l1 l2.
     induction l1; simpl.
     - reflexivity.
@@ -61,18 +60,18 @@ Defined.
 
 (*  ── Mutual inverses ───────────────────────────────────────────────── *)
 
-Lemma plist_natlist_iso :
-    forall (l : NPNatList),
-    natlist_to_plist (plist_to_natlist l) = l.
+Lemma plist_nlist_iso :
+    forall (l : _PList),
+        nlist_2_plist (plist_2_nlist l) = l.
 Proof.
     induction l; simpl.
-    - unfold npPNil. reflexivity.
-    - rewrite IHl. unfold npPCons. reflexivity.
+    - unfold _PNil. reflexivity.
+    - rewrite IHl. unfold _PCons. reflexivity.
 Defined.
 
-Lemma natlist_plist_iso :
+Lemma nlist_plist_iso :
     forall (l : NatList),
-    plist_to_natlist (natlist_to_plist l) = l.
+        plist_2_nlist (nlist_2_plist l) = l.
 Proof.
     induction l; simpl.
     - reflexivity.
@@ -81,13 +80,13 @@ Defined.
 
 (*  ── Relation between the types ────────────────────────────────────── *)
 
-Definition R_NatList : Param44.Rel NPNatList NatList.
+Definition R_NatList : Param44.Rel _PList NatList.
 Proof.
     apply Iso.toParam; unshelve econstructor.
-    - apply plist_to_natlist.   (* map   : NPNatList → NatList    *)
-    - apply natlist_to_plist.   (* comap : NatList   → NPNatList  *)
-    - apply plist_natlist_iso.  (* mapK  : comap ∘ map = id       *)
-    - apply natlist_plist_iso.  (* comapK: map ∘ comap = id       *)
+    - apply plist_2_nlist.    (* map   : _PList  → NatList *)
+    - apply nlist_2_plist.    (* comap : NatList → _PList  *)
+    - apply plist_nlist_iso.  (* mapK  : comap ∘ map = id  *)
+    - apply nlist_plist_iso.  (* comapK: map ∘ comap = id  *)
 Defined.
 
 (*  ── Relation between the functions ────────────────────────────────── *)
@@ -101,114 +100,109 @@ Defined.
     map_in_R_nat  => Converts a plain = on nat into a natR witness
 *)
 
-(* Definition R_npnlength
+(* Definition R__plength
     (** In plain English:
-        If a NPNatList (l) and a NatList (l') are related,
+        If a _PList (l) and a NatList (l') are related,
         then their lengths are related nats. *)
-    (l : NPNatList) (l' : NatList) (lR : rel R_NatList l l') :
-    (* rel R_NatList l l' === plist_to_natlist l = l' *)
-    natR (npnlength l) (nlength l') :=
+    (l : _PList) (l' : NatList) (lR : rel R_NatList l l') :
+    (* rel R_NatList l l' === plist_2_nlist l = l' *)
+    natR (_plength l) (nlength l') :=
     map_in_R_nat
-        (eq_trans (npnlength_eq_nlength l) (ap nlength lR)). *)
+        (eq_trans (_plength_eq_nlength l) (ap nlength lR)). *)
 
-Lemma R_npnlength
-    (l : NPNatList) (l' : NatList) (lR : rel R_NatList l l') :
-    natR (npnlength l) (nlength l').
+Lemma R__plength
+    (l : _PList) (l' : NatList) (lR : rel R_NatList l l') :
+    natR (_plength l) (nlength l').
 Proof.
-    change (plist_to_natlist l = l') in lR.
-    Show Proof. 
+    change (plist_2_nlist l = l') in lR.
     (* normalize lR's type *)
     apply map_in_R_nat.
-    Show Proof.
-    (* reduce to: npnlength l = nlength l' *)
-    rewrite npnlength_eq_nlength.
-    Show Proof. 
-    (* goal: nlength (plist_to_natlist l) = nlength l' *)
+    (* reduce to: _plength l = nlength l' *)
+    rewrite _plength_eq_nlength.
+    (* goal: nlength (plist_2_nlist l) = nlength l' *)
     rewrite lR.
-    Show Proof.
     (* goal: nlength l' = nlength l' *)        
     reflexivity.
-    Show Proof.
 Defined.
 
-(* Definition R_npnapp
+(* Definition R__papp
     (** In plain English:
         If (l1 ~ l1') and (l2 ~ l2') are two pairs of related lists,
         then their appended lists are also related. *)
-    (l1 : NPNatList) (l1' : NatList) (l1R : rel R_NatList l1 l1')
-    (* l1R : plist_to_natlist l1 = l1' *)
-    (l2 : NPNatList) (l2' : NatList) (l2R : rel R_NatList l2 l2') :
-    (* l2R : plist_to_natlist l2 = l2' *)
-    rel R_NatList (npnapp l1 l2) (napp l1' l2') :=
-    (* goal: plist_to_natlist (npnapp l1 l2) = napp l1' l2' *)
+    (l1 : _PList) (l1' : NatList) (l1R : rel R_NatList l1 l1')
+    (* l1R : plist_2_nlist l1 = l1' *)
+    (l2 : _PList) (l2' : NatList) (l2R : rel R_NatList l2 l2') :
+    (* l2R : plist_2_nlist l2 = l2' *)
+    rel R_NatList (_papp l1 l2) (napp l1' l2') :=
+    (* goal: plist_2_nlist (_papp l1 l2) = napp l1' l2' *)
     eq_trans
-        (plist_to_natlist_app l1 l2)
-        (* step 1: plist_to_natlist (npnapp l1 l2)
-                 = napp (plist_to_natlist l1) (plist_to_natlist l2)      *)
+        (plist_2_nlist_app l1 l2)
+        (* step 1: plist_2_nlist (_papp l1 l2)
+                 = napp (plist_2_nlist l1) (plist_2_nlist l2)      *)
         (eq_trans
-            (ap (fun x => napp x (plist_to_natlist l2)) l1R)
-            (* step 2: napp (plist_to_natlist l1) (plist_to_natlist l2)
-                     = napp l1'                   (plist_to_natlist l2)  *)
+            (ap (fun x => napp x (plist_2_nlist l2)) l1R)
+            (* step 2: napp (plist_2_nlist l1) (plist_2_nlist l2)
+                     = napp l1'                   (plist_2_nlist l2)  *)
             (ap (napp l1') l2R)).
-            (* step 3: napp l1' (plist_to_natlist l2)
+            (* step 3: napp l1' (plist_2_nlist l2)
                      = napp l1' l2'                                      *) *)
 
-Lemma R_npnapp
-    (l1 : NPNatList) (l1' : NatList) (l1R : rel R_NatList l1 l1')
-    (l2 : NPNatList) (l2' : NatList) (l2R : rel R_NatList l2 l2') :
-    rel R_NatList (npnapp l1 l2) (napp l1' l2').
+Lemma R__papp
+    (l1 : _PList) (l1' : NatList) (l1R : rel R_NatList l1 l1')
+    (l2 : _PList) (l2' : NatList) (l2R : rel R_NatList l2 l2') :
+    rel R_NatList (_papp l1 l2) (napp l1' l2').
 Proof.
-    change (plist_to_natlist l1 = l1') in l1R. 
+    change (plist_2_nlist l1 = l1') in l1R. 
     (* normalize hypotheses *)
-    change (plist_to_natlist l2 = l2') in l2R.
+    change (plist_2_nlist l2 = l2') in l2R.
     (* normalize hypotheses *)
-    change (plist_to_natlist (npnapp l1 l2) = napp l1' l2').
+    change (plist_2_nlist (_papp l1 l2) = napp l1' l2').
     (* normalize goal *)
-    rewrite plist_to_natlist_app.
+    rewrite plist_2_nlist_app.
     (* unfold the append conversion *)
     rewrite l1R.
-    (* substitute plist_to_natlist l1 → l1' *)
+    (* substitute plist_2_nlist l1 → l1' *)
     rewrite l2R.
-    (* substitute plist_to_natlist l2 → l2' *)
+    (* substitute plist_2_nlist l2 → l2' *)
     reflexivity.
 Defined.
 
 (*  ── Register in Trocq's database ──────────────────────────────────── *)
 
 Trocq Use R_NatList.        (* relation between the types *)
-Trocq Use R_npnlength.      (* relation between the functions *)
-Trocq Use R_npnapp.         (* relation between the functions *)
+Trocq Use R__plength.      (* relation between the functions *)
+Trocq Use R__papp.         (* relation between the functions *)
 
 Trocq Use Param44_nat.      (* from Trocq *)
 Trocq Use Param_add.        (* from Trocq *)
 
 (*  ── The theorem via Trocq ─────────────────────────────────────────── *)
-Theorem npnlength_npnapp_trocq : forall (l1 l2 : NPNatList),
-    npnlength (npnapp l1 l2) = npnlength l1 + npnlength l2.
+Theorem _plength_papp : forall (l1 l2 : _PList),
+    _plength (_papp l1 l2) = _plength l1 + _plength l2.
 Proof.
     trocq.
     apply nlength_napp.
 Qed.
 
-Print Assumptions npnlength_npnapp_trocq.
+Print Assumptions _plength_papp.
 
-Theorem npnlength_npnapp_comm_trocq : forall (l1 l2 : NPNatList),
-    npnlength (npnapp l1 l2) = npnlength l2 + npnlength l1.
+Theorem _plength_papp_comm : forall (l1 l2 : _PList),
+    _plength (_papp l1 l2) = _plength l2 + _plength l1.
 Proof.
     trocq.
     apply napp_length_comm.
 Qed.
 
-Print Assumptions npnlength_npnapp_comm_trocq.
+Print Assumptions _plength_papp_comm.
 
-Theorem npnapp_assoc_trocq : forall (l1 l2 l3 : NPNatList),
-    npnapp (npnapp l1 l2) l3 = npnapp l1 (npnapp l2 l3).
+Theorem _papp_assoc : forall (l1 l2 l3 : _PList),
+    _papp (_papp l1 l2) l3 = _papp l1 (_papp l2 l3).
 Proof.
     trocq.
     apply napp_assoc.
 Qed.
 
-Print Assumptions npnapp_assoc_trocq.
+Print Assumptions _papp_assoc.
 
 (** EXPL D — Notes about Trocq *)
 
@@ -257,7 +251,7 @@ Print Assumptions npnapp_assoc_trocq.
         Trocq sees functions whose types contain no implicit sort argument.
     *)
 
-    (* Note: "rel R_NatList l l'" is definitionally equal to "natlist_to_plist l = l'".
+    (* Note: "rel R_NatList l l'" is definitionally equal to "nlist_2_plist l = l'".
                 Every relational proof reduces to an equality over the conversion function,
                 which greatly simplifies the reasoning. *)
 
@@ -268,7 +262,7 @@ Print Assumptions npnapp_assoc_trocq.
         prove, registering them lets Trocq reason about the TYPE NatList in general
         (e.g. in induction instances). *)
 
-    (* [NNil ~ nPNil]: natlist_to_plist NNil = nPNil (true by definition). *)
+    (* [NNil ~ nPNil]: nlist_2_plist NNil = nPNil (true by definition). *)
 
     (* [NCons ~ PCons]: given h ~ h' (diagonal relation on nat, [natR h h'])
         and l ~ l' (list relation), we have [NCons h l ~ PCons h' l'].
@@ -287,7 +281,7 @@ Print Assumptions npnapp_assoc_trocq.
         This is the parametric counterpart of "function preserves the relation". 
 
         [nlength ~ plength]:
-        Given l ~ l' (i.e., natlist_to_plist l = l'), prove
+        Given l ~ l' (i.e., nlist_2_plist l = l'), prove
         [natR (nlength l) (plength l')].
 
         Why natR and not =?
@@ -296,7 +290,7 @@ Print Assumptions npnapp_assoc_trocq.
 
         Chain of equalities used:
         nlength l
-            = plength (natlist_to_plist l)   (by nlength_eq_plength)^
+            = plength (nlist_2_plist l)   (by nlength_eq_plength)^
             = plength l'                     (ap plength lR) *)
 
     (* [napp ~ papp]:
@@ -304,9 +298,9 @@ Print Assumptions npnapp_assoc_trocq.
         [rel R_NatList (napp l1 l2) (papp l1' l2')].
 
         Chain used:
-            natlist_to_plist (napp l1 l2)
-            = papp (natlist_to_plist l1) (natlist_to_plist l2)  [natlist_to_plist_app]
-            = papp l1'                   (natlist_to_plist l2)  [ap ... l1R]
+            nlist_2_plist (napp l1 l2)
+            = papp (nlist_2_plist l1) (nlist_2_plist l2)  [nlist_2_plist_app]
+            = papp l1'                   (nlist_2_plist l2)  [ap ... l1R]
             = papp l1'                   l2'                    [ap ... l2R] *)
 
 (*  ── Step (d): Register in Trocq's database ────────────────────────── *)
@@ -328,7 +322,7 @@ Print Assumptions npnapp_assoc_trocq.
 
     Trocq internally performs all the work we did by hand in PART 4
     (building the bridge, invoking nlength_eq_plength,
-    natlist_to_plist_app, etc.) fully automatically. *)
+    nlist_2_plist_app, etc.) fully automatically. *)
 
     (* Print Assumptions nlength_napp_trocq shows the axioms assumed by the proof.
         Univalence is not needed here because the relation between NatList and
