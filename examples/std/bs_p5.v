@@ -169,12 +169,12 @@ Defined.
 
 (*  ── Register in Trocq's database ──────────────────────────────────── *)
 
-Trocq Use R_NatList.        (* relation between the types *)
-Trocq Use R__plength.      (* relation between the functions *)
-Trocq Use R__papp.         (* relation between the functions *)
+Trocq Use R_NatList.    (* relation between the types *)
+Trocq Use R__plength.   (* relation between the functions *)
+Trocq Use R__papp.      (* relation between the functions *)
 
-Trocq Use Param44_nat.      (* from Trocq *)
-Trocq Use Param_add.        (* from Trocq *)
+Trocq Use Param44_nat.  (* from Trocq *)
+Trocq Use Param_add.    (* from Trocq *)
 
 (*  ── The theorem via Trocq ─────────────────────────────────────────── *)
 Theorem _plength_papp : forall (l1 l2 : _PList),
