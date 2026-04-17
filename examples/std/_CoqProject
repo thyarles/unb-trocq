@@ -9,6 +9,7 @@ bs_p2.v
 bs_p3.v
 bs_p4.v
 bs_p5.v
+bs_p6.v
 baby_steps.v
 # flt3_step.v
 # int_to_Zp.v
