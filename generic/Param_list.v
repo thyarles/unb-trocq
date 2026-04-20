@@ -11,19 +11,14 @@
 (*                            * see LICENSE file for the text of the license *)
 (*****************************************************************************)
 
-Require Import ssreflect.
-Require Import Stdlib Hierarchy Param_lemmas.
+From Trocq Require Import Relnm. 
 
 Set Universe Polymorphism.
 Unset Universe Minimization ToSet.
 Set Asymmetric Patterns.
 
-Import HoTTNotations.
-
-Require Import Database.
-From Trocq Require Import Relnm. 
-
 Elpi derive list.
+
 Notation listR := list_R.
 Notation nilR := nil_R.
 Notation consR := cons_R.

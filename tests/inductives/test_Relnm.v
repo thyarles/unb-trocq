@@ -1,15 +1,14 @@
-
-Require Import Database.
-From Trocq Require Import coverage Relnm. 
+From Trocq Require Import Relnm. 
+Require Import coverage.
 
 Elpi derive False.
 Check False_rel44.
 
-Elpi derive Unit.
-Check  Unit_rel44.
+Elpi derive testUnit.
+Check  testUnit_rel44.
 
-Elpi derive Bool.
-Check  Bool_rel44.
+Elpi derive testBool.
+Check  testBool_rel44.
 
 Elpi derive Wrap.
 Check  Wrap_rel44.

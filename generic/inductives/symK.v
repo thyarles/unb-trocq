@@ -7,7 +7,7 @@ From Trocq.Elpi Extra Dependency "inductives/symK.elpi" as symK.
 From Trocq Require Import sym. 
 (* Extra Dependency "algo/elpi/sym.elpi" as sym.  *)
 
-From elpi.apps Require Import derive.legacy derive.param2.
+From elpi.apps Require Import derive derive.param2.
 
 From Trocq Require Export Hierarchy.
 Unset Uniform Inductive Parameters. 

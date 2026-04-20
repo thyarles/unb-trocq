@@ -8,11 +8,11 @@ type subst  param-surgery.
 
 pred rel-mode i:int o:term. 
 % 0 - 4 could be merged for the change on the type parameters, but they have a different conclusion
-rel-mode 0 {{ forall (A B : Type) (AR : A -> B -> Type) (_ : Map1.Has AR) (Rest : Type), Rest }}. % my-map
-rel-mode 1 {{ forall (A B : Type) (AR : A -> B -> Type) (_ : Map2a.Has AR) (Rest : Type), Rest }}. % mR
-rel-mode 2 {{ forall (A B : Type) (AR : A -> B -> Type) (_ : Map2b.Has AR) (Rest : Type), Rest }}. % Rm
-rel-mode 3 {{ forall (A B : Type) (AR : A -> B -> Type) (_ : Map3.Has AR) (Rest : Type), Rest }}. % _
-rel-mode 4 {{ forall (A B : Type) (AR : A -> B -> Type) (_ : Map4.Has AR) (Rest : Type), Rest }}. % mRRmK
+rel-mode 0 {{ forall (A B : Type) (AR : A -> B -> Type) (_ : lib:trocq.map1 AR) (Rest : Type), Rest }}. % my-map
+rel-mode 1 {{ forall (A B : Type) (AR : A -> B -> Type) (_ : lib:trocq.map2a AR) (Rest : Type), Rest }}. % mR
+rel-mode 2 {{ forall (A B : Type) (AR : A -> B -> Type) (_ : lib:trocq.map2b AR) (Rest : Type), Rest }}. % Rm
+rel-mode 3 {{ forall (A B : Type) (AR : A -> B -> Type) (_ : lib:trocq.map3 AR) (Rest : Type), Rest }}. % _
+rel-mode 4 {{ forall (A B : Type) (AR : A -> B -> Type) (_ : lib:trocq.map4 AR) (Rest : Type), Rest }}. % mRRmK
 % 5 - 7 don't require extra assumption, the only changes happen on the conclusion 
 rel-mode 5 {{ fun (A B : Type)=> A -> B -> Type }}. % sym
 rel-mode 6 {{ fun (A B : Type)=> A -> B -> Type }}. % symK
@@ -27,7 +27,7 @@ swap A B ff A B.
 % Reached a sort, return map L = R -> IR.
 pred mk-impl-return i:term, i:term, i:term, i:bool, i:term, o:term.
 mk-impl-return ML MR Rel SwapB ITyTy2 R :- 
-  Map = {{ @eq lp:ITyTy2 lp:ML lp:MR }},
+  Map = {{ lib:@trocq.paths lp:ITyTy2 lp:ML lp:MR }},
   swap Map Rel SwapB First Second,
   R = prod `_` First _\ Second.
 
@@ -95,7 +95,7 @@ mk-mR-type-priv 0 (prod IN1 ITyTy x\ prod IN2 ITyTy2 _) _ _ Rel 4 LRev MR-DB RM-
       coq.mk-app RInMap {std.append L [x,y,iR]} (Rm x y iR),
       MR-DB Ind MapInR,
       coq.mk-app MapInR {std.append L [x,y,(Rm x y iR)]} (MRRM x y iR),
-      (R x y iR) = {{ @eq _ lp:{{MRRM x y iR}} lp:iR }}.
+      (R x y iR) = {{ lib:@trocq.paths _ lp:{{MRRM x y iR}} lp:iR }}.
 mk-mR-type-priv 0 (prod IN1 ITyTy x\ prod IN2 ITyTy2 _) _ _ Rel 5 LRev _ _ _
              (prod IN1 ITyTy x\ prod IN2 ITyTy2 y\ (R x y)) :-
   std.rev LRev L,
@@ -131,7 +131,7 @@ mk-mR-type-priv 0 (prod IN1 ITyTy x\ prod IN2 ITyTy2 _) SymC _ Rel 6 LRev _ _ _
     % sigma NewML NewMR NewRel L\
       coq.mk-app SymC {std.append L [x,y,iR]} (SymR x y iR),
       coq.mk-app SymC {std.append L2 [y,x,(SymR x y iR)]} (SymSym x y iR),
-      (R x y iR) = {{ @eq _ lp:{{SymSym x y iR}} lp:iR }}.
+      (R x y iR) = {{ lib:@trocq.paths _ lp:{{SymSym x y iR}} lp:iR }}.
 % Process two type parameters + 1 relation at a time.
 % Apply these parameters to the LHS of the equation.
 % This branch deals with adding the additional hypothesis in case the input boolean is set.

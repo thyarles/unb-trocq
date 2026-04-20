@@ -1,19 +1,18 @@
 From Trocq Require Import Rm.
-From Trocq Require Import coverage.
-From Trocq Require Import Hierarchy.
+Require Import coverage.
 Unset Uniform Inductive Parameters.
 
 Elpi derive.param2 False.
 Elpi derive.mymap False.
 Elpi derive.Rm False.
 
-Elpi derive.param2 Unit.
-Elpi derive.mymap Unit.
-Elpi derive.Rm Unit.
+Elpi derive.param2 testUnit.
+Elpi derive.mymap testUnit.
+Elpi derive.Rm testUnit.
 
-Elpi derive.param2 Bool.
-Elpi derive.mymap Bool.
-Elpi derive.Rm Bool.
+Elpi derive.param2 testBool.
+Elpi derive.mymap testBool.
+Elpi derive.Rm testBool.
 
 Elpi derive.param2 Wrap.
 Elpi derive.mymap Wrap.

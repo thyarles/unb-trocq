@@ -8,7 +8,7 @@ From Trocq Require Import sym symK.
 Import HoTTNotations.
 (* Extra Dependency "algo/elpi/sym.elpi" as sym.  *)
 
-From elpi.apps Require Import derive.legacy derive.param2.
+From elpi.apps Require Import derive derive.param2.
 
 From Trocq Require Export Hierarchy.
 Unset Uniform Inductive Parameters. 

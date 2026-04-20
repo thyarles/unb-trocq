@@ -92,7 +92,7 @@ mk-pred Curr I ArgNo Pred T P [A1|Args1] [_A2|Args2] [A2Ty|TyArgs2] [_Path|Paths
   Curr < I,
   !,
   J is Curr + 1,
-  coq.mk-app Pred [A1,A1,{{ @eq_refl lp:A2Ty lp:A1}}] NewPred,
+  coq.mk-app Pred [A1,A1,{{ lib:@trocq.idpath lp:A2Ty lp:A1}}] NewPred,
   mk-pred J I ArgNo NewPred T P Args1 Args2 TyArgs2 Paths TyPaths R.
 
 mk-pred I I ArgNo Pred T P [A1|Args1] [_A2|Args2] [_A2Ty|TyArgs2] [_Path|Paths] [_PathTy|TyPaths] R :-
@@ -121,7 +121,7 @@ mk-preds I ArgNo [P|Preds] Args1 Args2 TyArgs2 Paths TyPaths [ fun `t` Ty t\ fun
 pred iter-convs i:list term, i:list term, i:list term, i:list term, i:list term, i:term, o:term.
 iter-convs [] [] [] [] [] End End.
 iter-convs [Ty|Tys] [A1|Args1] [A2|Args2] [Path|Paths] [Pred|Preds] End R :-
-  Conv = {{lib:@elpi.derive.conv}},
+  Conv = {{lib:@trocq.conv}},
   iter-convs Tys Args1 Args2 Paths Preds End P0,
   coq.mk-app Conv [ Ty, A1, A2, Path, Pred, P0] R.
 
@@ -141,9 +141,9 @@ implement-injK 0 0 ArgNo DestNo _ Pred TyParamsR Args1R Args2R TyArgs2R PathsR T
 
   std.nth DestNo Args1 A1,
   std.nth DestNo TyArgs2 Ty,
-  EndArg = {{ @eq_refl lp:Ty lp:A1}},
+  EndArg = {{ lib:@trocq.idpath lp:Ty lp:A1}},
   coq.typecheck EndArg EndTy ok,
-  End = {{@eq_refl lp:EndTy lp:EndArg}}, 
+  End = {{ lib:@trocq.idpath lp:EndTy lp:EndArg}}, 
   iter-convs TyArgs2 Args1 Args2 Paths RPreds End RSkel,
   coq.elaborate-skeleton RSkel _ R ok.
 

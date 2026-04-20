@@ -1,6 +1,5 @@
-Require Import Database.
 From Trocq Require Import map4 mapn.
-From Trocq Require Import coverage.
+Require Import coverage.
 Unset Uniform Inductive Parameters.
 
 Elpi derive False.
@@ -11,11 +10,11 @@ Check False_map2b : Map2b.Has False_R.
 Check False_map3 : Map3.Has False_R.
 Check False_map4 : IsUMap False_R.
 
-Elpi derive Unit.
-Check Unit_map4 : IsUMap Unit_R.
+Elpi derive testUnit.
+Check testUnit_map4 : IsUMap testUnit_R.
 
-Elpi derive Bool.
-Check Bool_map4 : IsUMap Bool_R.
+Elpi derive testBool.
+Check testBool_map4 : IsUMap testBool_R.
 
 Elpi derive Wrap.
 Check Wrap_map4 : IsUMap Wrap_R.

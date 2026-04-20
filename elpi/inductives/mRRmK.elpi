@@ -124,7 +124,7 @@ i:list term, i:list term, i:list term, o:term.
 process-args Ksrc Kdest 0 0 _ _ Goal _ KR _ _ _ R :- 
   coq.mk-app Goal [Ksrc, Kdest, KR] EqTy, 
   whd EqTy [] _ [IRTy,_,IR],
-  R = {{ @eq_refl lp:IRTy lp:IR }}.
+  R = {{ lib:@trocq.idpath lp:IRTy lp:IR }}.
 process-args Ksrc Kdest 0 InitArgs TyArgsNo _ Goal _ KR InjKs _ MRRMKEq R:- 
   coq.mk-app Goal [Ksrc, Kdest, KR] EqTy, 
   %EqTy is the following type ImR i1 i2 (IRm i1 i2 ir) = ir for this specific branch
@@ -134,7 +134,7 @@ process-args Ksrc Kdest 0 InitArgs TyArgsNo _ Goal _ KR InjKs _ MRRMKEq R:-
   invert-eqs Eqs IEqs, 
   std.map MRRMKEq (x\ r\ sigma TMP\ coq.elaborate-skeleton x _ TMP ok, r = TMP) MRRMKElab,
   invert-eqs {std.rev MRRMKElab} IEqs2,
-  End = {{ @eq_refl lp:IRTy lp:IR }},
+  End = {{ lib:@trocq.idpath lp:IRTy lp:IR }},
   coq.mk-app HD [IRTy,{whd1 MRRM},IR] RGoal, % KR a1 a2 ar1[I_Rm] b1 b2 br[I_Rm]
   pierce-goal-injK TyArgsNo 0 InitArgs RGoal IEqs PatsInj LastGoal,
   pierce-goal-mRRmK TyArgsNo 0 InitArgs LastGoal IEqs2 PatsMRRMK,
@@ -249,7 +249,7 @@ implement-mRRmK N (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 a2) ar\
     std.map KTyRs (x\ r\ sigma TMP1\ coq.subst-prod [a1,a2,ar] x TMP1, r = TMP1) (NewKTyRs a1 a2 ar),
     std.map KRs (x\ r\ sigma TMP\ coq.mk-app x [a1,a2,ar] TMP, r = TMP) (NewKRs a1 a2 ar),
 
-    MRRMK = {{ @Trocq.Hierarchy.Map4.R_in_mapK }},
+    MRRMK = pglobal {{:gref lib:trocq.map4.r_in_mapk }} _,
     coq.mk-app MRRMK [a1, a2, ar, am] (MRRMKS a1 a2 ar am),
     coq.typecheck (MRRMKS a1 a2 ar am) _ ok,
     ar-db a1 a2 ar ==>

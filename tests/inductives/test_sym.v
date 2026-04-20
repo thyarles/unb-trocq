@@ -1,15 +1,17 @@
 From elpi Require Import elpi.
-From elpi.apps Require Import derive.param2.
-From Trocq Require Import coverage sym.
+From elpi.apps Require Import derive.legacy derive.param2.
+
+Require Import coverage.
+From Trocq Require Import sym.
 
 Elpi derive.param2 False.
 Elpi derive.sym False.
 
-Elpi derive.param2 Unit.
-Elpi derive.sym Unit.
+Elpi derive.param2 testUnit.
+Elpi derive.sym testUnit.
 
-Elpi derive.param2 Bool.
-Elpi derive.sym Bool.
+Elpi derive.param2 testBool.
+Elpi derive.sym testBool.
 
 Elpi derive.param2 Wrap.
 Elpi derive.sym Wrap.

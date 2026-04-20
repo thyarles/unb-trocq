@@ -6,6 +6,7 @@
 -R ./generic/inductives Trocq
 -R ../elpi/ Trocq.Elpi
 
+HoTTNotations.v
 Common.v
 Hierarchy.v
 HoTT_additions.v

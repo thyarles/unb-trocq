@@ -4,7 +4,7 @@ From Trocq.Elpi Extra Dependency "inductives/common_algo.elpi" as common.
 From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as utils.
 From Trocq.Elpi Extra Dependency "inductives/sym.elpi" as sym.
 
-From elpi.apps Require Import derive.legacy derive.param2.
+From elpi.apps Require Export derive derive.param2 derive.bcongr.
 
 From Trocq Require Export Hierarchy Stdlib.
 Unset Uniform Inductive Parameters. 

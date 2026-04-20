@@ -89,10 +89,14 @@ End Map4.
 
 Register Map0.Has as trocq.map0.
 Register Map1.Has as trocq.map1.
+Register Map1.map as trocq.map1.map.
 Register Map2a.Has as trocq.map2a.
+Register Map2a.map_in_R as trocq.map2a.map_in_r.
 Register Map2b.Has as trocq.map2b.
+Register Map2b.R_in_map as trocq.map2b.r_in_map.
 Register Map3.Has as trocq.map3.
 Register Map4.Has as trocq.map4.
+Register Map4.R_in_mapK as trocq.map4.r_in_mapk.
 Elpi Query lp:{{register-map-classes}}.
 
 Definition sym_rel@{i} {A B : Type@{i}} (R : A -> B -> Type@{i}) := fun b a => R a b.

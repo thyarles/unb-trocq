@@ -43,12 +43,12 @@ implement-relnm N (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 a2) ar\
       implement-relnm M (Bo a1 a2 ar) MapNCov MapMContra Eq_map RsymK CovariantNN ContravariantNN BuildNN NewL (R a1 a2 ar).
 
 pred get-eq-map i:map-class, o:term.
-get-eq-map map0  {{ eq_Map0 }}.
-get-eq-map map1  {{ eq_Map1 }}.
-get-eq-map map2a {{ eq_Map2a }}.
-get-eq-map map2b {{ eq_Map2b }}.
-get-eq-map map3  {{ eq_Map3 }}.
-get-eq-map map4  {{ eq_Map4 }}.
+get-eq-map map0  {{ lib:trocq.eq_map0 }}.
+get-eq-map map1  {{ lib:trocq.eq_map1 }}.
+get-eq-map map2a {{ lib:trocq.eq_map2a }}.
+get-eq-map map2b {{ lib:trocq.eq_map2b }}.
+get-eq-map map3  {{ lib:trocq.eq_map3 }}.
+get-eq-map map4  {{ lib:trocq.eq_map4 }}.
 
 pred generate-relNM i:inductive, i:param-class, o: term, o: term.
 generate-relNM GR (pc N M as PC) ReTy Re :-

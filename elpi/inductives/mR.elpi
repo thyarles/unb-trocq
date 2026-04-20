@@ -144,11 +144,12 @@ implement-mR N TyParamNo (prod A1 A1Ty a1\ prod A2 A2Ty a2\ prod AR (ARTy a1 a2)
   @pi-decl A2 A2Ty a2\
   @pi-decl AR (ARTy a1 a2) ar\
   @pi-decl AM (AMTy a1 a2 ar) am\
-    Map = {{ @Trocq.Hierarchy.Map1.map }},
+    % todo: fix me: universes
+    Map = pglobal {{:gref lib:trocq.map1.map }} _ ,
     coq.mk-app Map [a1,a2,ar,am] (PMapA a1 a2 ar am),
     % insert coercions
     coq.elaborate-skeleton (PMapA a1 a2 ar am) _ (MapA a1 a2 ar am) ok,
-    MR = {{ @Trocq.Hierarchy.Map2a.map_in_R }},
+    MR = pglobal {{:gref lib:trocq.map2a.map_in_r }} _,
     coq.mk-app MR [a1,a2,ar,am] (PMR a1 a2 ar am),
     coq.elaborate-skeleton (PMR a1 a2 ar am) _ (MRA a1 a2 ar am) ok,
     mymap-def A1Ty (MapA a1 a2 ar am) ==>

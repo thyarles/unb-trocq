@@ -4,20 +4,18 @@ From Trocq.Elpi Extra Dependency "inductives/injK.elpi" as injK.
 From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as algo_utils.
 From Trocq Require Export injection_lemmas. 
 
-From elpi Require Import elpi.
 From elpi.apps Require Export derive.bcongr. (* for eq_f register *) 
-(* From Trocq Require Export Rm. *)
 
-From Trocq Require Import Hierarchy.
-(* From Trocq Require Import HoTT_additions Hierarchy. *)
+From Trocq Require Import HoTTNotations Stdlib Hierarchy.
+
 Unset Uniform Inductive Parameters. 
 
 Definition conv (A : Type) (x y : A) (p: x = y) 
-    (P : forall x0 : A, x = x0 -> Prop) (P0 : P x eq_refl) :=
+    (P : forall x0 : A, x = x0 -> Prop) (P0 : P x idpath) :=
   match p as p0 in _ = t return (P t p0)
-   with eq_refl => P0 end.
+   with idpath => P0 end.
 
-Register conv as elpi.derive.conv.
+Register conv as trocq.conv.
 
 Elpi Db derive.injectionsK.db lp:{{
 

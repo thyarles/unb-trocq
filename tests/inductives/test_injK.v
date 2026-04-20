@@ -1,19 +1,18 @@
 From Trocq Require Import injK.
-From Trocq Require Import coverage.
-From Trocq Require Import Hierarchy.
+Require Import coverage.
 Unset Uniform Inductive Parameters.
 
 Elpi derive.projK False.
 Elpi derive.injections False.
 Elpi derive.injK False.
 
-Elpi derive.projK Unit.
-Elpi derive.injections Unit.
-Elpi derive.injK Unit.
+Elpi derive.projK testUnit.
+Elpi derive.injections testUnit.
+Elpi derive.injK testUnit.
 
-Elpi derive.projK Bool.
-Elpi derive.injections Bool.
-Elpi derive.injK Bool.
+Elpi derive.projK testBool.
+Elpi derive.injections testBool.
+Elpi derive.injK testBool.
 
 Elpi derive.projK Wrap.
 Elpi derive.injections Wrap.

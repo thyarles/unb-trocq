@@ -1,21 +1,22 @@
 
 From elpi.apps Require Import derive.param2.
-From Trocq Require Import sym symK RsymK coverage.
+From Trocq Require Import sym symK RsymK.
+Require Import coverage.
 
 Elpi derive.param2 False.
 Elpi derive.sym False.
 Elpi derive.symK False.
 Elpi derive.rsymK False.
 
-Elpi derive.param2 Unit.
-Elpi derive.sym Unit.
-Elpi derive.symK Unit.
-Elpi derive.rsymK Unit.
+Elpi derive.param2 testUnit.
+Elpi derive.sym testUnit.
+Elpi derive.symK testUnit.
+Elpi derive.rsymK testUnit.
 
-Elpi derive.param2 Bool.
-Elpi derive.sym Bool.
-Elpi derive.symK Bool.
-Elpi derive.rsymK Bool.
+Elpi derive.param2 testBool.
+Elpi derive.sym testBool.
+Elpi derive.symK testBool.
+Elpi derive.rsymK testBool.
 
 Elpi derive.param2 Wrap.
 Elpi derive.sym Wrap.

@@ -168,3 +168,10 @@ move=> RR' [m mR Rm RmK]; unshelve eexists m _ _.
 - move=> a' b r /=; rewrite RmK.
   by case: RR' => /= f [/= g ].
 Defined.
+
+Register eq_Map0 as trocq.eq_map0.
+Register eq_Map1 as trocq.eq_map1.
+Register eq_Map2a  as trocq.eq_map2a.
+Register eq_Map2b  as trocq.eq_map2b.
+Register eq_Map3 as trocq.eq_map3.
+Register eq_Map4 as trocq.eq_map4.

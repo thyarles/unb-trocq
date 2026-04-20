@@ -6,12 +6,14 @@ From Trocq.Elpi Extra Dependency "inductives/injection_lemmas.elpi" as injection
 
 From elpi Require Import elpi.
 From elpi.apps Require Export derive.param2 derive.isK.
+(* todo: ask for bool_discr to be defined elsewhere *)
+(* todo: perhaps redefine eq_f *)
 From elpi.apps Require Export derive.bcongr (* for eq_f register *) 
                               derive.eqK (*for bool_discr *)
                               derive.isK. (* for isK db required by discriminate *)
 From Trocq Require Export mymap injection_lemmas. 
 
-From Trocq Require Export Hierarchy.
+From Trocq Require Export Hierarchy Param_lemmas Stdlib.
 Unset Uniform Inductive Parameters. 
 
 Elpi Db derive.mR.db lp:{{
@@ -65,7 +67,4 @@ Elpi Accumulate derive lp:{{
 derivation (indt T) Prefix ff (derive "mR" (derive.mR.main T Prefix) (mR-done T)).
 
 }}.
-
-
-
 

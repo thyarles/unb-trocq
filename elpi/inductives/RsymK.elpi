@@ -17,7 +17,7 @@ implement-rsymK 0 (prod IN1 ITy1 i1\ prod IN2 ITy2 i2\ _) Sym SymK LRev (fun IN1
     (F i1 i2) = {{ lp:FSym lp:i2 lp:i1 }},
     (G i1 i2) = {{ lp:GSym lp:i1 lp:i2 }},
     (FGK i1 i2) = {{ lp:SymKSym lp:i2 lp:i1 }},
-    (R i1 i2) = {{ existT _ lp:{{ (F i1 i2) }} (existT _ lp:{{ (G i1 i2) }} lp:{{ (FGK i1 i2) }}) }}.
+    (R i1 i2) = {{ lib:trocq.exist _ lp:{{ (F i1 i2) }} (lib:trocq.exist _ lp:{{ (G i1 i2) }} lp:{{ (FGK i1 i2) }}) }}.
 implement-rsymK N (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 a2) ar\ (Bo a1 a2 ar)) Sym SymK L 
             (fun AN1 ATy1 a1\ fun AN2 ATy2 a2\ fun ARN (ARTy a1 a2) ar\ (R a1 a2 ar)) :-
   M is N - 1,

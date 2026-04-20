@@ -74,7 +74,7 @@ mk-etas SrcArgs DestArgs TyDest KAppTyArgs REtas :-
 
 pred compose-path i:list term, i:term, i:term o: term.
 compose-path [] End _ End.
-compose-path [Argk|Args] End ITy {{ @eq_trans lp:ITy _ _ _ lp:Argk lp:R }} :-
+compose-path [Argk|Args] End ITy {{ lib:@trocq.concat lp:ITy _ _ _ lp:Argk lp:R }} :-
   compose-path Args End ITy R.
 
 % List of src args, list of dest args and their types, K applied to type parameters, equalities src = dest, type of K TyParam Dest.
@@ -83,7 +83,7 @@ pred mk-chain i:list term, i:list term, i:list term, i:term, i:list term, i:term
 mk-chain SrcArgs DestArgs DestArgsTy K Eqs ITyTy RHS R :-
   mk-etas SrcArgs DestArgs DestArgsTy K REtas,
   mk-aps-etas DestArgsTy ITyTy REtas SrcArgs DestArgs Eqs Raps,
-  compose-path Raps {{ @eq_refl lp:ITyTy lp:RHS }} ITyTy RSkel,
+  compose-path Raps {{ lib:@trocq.idpath lp:ITyTy lp:RHS }} ITyTy RSkel,
   coq.elaborate-skeleton RSkel _ R ok.
 
 % pred name-ij i:string, i:int, i:int, i:inductive, i:constructor, i:list term, i: constructor -> int -> constant -> prop, o:list prop.
@@ -164,7 +164,7 @@ iota-step (match A _ L) C X XC :- whd-indc A GR KA, !,
 
 pred invert-eqs i:list term, o:list term.
 invert-eqs Eqs IEqs :-
-  std.map Eqs (x\r\ sigma Skel TMP Err\ Skel = {{ @eq_sym _ _ _ lp:x}}, 
+  std.map Eqs (x\r\ sigma Skel TMP Err\ Skel = {{ lib:@trocq.inverse _ _ _ lp:x}}, 
               coq.elaborate-skeleton Skel _ TMP ok, 
               r = TMP
               ) IEqs.
@@ -174,7 +174,7 @@ pred rewrite-with i:list term, i:list term, i:term, o:term.
 rewrite-with [] [] End End. 
 rewrite-with [Eq|Eqs] [Pat|Pats] End R :-
   (pi rest\
-    (T rest) = {{ @eq_ind _ _ lp:Pat lp:rest _ lp:Eq }}),
+    (T rest) = {{ lib:@trocq.paths_ind _ _ lp:Pat lp:rest _ lp:Eq }}),
   rewrite-with Eqs Pats End RestSkel,
   coq.elaborate-skeleton RestSkel _ Rest ok,
   R = (T Rest).

@@ -12,6 +12,13 @@
 (*****************************************************************************)
 Require Import ssreflect.
 From Trocq Require Import HoTTNotations.
+From elpi Require Export elpi.
+
+Register idpath as trocq.idpath.
+Register concat as trocq.concat. 
+Register inverse as trocq.inverse.
+Register eq_ind as trocq.paths_ind.
+Register existT as trocq.exist.
 
 Set Universe Polymorphism.
 Unset Universe Minimization ToSet.

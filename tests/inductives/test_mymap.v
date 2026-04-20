@@ -1,12 +1,10 @@
-From Trocq Require Import coverage.
-From elpi Require Import elpi.
 From Trocq Require Import mymap.
-From Trocq Require Import Hierarchy.
+Require Import coverage.
 Unset Uniform Inductive Parameters.
 
 Elpi derive.mymap False.
-Elpi derive.mymap Unit.
-Elpi derive.mymap Bool.
+Elpi derive.mymap testUnit.
+Elpi derive.mymap testBool.
 Elpi derive.mymap Wrap.
 Elpi derive.mymap WrapMore.
 Elpi derive.mymap Box.

@@ -13,7 +13,14 @@
 
 From HoTT Require Export HoTT.
 From Trocq Require Export HoTT_additions.
+From elpi Require Export elpi.
 
 Module HoTTNotations.
   (* Stub for compatibility with stdlib version  *)
 End HoTTNotations.
+
+Register concat as trocq.concat.
+Register idpath as trocq.idpath.
+Register inverse as trocq.inverse.
+Register paths_ind as trocq.paths_ind.
+Register exist as trocq.exist.

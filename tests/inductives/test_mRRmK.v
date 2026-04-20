@@ -1,6 +1,5 @@
 From Trocq Require Import mR Rm injK mRRmK.
-From Trocq Require Import coverage.
-From Trocq Require Import Hierarchy.
+Require Import coverage.
 Unset Uniform Inductive Parameters.
 
 Elpi derive.param2 False.
@@ -13,25 +12,25 @@ Elpi derive.Rm False.
 Elpi derive.injK False.
 Elpi derive.mRRmK False.
 
-Elpi derive.param2 Unit.
-Elpi derive.mymap Unit.
-Elpi derive.projK Unit.
-Elpi derive.injections Unit.
-Elpi derive.isK Unit.
-Elpi derive.mR Unit.
-Elpi derive.Rm Unit.
-Elpi derive.injK Unit.
-Elpi derive.mRRmK Unit.
+Elpi derive.param2 testUnit.
+Elpi derive.mymap testUnit.
+Elpi derive.projK testUnit.
+Elpi derive.injections testUnit.
+Elpi derive.isK testUnit.
+Elpi derive.mR testUnit.
+Elpi derive.Rm testUnit.
+Elpi derive.injK testUnit.
+Elpi derive.mRRmK testUnit.
 
-Elpi derive.param2 Bool.
-Elpi derive.mymap Bool.
-Elpi derive.projK Bool.
-Elpi derive.injections Bool.
-Elpi derive.isK Bool.
-Elpi derive.mR Bool.
-Elpi derive.Rm Bool.
-Elpi derive.injK Bool.
-Elpi derive.mRRmK Bool.
+Elpi derive.param2 testBool.
+Elpi derive.mymap testBool.
+Elpi derive.projK testBool.
+Elpi derive.injections testBool.
+Elpi derive.isK testBool.
+Elpi derive.mR testBool.
+Elpi derive.Rm testBool.
+Elpi derive.injK testBool.
+Elpi derive.mRRmK testBool.
 
 Elpi derive.param2 Wrap.
 Elpi derive.mymap Wrap.

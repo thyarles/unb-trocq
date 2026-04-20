@@ -38,7 +38,7 @@ process-args KsS KsD KR 0 ArgNo TyArgsNo _ RevEqs Goal _ R:-
   coq.mk-app KRHD KRArgs RedLHS,
   coq.mk-app HD [IRTy,RedLHS,IR] StartingGoal,
   pierce-goal-symK TyArgsNo 0 ArgNo StartingGoal IEqs PatsSym _,
-  End = {{ @eq_refl lp:IRTy lp:IR }},
+  End = {{ lib:@trocq.idpath lp:IRTy lp:IR }},
   rewrite-with IEqs PatsSym End R.
 
 process-args KsS KsD KR N O TyArgsNo (prod AN1 A1Ty a1\ prod AN2 A2Ty a2\ prod ARN (ARTy a1 a2) ar\ (Bo a1 a2 ar)) Eqs Goal ITyTy 
@@ -129,7 +129,7 @@ implement-symK N TyParamNo (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a
     std.map KTys (x\ r\ sigma TMP\ coq.subst-prod [a2] x TMP, r = TMP) (NewKTys a2),
     std.map KTyRs (x\ r\ sigma TMP1\ coq.subst-prod [a1,a2,(RelAR a1 a2 ar)] x TMP1, r = TMP1) (NewKTyRs a1 a2 ar),
 
-    (SymFun a1 a2 ar) = {{ fun (a1 : lp:{{a1}}) (a2 : lp:{{a2}}) (ar : (lp:{{ar}} a1 a2))=> @eq_refl (lp:{{ar}} a1 a2) ar }},
+    (SymFun a1 a2 ar) = {{ fun (a1 : lp:{{a1}}) (a2 : lp:{{a2}}) (ar : (lp:{{ar}} a1 a2))=> lib:@trocq.idpath (lp:{{ar}} a1 a2) ar }},
     symK-db a2 (SymFun a1 a2 ar) ==>
     implement-symK M TyParamNo (Bo a1 a2 ar) (NewKsS a1) (NewKsD a2) (NewKRs a1 a2 ar) (NewKTys a2) (NewKTyRs a1 a2 ar) (NewPred a1 a2 ar) (NewRInd a1 a2 ar) (R a1 a2 ar).
 

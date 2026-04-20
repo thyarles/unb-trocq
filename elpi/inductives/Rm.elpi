@@ -38,7 +38,7 @@ pred process-args i:term, i:term, i:int, i:int, i:term, i:term, i:list term, i:l
 process-args Ksrc Kdest 0 TyArgsNo _ Goal TySrc TyDest ITyTy R:- 
   coq.mk-app Goal [Ksrc, Kdest, {{ Type }}] EqTy, %discards the relation between Ksrc and Kdest, we want the equality.
   whd EqTy [] {{lib:@elpi.eq}} [ITyTy,MapA,B],
-  whd MapA [] (global (indc _)) TySrcMappedArgs,
+  whd MapA [] _ TySrcMappedArgs,
   whd B [] KDest TyDestArgs,
   std.drop TyArgsNo TySrcMappedArgs SrcArgs,
   std.drop TyArgsNo TyDestArgs DestArgs,
@@ -84,7 +84,7 @@ pred implement-Rm i:int, i:int, i:term, i:list term, i:list term, i:list term, i
 implement-Rm 0 _TyParamNo (prod IN1 ITy1 i1\ prod IN2 ITy2 i2\ prod ARN (ARTy i1 i2) ar\ (Bo i1 i2 ar)) KsS KsD KTys KTyRs Pred RInd
             (fix `f` 2 RT f\ fun IN1 ITy1 i1\ fun IN2 ITy2 i2\ fun ARN (ARTy i1 i2) ar\ (R f i1 i2 ar)) :-
   coq.safe-dest-app ITy1 Ind _, 
-  Ind = (global (indt GR)),
+  coq.env.global (indt GR) Ind,
   coq.env.recursive? GR, !,
   RT = (prod IN1 ITy1 i1\ prod IN2 ITy2 i2\ prod ARN (ARTy i1 i2) ar\ (Bo i1 i2 ar)),
   coq.mk-app RInd [Pred] RIndP,
@@ -121,9 +121,9 @@ implement-Rm N TyParamNo (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 
     std.map KsD (x\ r\ sigma TMP\ coq.mk-app x [a2] TMP, r = TMP) (NewKsD a2),
     std.map KTys (x\ r\ sigma TMP\ coq.subst-prod [a2] x TMP, r = TMP) (NewKTys a2),
     std.map KTyRs (x\ r\ sigma TMP1\ coq.subst-prod [a1,a2,ar] x TMP1, r = TMP1) (NewKTyRs a1 a2 ar),
-    Rm = {{ @Trocq.Hierarchy.Map2b.R_in_map }},
+    %todo: fixme use of universes
+    coq.env.global {{:gref lib:trocq.map2b.r_in_map }} Rm,
     coq.mk-app Rm [a1, a2, ar, am] (RMS a1 a2 ar am),
-    % coq.elaborate-skeleton (RMS a1 a2 ar) _ (RM a1 a2 ar) ok,
     ar-db a1 a2 ar ==>
     rm-db a1 (RMS a1 a2 ar am) ==>
     implement-Rm M TyParamNo (Bo a1 a2 ar am) (NewKsS a1) (NewKsD a2) (NewKTys a2) (NewKTyRs a1 a2 ar) (NewPred a1 a2 ar am) (NewRInd a1 a2 ar) (R a1 a2 ar am).

@@ -1,19 +1,21 @@
+Unset Universe Polymorphism.
+
 Inductive False : Set :=.
 
-Inductive Unit : Set := 
-| TT : Unit.
+Inductive testUnit : Set := 
+| TT : testUnit.
 
-Inductive Bool : Set := 
+Inductive testBool : Set := 
 | Falseb 
 | Trueb.
 
 Inductive Wrap : Set :=
-| KWrap1 : Unit -> Wrap.
+| KWrap1 : testUnit -> Wrap.
 
 Inductive WrapMore : Set :=
-| KWrap : Unit -> Bool -> WrapMore
+| KWrap : testUnit -> testBool -> WrapMore
 | KWrapWrap : Wrap -> WrapMore
-| F : Unit -> Unit -> Unit -> WrapMore.
+| F : testUnit -> testUnit -> testUnit -> WrapMore.
 
 Inductive Nat : Set :=
 | O' 
