@@ -58,6 +58,7 @@ style: |
 ---
 
 <!-- _class: title -->
+<!-- _paginate: false -->
 
 # ROI Analysis: Proof Transfer with Trocq
 
@@ -86,6 +87,7 @@ We want to measure the **Return on Investment** of using Trocq to transfer theor
 ---
 
 <!-- _class: chapter -->
+<!-- _paginate: false -->
 
 # First Try
 
@@ -179,6 +181,7 @@ Lemma plist_2_nlist_app : forall (l1 l2 : _PList),
 ---
 
 <!-- _class: chapter -->
+<!-- _paginate: false -->
 
 # Second Try
 
@@ -284,12 +287,13 @@ $$\text{ROI}(n) = \frac{C_{\text{manual}}(n) - C_{\text{trocq}}(n)}{C_{\text{tro
 
 For $P_{\text{manual}} = 7$: ROI $\to 2.5$ — a bounded **2.5× return**.
 
-![height:420px](_graphs/graph_02_const.png)
+![height:400px](_graphs/graph_02_const.png)
 
 
 ---
 
 <!-- _class: chapter -->
+<!-- _paginate: false -->
 
 # Third Try
 
