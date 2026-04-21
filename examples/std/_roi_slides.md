@@ -156,12 +156,11 @@ The curve starts at $-1$ (Trocq costs 2× at $n=0$), crosses zero at $n \approx 
 But `bs_p4.v` shows the isomorphisms and bridge lemmas are written **exactly once**:
 
 ```coq
-(* FIXED SETUP in bs_p4.v — written once, not per theorem *)
-Lemma plist_natlist_iso  : natlist_to_plist (plist_to_natlist l) = l.
-Lemma natlist_plist_iso  : plist_to_natlist (natlist_to_plist l) = l.
-Lemma plength_eq_nlength : nlength (plist_to_natlist l) = plength l.
-Lemma plist_to_natlist_app : plist_to_natlist (papp l1 l2) =
-    napp (plist_to_natlist l1) (plist_to_natlist l2).
+(* bs_p4.v — written once, not per theorem *)
+Lemma plist_natlist_iso    : natlist_to_plist (plist_to_natlist l) = l.
+Lemma natlist_plist_iso    : plist_to_natlist (natlist_to_plist l) = l.
+Lemma plength_eq_nlength   : nlength (plist_to_natlist l) = plength l.
+Lemma plist_to_natlist_app : plist_to_natlist (papp l1 l2) = napp (plist_to_natlist l1) (plist_to_natlist l2).
 ```
 
 And `bs_p5.v` shows Trocq **also requires** those same bridge lemmas:
@@ -169,11 +168,10 @@ And `bs_p5.v` shows Trocq **also requires** those same bridge lemmas:
 ```coq
 (* bs_p5.v — Trocq still needs the same bridges *)
 Lemma _plength_eq_nlength : forall (l : _PList),
-    _plength l = nlength (plist_2_nlist l).   (* ← identical to manual *)
+    _plength l = nlength (plist_2_nlist l).           (* identical to manual *)
 
 Lemma plist_2_nlist_app : forall (l1 l2 : _PList),
-    plist_2_nlist (_papp l1 l2) =
-    napp (plist_2_nlist l1) (plist_2_nlist l2).
+    plist_2_nlist (_papp l1 l2) = napp (plist_2_nlist l1) (plist_2_nlist l2).
 ```
 
 **Conclusion:** both the manual fixed cost and the Trocq base cost were misrepresented.
@@ -204,13 +202,14 @@ Lemma plist_to_natlist_app  : plist_to_natlist (papp l1 l2) = napp (...) (...).
 Theorem plength_papp_via_natlist : forall (l1 l2 : PList nat),
     plength (papp l1 l2) = plength l1 + plength l2.
 Proof.
-    intros l1 l2.                                           (* step 1 *)
-    rewrite <- (plength_eq_nlength (papp l1 l2)).           (* step 2 *)
-    rewrite plist_to_natlist_app.                           (* step 3 *)
-    rewrite nlength_napp.                                   (* step 4 *)
-    rewrite plength_eq_nlength. rewrite plength_eq_nlength. (* 5–6 *)
-    reflexivity.                                            (* step 7 *)
-Qed.  (* ~7 tactic steps per theorem *)
+    intros l1 l2.                                  (* 1 *)
+    rewrite <- (plength_eq_nlength (papp l1 l2)).  (* 2 *)
+    rewrite plist_to_natlist_app.                  (* 3 *)
+    rewrite nlength_napp.                          (* 4 *)
+    rewrite plength_eq_nlength.                    (* 5 *)
+    rewrite plength_eq_nlength.                    (* 6 *)
+    reflexivity.                                   (* 7 *)
+Qed.
 ```
 
 ---
@@ -224,22 +223,28 @@ Trocq requires the **same bridge lemmas** plus **relational wrappers** for each 
 Lemma _plength_eq_nlength : ...   Lemma plist_2_nlist_app : ...
 
 (* ── TROCQ OVERHEAD — one R__ lemma per function + registrations ───── *)
-Lemma R__plength                                  (* relational witness for plength *)
+Lemma R__plength (* relational witness for plength *)
     (l : _PList) (l' : NatList) (lR : rel R_NatList l l') :
-    natR (_plength l) (nlength l').               (* ~5 extra tactic steps *)
+    natR (_plength l) (nlength l').               
+    (* ~5 extra tactic steps *)
 
-Lemma R__papp                             (* relational witness for papp *)
+Lemma R__papp (* relational witness for papp *)
     (l1 : _PList) (l1' : NatList) (l1R : rel R_NatList l1 l1')
     (l2 : _PList) (l2' : NatList) (l2R : rel R_NatList l2 l2') :
-    rel R_NatList (_papp l1 l2) (napp l1' l2').   (* ~7 extra tactic steps *)
+    rel R_NatList (_papp l1 l2) (napp l1' l2').
+    (* ~7 extra tactic steps *)
 
+(* 5 registrations *)
 Trocq Use R_NatList.    Trocq Use R__plength.   Trocq Use R__papp.
-Trocq Use Param44_nat.  Trocq Use Param_add.      (* 5 registrations *)
+Trocq Use Param44_nat.  Trocq Use Param_add.      
 
 (* ── PER-THEOREM COST — just 2 tactics ─────────────────────────────── *)
 Theorem _plength_papp : forall (l1 l2 : _PList),
-    _plength (_papp l1 l2) = _plength l1 + _plength l2.
-Proof.  trocq.  apply nlength_napp.  Qed.
+  _plength (_papp l1 l2) = _plength l1 + _plength l2.
+Proof.
+  trocq.
+  apply nlength_napp.
+Qed.
 ```
 
 ---
@@ -260,7 +265,7 @@ $$C_{\text{manual}}(n, f) = C_{\text{base}}(f) + n \cdot P_{\text{manual}}$$
 
 $$C_{\text{trocq}}(n, f) = C_{\text{base}}(f) + \underbrace{f \cdot W_{\text{trocq}}}_{\text{wrapper penalty}} + n \cdot 2$$
 
-| Factor | Value (bs_p5, $f=2$) |
+| Factor | Value (`bs_p5.v`, $f=2$) |
 |--------|----------------------|
 | $C_{\text{base}}$ | ≈ 12 shared tactic steps |
 | $f \cdot W_{\text{trocq}}$ | ≈ 22 (R__ wrappers + Trocq Use) |
@@ -307,21 +312,21 @@ Adding `rev` reveals the core asymmetry: manual cost **scales with theorem compl
 
 <div class="cols">
 
-**Manual — 9 tactic steps:**
+**Manual — 11 tactic steps:**
 ```coq
 Theorem _prev_papp_manual : _prev (_papp l1 l2) = _papp (_prev l2) (_prev l1).
 Proof.
-  intros l1 l2.
-  rewrite <- (plist_nlist_iso (_prev (_papp l1 l2))).         (* 1 *)
-  rewrite <- (plist_nlist_iso (_papp (_prev l2) (_prev l1))). (* 2 *)
-  apply f_equal.                                              (* 3 *)
-  rewrite plist_2_nlist_rev.                                  (* 4 *)
-  rewrite plist_2_nlist_app.                                  (* 5 *)
-  rewrite nrev_napp.                                          (* 6 *)
-  rewrite plist_2_nlist_app.                                  (* 7 *)
-  rewrite plist_2_nlist_rev.                                  (* 8 *)
-  rewrite plist_2_nlist_rev.                                  (* 9 *)
-  reflexivity.
+  intros l1 l2.                                               (*  1 *)
+  rewrite <- (plist_nlist_iso (_prev (_papp l1 l2))).         (*  2 *)
+  rewrite <- (plist_nlist_iso (_papp (_prev l2) (_prev l1))). (*  3 *)
+  apply f_equal.                                              (*  4 *)
+  rewrite plist_2_nlist_rev.                                  (*  5 *)
+  rewrite plist_2_nlist_app.                                  (*  6 *)
+  rewrite nrev_napp.                                          (*  7 *)
+  rewrite plist_2_nlist_app.                                  (*  8 *)
+  rewrite plist_2_nlist_rev.                                  (*  9 *)
+  rewrite plist_2_nlist_rev.                                  (* 10 *)
+  reflexivity.                                                (* 11 *)
 Qed.
 ```
 
@@ -337,8 +342,7 @@ Qed.
 </div>
 
 The theorem has **5 function applications** (`_prev` ×3, `_papp` ×2).
-
-Every application adds ~1.5 manual tactics; Trocq is unaffected by this complexity.
+So every application adds $k=2.2$ (11 steps by 5 applications) manual tactics, but Trocq is unaffected by this complexity.
 
 ---
 
@@ -356,13 +360,13 @@ $$C_{\text{trocq}}(n, f) = C_{\text{base}}(f) + f \cdot W_{\text{trocq}} + n \cd
 
 > $c_{\text{avg}}$ **does not appear** in the Trocq formula — Trocq is complexity-blind.
 
-**Ultimate ROI:**
+**ROI:**
 
 $$\text{ROI}(n, f, c_{\text{avg}}) = \frac{n(k \cdot c_{\text{avg}} - 2) - f \cdot W_{\text{trocq}}}{C_{\text{base}}(f) + f \cdot W_{\text{trocq}} + 2n}$$
 
-**From `bs_p6.v`** ($f=1$, $k=1.5$, $c_{\text{avg}}=5$, manual bridge costs 5, Trocq setup costs 11):
+**From `bs_p6.v`** ($f=1$, $k=2.2$, $c_{\text{avg}}=5$, manual bridge costs 5, Trocq setup costs 11):
 
-$$C_M = 18 + 9n \qquad C_T = 24 + 2n \qquad n^* = \frac{6}{7} \approx 0.86$$
+$$C_M = 18 + 11n \qquad C_T = 24 + 2n \qquad n^* = \frac{2}{3} \approx 0.67$$
 
 Trocq is cheaper from the **very first theorem**.
 
@@ -386,15 +390,19 @@ Trocq is cheaper from the **very first theorem**.
 
     As $n \to \infty$, fixed costs become negligible. ROI converges to     $\text{ROI}_\infty = \frac{k \cdot c_{\text{avg}} - 2}{2}$.
 
-    For $k = 1.5$, $c_{\text{avg}} = 6$: $\text{ROI}_\infty = \frac{9 - 2}{2} = 3.5$.
+    <!-- 
+    With $k = 2.2$ and $c_{\text{avg}} = 6$:
+    $$\text{ROI}_\infty = \frac{k \cdot c_{\text{avg}} - 2}{2} = \frac{2.2 \times 6 - 2}{2} = \frac{13.2 - 2}{2} = \frac{11.2}{2} = 5.6$$
+    -->
+    For $k = 2.2$, $c_{\text{avg}} = 6$: $\text{ROI}_\infty = \frac{13.2 - 2}{2} = 5.6$.
 
-    Trocq returns **350% on its setup investment** — i.e., manual becomes 4.5× more expensive.
+    Trocq returns **560% on its setup investment** — i.e., manual becomes 6.6× more expensive.
 
 ---
 
 ## Third Try — Break-Even Shifts with Complexity
 
-![width:780px](_graphs/graph_04_family.png)
+![h:440px](_graphs/graph_04_family.png)
 
 Each dashed curve is $C_M(n, c_{\text{avg}})$ for a different complexity. The solid Trocq line is fixed. Dots mark break-even points — they shift left as theorems grow more complex.
 
