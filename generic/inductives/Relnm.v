@@ -5,7 +5,6 @@ From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as utils.
 From Trocq.Elpi Extra Dependency "inductives/relnm.elpi" as relnm.
 From Trocq Require Import sym symK RsymK Param_lemmas mapn map4. 
 Import HoTTNotations.
-(* Extra Dependency "algo/elpi/sym.elpi" as sym.  *)
 
 From elpi.apps Require Import derive derive.param2.
 

@@ -5,7 +5,6 @@ From Trocq.Elpi Extra Dependency "inductives/common_algo.elpi" as common.
 From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as utils. 
 From Trocq.Elpi Extra Dependency "inductives/symK.elpi" as symK.
 From Trocq Require Import sym. 
-(* Extra Dependency "algo/elpi/sym.elpi" as sym.  *)
 
 From elpi.apps Require Import derive derive.param2.
 

@@ -6,11 +6,7 @@ From Trocq Require Export mymap injK mR Rm.
 
 From elpi Require Import elpi.
 From elpi.apps Require Export derive.param2.
-(* From elpi.apps Require Import derive.bcongr. for eq_f register  *)
-(* From Trocq Require Import mymap. *)
-(* From elpi.apps Require Import derive.induction. *)
 From Trocq Require Import Hierarchy.
-(* From Trocq Require Import HoTT_additions Hierarchy. *)
 Unset Uniform Inductive Parameters. 
 
 Elpi Db derive.mRRmK.db lp:{{

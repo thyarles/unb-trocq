@@ -24,3 +24,4 @@ Register idpath as trocq.idpath.
 Register inverse as trocq.inverse.
 Register paths_ind as trocq.paths_ind.
 Register exist as trocq.exist.
+Register ap as trocq.ap.

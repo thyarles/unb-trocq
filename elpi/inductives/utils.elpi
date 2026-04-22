@@ -43,7 +43,7 @@ count-args N T R :-
 pred mk-aps-etas i:list term, i:term, i:list term, i:list term, i:list term, i:list term, o:list term.
 mk-aps-etas [] _ [] [] [] [] [].
 mk-aps-etas [DTy|DestTys] ITyTy [Eta|Etas] [SA|SrcArgs] [DA|DestArgs] [Eq|Eqs] [RE | RS] :-
-  Ap = {{ eq_f }},
+  Ap = {{ lib:@trocq.ap }},
   coq.mk-app Ap [DTy,ITyTy,Eta,SA,DA,Eq] R,
   coq.elaborate-skeleton R _ RE ok,
   mk-aps-etas DestTys ITyTy Etas SrcArgs DestArgs Eqs RS.

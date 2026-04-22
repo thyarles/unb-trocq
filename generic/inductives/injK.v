@@ -4,9 +4,7 @@ From Trocq.Elpi Extra Dependency "inductives/injK.elpi" as injK.
 From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as algo_utils.
 From Trocq Require Export injection_lemmas. 
 
-From elpi.apps Require Export derive.bcongr. (* for eq_f register *) 
-
-From Trocq Require Import HoTTNotations Stdlib Hierarchy.
+From Trocq Require Import DeriveLib HoTTNotations Stdlib Hierarchy.
 
 Unset Uniform Inductive Parameters. 
 

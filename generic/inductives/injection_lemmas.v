@@ -4,11 +4,9 @@ From elpi.apps.derive.elpi Extra Dependency "derive_synterp_hook.elpi" as derive
 From Trocq.Elpi Extra Dependency "inductives/injection_lemmas.elpi" as injections.
 From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as algo_utils.
 
-From elpi.apps Require Import derive.
-From elpi.apps Require Export derive.bcongr. (* for eq_f register  *)
+From elpi.apps Require Export derive.
 From elpi.apps Require Export derive.projK. 
-
-From Trocq Require Export Stdlib.
+From Trocq Require Export DeriveLib.
 
 Unset Uniform Inductive Parameters. 
 Elpi Db derive.injections.db lp:{{

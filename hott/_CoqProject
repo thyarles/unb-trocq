@@ -18,6 +18,7 @@ Param_forall.v
 Param_lemmas.v
 Stdlib.v
 
+generic/inductives/DeriveLib.v
 generic/inductives/sym.v
 generic/inductives/symK.v
 generic/inductives/RsymK.v

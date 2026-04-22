@@ -36,6 +36,7 @@ Definition inv_V {A : Type} {x y : A} (p : x = y) : (p^)^ = p :=
 
 Definition ap := f_equal.
 Arguments ap {A B} f {x y}.
+Register ap as trocq.ap.
 
 (* relation for forall *)
 Monomorphic Axiom Funext : Prop.

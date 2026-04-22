@@ -20,6 +20,7 @@ Inductive EmptyR : Empty -> Empty -> Type :=.
 (* param2 does not handle universe polymorphic inductives.
    Hence we have define EmptyR before seting Universe Polymorphism. *)
 Elpi derive.param2.register "False" "EmptyR".
+Elpi derive.param2.register "Empty" "EmptyR".
 
 Set Universe Polymorphism.
 Unset Universe Minimization ToSet.
@@ -27,3 +28,4 @@ Unset Universe Minimization ToSet.
 Elpi derive Empty.
 Definition Param01_Empty := False_rel01.
 Definition Param10_Empty := False_rel10.
+

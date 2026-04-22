@@ -21,6 +21,7 @@ Return the processed Types */
 % Ret is discarded and replaced by Left = Right
 pred craft-eq i:int, i:int, i:int, i:int, i:term, i:term, i:term, i:term, i:term, i:term, i:term, o:term.
 craft-eq 0 0 _ _ _ EqTy Left Right ConclEqTy ConclL ConclR R:-  !,
+  %todo use trocq.idpath
   coq.mk-app {{lib:@elpi.eq}} [EqTy, Left, Right] AETy,
   coq.mk-app {{lib:@elpi.eq}} [ConclEqTy, ConclL, ConclR] C, 
   R = {{ forall (e : lp:AETy), lp:C }}. 
@@ -73,7 +74,7 @@ implement-K-injector-J 0 J 0 TyParam (prod E Ty _) R :- !,
   @pi-decl E Ty e\
     sigma GR TyArgs GRK KArgs A B\
     ltac.injection? Ty GR TyArgs GRK KArgs A B,
-    ltac.injection.arg-i I J {{lib:@elpi.derive.eq_f}} GR TyArgs TyParam GRK KArgs A B e [(PL e)].
+    ltac.injection.arg-i I J {{lib:@trocq.ap }} GR TyArgs TyParam GRK KArgs A B e [(PL e)].
 
 implement-K-injector-J 0 J ArgNo TyParam (prod ArgN1 ArgTy a\ (prod ArgN2 ArgTy b\ (Bo a b))) (fun ArgN1 ArgTy a\ fun ArgN2 ArgTy b\ (R a b) ) :- !,
   ArgNon is ArgNo - 1,

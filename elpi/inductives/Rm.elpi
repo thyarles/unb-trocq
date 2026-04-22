@@ -37,6 +37,7 @@ mk-equalities [STy| SrcTys] ITyTy [DA|Dargs] [R|RS] :-
 pred process-args i:term, i:term, i:int, i:int, i:term, i:term, i:list term, i:list term, i:term, o:term.
 process-args Ksrc Kdest 0 TyArgsNo _ Goal TySrc TyDest ITyTy R:- 
   coq.mk-app Goal [Ksrc, Kdest, {{ Type }}] EqTy, %discards the relation between Ksrc and Kdest, we want the equality.
+  % todo: change elpi.eq for trocq.idpath
   whd EqTy [] {{lib:@elpi.eq}} [ITyTy,MapA,B],
   whd MapA [] _ TySrcMappedArgs,
   whd B [] KDest TyDestArgs,

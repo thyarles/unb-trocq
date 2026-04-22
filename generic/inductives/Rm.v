@@ -7,7 +7,6 @@ From elpi Require Import elpi.
 From Trocq Require Export Hierarchy Param_lemmas mymap.
 
 From elpi.apps Require Export derive derive.param2.
-From elpi.apps Require Export derive.bcongr. (* for eq_f register *) 
 
 Unset Uniform Inductive Parameters. 
 Elpi Db derive.Rm.db lp:{{
