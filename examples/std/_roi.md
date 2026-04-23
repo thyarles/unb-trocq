@@ -46,7 +46,7 @@ $$\text{ROI}(n) = \frac{C_{\text{manual}}(n) - C_{\text{trocq}}(n)}{C_{\text{tro
 - $\text{ROI} = 0$ at $n \approx 4$: break-even
 - $\text{ROI} \to 2.5$ as $n \to \infty$: Trocq saves ~2.5× the cost of using it
 
-## 4. Recommended Visual Representation
+## 4. Visual Representation
 
 A **cost vs. $n$ line chart** is the clearest artifact:
 
@@ -67,16 +67,14 @@ You can note:
 
 # ROI - Second try
 
-The analysis provided in the `ROI_01` file contains a fundamental mathematical flaw regarding how the formalization costs scale, which becomes immediately apparent when cross-referencing it with your Rocq code in `bs_p4.v` (the manual approach) and `bs_p5.v` (the Trocq approach). 
+The analysis contains a fundamental mathematical flaw regarding how the formalization costs scale, which becomes immediately apparent when cross-referencing it with your Rocq code in `bs_p4.v` (the manual approach) and `bs_p5.v` (the Trocq approach). 
 
-Here is a detailed evaluation of your current analysis, followed by specific suggestions and formulas to accurately answer the prompt regarding Variables, Cost Metrics, and ROI.
-
-## 1. Critique of the `ROI_01` Analysis Based on the Code
-The formula proposed in `ROI_01` for the manual approach is $C_{\text{manual}}(n, c) = 7cn$, implying that **all** manual proof obligations scale linearly with every new theorem. However, looking at `bs_p4.v`, this is factually incorrect. 
+## 1. Critique of the Analysis Based on the Code
+The formula proposed for the manual approach is $C_{\text{manual}}(n, c) = 7cn$, implying that **all** manual proof obligations scale linearly with every new theorem. However, looking at `bs_p4.v`, this is factually incorrect. 
 
 In the manual approach, you define the conversion functions (`plist_to_natlist`, `natlist_to_plist`) and prove their mutual isomorphisms (`plist_natlist_iso`, `natlist_plist_iso`) only **once per type**. Furthermore, the compatibility bridge lemmas (like `plength_eq_nlength` and `plist_to_natlist_app`) are proven only **once per function**. If you add a second or third theorem to transfer, you **do not** rewrite these 6 base lemmas. You only write the manual rewrite script for the new theorem. Therefore, the manual cost is largely a *fixed setup cost* plus a variable cost that scales with $n$, not a purely multiplicative $7cn$.
 
-Secondly, `ROI_01` assumes Trocq bypasses these manual obligations. But looking at `bs_p5.v`, **Trocq actually requires the exact same manual bridge lemmas** (`_plength_eq_nlength`, `plist_2_nlist_app`) to function. On top of those, Trocq requires you to write `Param` wrapper lemmas (`R__plength`, `R__papp`) and register them with `Trocq Use`. 
+Secondly, it assumes Trocq bypasses these manual obligations. But looking at `bs_p5.v`, **Trocq actually requires the exact same manual bridge lemmas** (`_plength_eq_nlength`, `plist_2_nlist_app`) to function. On top of those, Trocq requires you to write `Param` wrapper lemmas (`R__plength`, `R__papp`) and register them with `Trocq Use`. 
 
 **Conclusion from the code:** Trocq's *initial setup cost* is actually **higher** than the manual setup cost. Trocq's true ROI comes entirely from the *per-theorem* scaling. While a manual theorem requires a bespoke, step-by-step rewrite script for every new goal, Trocq solves any new theorem instantly in two steps (`trocq. apply ...`).
 
@@ -111,7 +109,7 @@ To derive an accurate ROI, define the costs as linear functions of $f$ (function
     *   Trocq adds 1 type relation, $f$ function relations, and their registrations.
     *   $P_{\text{trocq}}$ is basically $0 \approx 2$ lines of code (`trocq. apply...`).
 
-## 3. Recommended Graphical Representation (ROI)
+## 3. Visual Representation
 To visually represent this for your analysis:
 
 **Graph 1: Cost vs. Number of Theorems ($n$)**
@@ -130,7 +128,7 @@ Plot the ROI equation: $\text{ROI}(n) = \frac{C_{\text{manual}}(n) - C_{\text{tr
 
 # ROI - Third try
 
-Based on the results of your newly implemented `bs_p6.v` experiment, we can now formulate a much more precise and mathematically sound Return on Investment (ROI) model. 
+Based on the results of `bs_p6.v` experiment, we can now formulate a much more precise and mathematically sound Return on Investment (ROI) model. 
 
 The `bs_p6.v` file provides a crucial "Aha!" moment for our analysis: **the manual approach scales terribly not just with the *number* of theorems, but with the *syntactic complexity* of each theorem, whereas Trocq completely bypasses this complexity.**
 
@@ -149,7 +147,7 @@ To map this mathematically, we must separate the size of the *vocabulary* from t
 *   **$n$ (Number of Theorems):** How many theorems you want to transfer.
 *   **$c_{avg}$ (Average Theorem Complexity):** The average number of function applications inside the theorems being transferred. (For example, `prev(papp l1 l2) = papp (prev l2) (prev l1)` has $c=5$ function applications).
 
-## 3. The New "Think Harder" ROI Formulas
+## 3. The ROI Formulas
 We can now write equations that accurately reflect the LTAC tactic lines required for each approach.
 
 **The Base Setup Cost (Shared by both):**
@@ -165,7 +163,7 @@ $$C_{\text{trocq}}(n, f) = C_{\text{base}}(f) + f \cdot W_{\text{trocq}} + n \cd
 *   $W_{\text{trocq}}$ is the Trocq wrapper cost per function ($\approx 5$ tactics: 4 for the `R__` lemma + 1 for `Trocq Use`).
 *   Notice that **$c_{avg}$ has completely disappeared from the Trocq formula**.
 
-## 4. The Ultimate ROI Equation
+## 4. The Third ROI Equation
 We calculate ROI as the net savings divided by the investment cost: $\text{ROI} = \frac{C_{\text{manual}} - C_{\text{trocq}}}{C_{\text{trocq}}}$.
 
 Substituting our new variables, we get:
@@ -181,7 +179,7 @@ If you analyze this formula, it yields three brilliant insights that perfectly a
 3. **The Infinite Asymptote:**
    As your library of theorems grows ($n \to \infty$), the fixed setup costs ($f$) vanish into insignificance. The ROI asymptotes to $\frac{k \cdot c_{avg} - 2}{2}$. If an average theorem has $c=6$ complexity, Trocq will eventually save you **$\approx 400\%$** of the manual effort over the lifespan of a software verification project.
 
-## Visual Suggestion for your Slides
+## Visual Representation
 Instead of a simple 2D graph mapping $n$, you can now describe a **3D break-even surface**. 
 *   **Axis X:** Number of Theorems ($n$)
 *   **Axis Y:** Complexity of Theorems ($c_{avg}$)
