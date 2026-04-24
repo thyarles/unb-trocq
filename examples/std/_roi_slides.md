@@ -402,9 +402,9 @@ Trocq is cheaper from the **very first theorem**.
 
 ## Third Try — Break-Even Shifts with Complexity
 
-![h:440px](_graphs/graph_04_family.png)
+![h:550px](_graphs/graph_05_roi_3d.png)
 
-Each dashed curve is $C_M(n, c_{\text{avg}})$ for a different complexity. The solid Trocq line is fixed. Dots mark break-even points — they shift left as theorems grow more complex.
+<!-- Each dashed curve is $C_M(n, c_{\text{avg}})$ for a different complexity. The solid Trocq line is fixed. Dots mark break-even points — they shift left as theorems grow more complex. -->
 
 ---
 
