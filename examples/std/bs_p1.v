@@ -27,7 +27,8 @@ Proof. simpl. reflexivity. Qed.
 Example nlength_ex2 : nlength (1 :n: 2 :n: 3 :n: [[]]) = 3.
 Proof. simpl. reflexivity. Qed.
 
-Example napp_ex : napp (1 :n: 2 :n: [[]]) (3 :n: 4 :n: [[]]) = (1 :n: 2 :n: 3 :n: 4 :n: [[]]).
+Example napp_ex : napp (1 :n: 2 :n: [[]]) (3 :n: 4 :n: [[]]) =
+                       (1 :n: 2 :n: 3 :n: 4 :n: [[]]).
 Proof. simpl. reflexivity. Qed.
 
 Theorem nlength_napp : forall (l1 l2 : NatList),

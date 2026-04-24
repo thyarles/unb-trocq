@@ -19,7 +19,7 @@ Set Universe Polymorphism.
         6. Notes
 *)
 
-(*  ── 1 & 2: Conversion functions ──────────────────────────────────-── *)
+(*  ── 1 & 2: Conversion functions ───────────────────────────────────────── *)
 
 Fixpoint plist_to_natlist (l : PList nat) : NatList :=
     match l with
@@ -43,7 +43,7 @@ Goal plist_to_natlist (1 :p: 2 :p: {{}}) = (1 :n: 2 :n: [[]]).
 Goal natlist_to_plist (1 :n: 2 :n: [[]]) = (1 :p: 2 :p: {{}}).
      reflexivity. Qed.
 
-(*  ── 3: Isomorphism ────────────────────────────────────────────────── *)
+(*  ── 3: Isomorphism ────────────────────────────────────────────────────── *)
 
 (** Round trip (to NatList and back): natlist_to_plist ∘ plist_to_natlist = id *)
 Lemma plist_natlist_iso : forall (l : PList nat),
@@ -63,7 +63,7 @@ Proof.
     - rewrite IH. reflexivity.
 Qed.
 
-(*  ── 4: Compatibility with length and app ──────────────────────────── *)
+(*  ── 4: Compatibility with length and app ──────────────────────────────── *)
 
 (* The conversion preserves the length. *)
 Lemma plength_eq_nlength : forall (l : PList nat),
@@ -85,7 +85,7 @@ Proof.
     - rewrite IH. reflexivity.
 Qed.
 
-(*  ── 5: Manual transfer ────────────────────────────────────────────── *)
+(*  ── 5: Manual transfer ────────────────────────────────────────────────── *)
 
 Theorem plength_papp_via_natlist : forall (l1 l2 : PList nat),
     plength (papp l1 l2) = plength l1 + plength l2.
@@ -119,7 +119,7 @@ Goal plength (papp (1 :p: 2 :p: {{}}) ({{}} : PList nat)) =
      plength (1 :p: 2 :p: {{}}) + plength ({{}} : PList nat).
      apply plength_papp_via_natlist. Qed.
 
-(*  ── 7: Notes ───────────────────────────────────────────────────────── *)
+(*  ── 7: Notes ──────────────────────────────────────────────────────────── *)
 
 (** EXPL D — Notes about manual transfer *)
 

@@ -9,10 +9,10 @@ Require Import Trocq_examples.bs_p1.
 Require Import Trocq_examples.bs_p2.
 Require Import Trocq_examples.bs_p5.
 
-(*  ── New Definitions ───────────────────────────────────────────────── *)
+(*  ── New Definitions ───────────────────────────────────────────────────── *)
 
 (*  Reversal for NatList — accumulates into a new list by cons-ing the
-    current head onto the reversed tail, then appending the singleton.    *)
+    current head onto the reversed tail, then appending the singleton.       *)
 Fixpoint nrev (l : NatList) : NatList :=
     match l with
     | NNil      => NNil
@@ -21,17 +21,17 @@ Fixpoint nrev (l : NatList) : NatList :=
 
 (*  Reversal for _PList (monomorphic alias for @prev nat).
     Follows the same pattern as the other _P* aliases in bs_p5 to avoid
-    Trocq confusing implicit sort arguments with list variables.           *)
+    Trocq confusing implicit sort arguments with list variables.             *)
 Fixpoint _prev (l : _PList) : _PList :=
     match l with
     | @PNil _      => _PNil
     | @PCons _ h t => _papp (_prev t) (_PCons h _PNil)
     end.
 
-(*  ── Base Proofs | Auxiliary lemmas ────────────────────────────────── *)
+(*  ── Base Proofs | Auxiliary lemmas ────────────────────────────────────── *)
 
 (*  napp with an empty right argument is the identity.
-    Needed as the base case for nrev_napp.                                 *)
+    Needed as the base case for nrev_napp.                                   *)
 Lemma napp_nil_r : forall l : NatList, napp l NNil = l.
 Proof.
     induction l as [| h t IH]; simpl.
@@ -40,7 +40,7 @@ Proof.
 Defined.
 
 (*  _papp with an empty right argument is the identity.
-    Needed as the base case for _prev_papp.                               *)
+    Needed as the base case for _prev_papp.                                  *)
 Lemma _papp_nil_r : forall l : _PList, _papp l _PNil = l.
 Proof.
     unfold _papp, _PNil.
@@ -49,10 +49,10 @@ Proof.
     - rewrite IH. reflexivity.
 Defined.
 
-(*  ── Base Proofs | Distribution of reversal over append (NatList) ──── *)
+(*  ── Base Proofs | Distribution of reversal over append (NatList) ──────── *)
 
 (*  Reversing a concatenation yields the concatenation of the reversals
-    in the opposite order: nrev (l1 ++ l2) = nrev l2 ++ nrev l1.          *)
+    in the opposite order: nrev (l1 ++ l2) = nrev l2 ++ nrev l1.             *)
 Theorem nrev_napp : forall (l1 l2 : NatList),
     nrev (napp l1 l2) = napp (nrev l2) (nrev l1).
 Proof.
@@ -68,11 +68,11 @@ Proof.
       reflexivity.
 Defined.
 
-(*  ── Base Proofs | Distribution of reversal over append (_PList) ───── *)
+(*  ── Base Proofs | Distribution of reversal over append (_PList) ───────── *)
 
 (*  Mirror of nrev_napp for the polymorphic list type.
     Proved independently by structural induction, using _papp_nil_r and
-    _papp_assoc (the latter imported from bs_p5 via Trocq).               *)
+    _papp_assoc (the latter imported from bs_p5 via Trocq).                  *)
 Theorem _prev_papp : forall (l1 l2 : _PList),
     _prev (_papp l1 l2) = _papp (_prev l2) (_prev l1).
 Proof.
@@ -83,18 +83,18 @@ Proof.
       apply _papp_assoc.
 Defined.
 
-(*  ── Manual Transfer ───────────────────────────────────────────────── *)
+(*  ── Manual Transfer ───────────────────────────────────────────────────── *)
 
 (*  This phase proves _prev (_papp l1 l2) = _papp (_prev l2) (_prev l1)
     by going THROUGH NatList: we build the bridge lemma that connects _prev
     to nrev, then chain it with plist_2_nlist_app and nrev_napp manually.
 
-    Contrast with Phase 4, where Trocq does all of this automatically.    *)
+    Contrast with Phase 4, where Trocq does all of this automatically.       *)
 
-(*  ── Manual Transfer | Bridge lemma for reversal ───────────────────── *)
+(*  ── Manual Transfer | Bridge lemma for reversal ───────────────────────── *)
 
 (*  The forward conversion function plist_2_nlist commutes with reversal:
-    converting a reversed _PList is the same as reversing after converting. *)
+    converting a reversed _PList is the same as reversing after converting.  *)
 Lemma plist_2_nlist_rev : forall (l : _PList),
     plist_2_nlist (_prev l) = nrev (plist_2_nlist l).
 Proof.
@@ -106,7 +106,7 @@ Proof.
       reflexivity.
 Defined.
 
-(*  ── Manual Transfer | Manual theorem ──────────────────────────────── *)
+(*  ── Manual Transfer | Manual theorem ──────────────────────────────────── *)
 
 (*  We prove _prev_papp WITHOUT trocq, by manually injecting the
     plist_2_nlist bijection into both sides and then rewriting.
@@ -121,7 +121,7 @@ Defined.
       7. rewrite plist_2_nlist_rev (×2)— bridge: _prev → nrev (×2)
       8. reflexivity
       ─────────────────────────────────
-      TOTAL: 9 tactic steps                                              *)
+      TOTAL: 9 tactic steps                                                  *)
 Theorem _prev_papp_manual : forall (l1 l2 : _PList),
     _prev (_papp l1 l2) = _papp (_prev l2) (_prev l1).
 Proof.
@@ -139,7 +139,7 @@ Proof.
     reflexivity.
 Defined.
 
-(*  ── Trocq Transfer | Relational witness for _prev / nrev ──────────── *)
+(*  ── Trocq Transfer | Relational witness for _prev / nrev ──────────────── *)
 
 (*  R__prev connects _prev and nrev under the R_NatList relation:
     if l ~ l' (i.e. plist_2_nlist l = l') then _prev l ~ nrev l'.
@@ -151,7 +151,7 @@ Defined.
       4. rewrite lR          — substitute the related pair
       5. reflexivity
       ─────────────────────────────────
-      TOTAL: 5 tactic steps                                              *)
+      TOTAL: 5 tactic steps                                                  *)
 
 Lemma R__prev
     (l : _PList) (l' : NatList) (lR : rel R_NatList l l') :
@@ -166,13 +166,13 @@ Proof.
     reflexivity.
 Defined.
 
-(*  ── Trocq Transfer | Register in Trocq's database ─────────────────── *)
+(*  ── Trocq Transfer | Register in Trocq's database ─────────────────────── *)
 
 Trocq Use R__prev.
 
-(*  ── Trocq Transfer | The theorem via Trocq ────────────────────────── *)
+(*  ── Trocq Transfer | The theorem via Trocq ────────────────────────────── *)
 
-(*  Per-theorem cost: 2 tactic steps.                                      *)
+(*  Per-theorem cost: 2 tactic steps.                                        *)
 Theorem _prev_papp_trocq : forall (l1 l2 : _PList),
     _prev (_papp l1 l2) = _papp (_prev l2) (_prev l1).
 Proof.
@@ -182,7 +182,7 @@ Qed.
 
 Print Assumptions _prev_papp_trocq.
 
-(*  ── ROI Analysis ──────────────────────────────────────────────────── *)
+(*  ── ROI Analysis ──────────────────────────────────────────────────────── *)
 
 (** Comparing manual vs. Trocq transfer
 
@@ -224,19 +224,19 @@ Print Assumptions _prev_papp_trocq.
     ┌─────────────────────────────────────────────────────────────────────┐
     │  TOTAL COST after n theorems involving _prev:                       │
     │                                                                     │
-    │   C_manual(n)  = 13 (shared) + 5  (bridge) + 9n  = 18 + 9n        │
-    │   C_trocq(n)   = 13 (shared) + 11 (setup)  + 2n  = 24 + 2n        │
+    │   C_manual(n)  = 13 (shared) + 5  (bridge) + 9n  = 18 + 9n          │
+    │   C_trocq(n)   = 13 (shared) + 11 (setup)  + 2n  = 24 + 2n          │
     │                                                                     │
-    │  Break-even:  18 + 9n = 24 + 2n  =>  7n = 6  =>  n ≈ 1 theorem    │
+    │  Break-even:  18 + 9n = 24 + 2n  =>  7n = 6  =>  n ≈ 1 theorem      │
     │                                                                     │
-    │  From n = 1 onwards, Trocq is already cheaper than the manual      │
+    │  From n = 1 onwards, Trocq is already cheaper than the manual       │
     │  approach, because the per-theorem saving (7 tactics/theorem)       │
     │  exceeds the extra setup cost (6 extra tactics).                    │
     │                                                                     │
-    │  Observation: compared to the simple napp/nlength case in bs_p5,   │
-    │  where break-even was ≈ 3-4 theorems, the rev benchmark breaks     │
-    │  even SOONER because the manual rewrite chain is longer (9 vs. 5   │
-    │  tactics), amplifying Trocq's per-theorem advantage.               │
+    │  Observation: compared to the simple napp/nlength case in bs_p5,    │
+    │  where break-even was ≈ 3-4 theorems, the rev benchmark breaks      │
+    │  even SOONER because the manual rewrite chain is longer (9 vs. 5    │
+    │  tactics), amplifying Trocq's per-theorem advantage.                │
     └─────────────────────────────────────────────────────────────────────┘
 
     Key takeaway:
@@ -247,4 +247,4 @@ Print Assumptions _prev_papp_trocq.
     - Therefore, for a theory with f functions and n theorems, Trocq is
       more efficient whenever:
           n > (f * setup_per_function) / (per_theorem_saving)
-      which decreases as theorem complexity grows.                       *)
+      which decreases as theorem complexity grows.                         *)

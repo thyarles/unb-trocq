@@ -5,11 +5,11 @@ From Trocq Require Import Param_nat.
 
 Set Universe Polymorphism.
 
-(*  ── NatList definitions (source – theorem to transfer) ────────────── *)
+(*  ── NatList definitions (source – theorem to transfer) ────────────────── *)
 
 Require Import Trocq_examples.bs_p1.
 
-(*  ── PList nat definitions (target – type to prove) ────────────────── *)
+(*  ── PList nat definitions (target – type to prove) ────────────────────── *)
 
 Require Import Trocq_examples.bs_p2.
 
@@ -21,7 +21,7 @@ Definition _PCons   : nat -> _PList -> _PList    := @PCons nat.
 Definition _plength : _PList -> nat              := @plength nat.
 Definition _papp    : _PList -> _PList -> _PList := @papp nat.
 
-(*  ── Relation between the constructors ────────────────────────────── *)
+(*  ── Relation between the constructors ─────────────────────────────────── *)
 
 Fixpoint plist_2_nlist (l : _PList) : NatList :=
     match l with
@@ -35,7 +35,7 @@ Fixpoint nlist_2_plist (l : NatList) : _PList :=
     | NCons h t => _PCons h (nlist_2_plist t)
     end.
 
-(*  ── Bridge lemmas  ────────────────────────────────────────────────── *)
+(*  ── Bridge lemmas  ────────────────────────────────────────────────────── *)
 
 Lemma _plength_eq_nlength :
     forall (l : _PList),
@@ -58,7 +58,7 @@ Proof.
     - rewrite IHl1. reflexivity.
 Defined.
 
-(*  ── Mutual inverses ───────────────────────────────────────────────── *)
+(*  ── Mutual inverses ───────────────────────────────────────────────────── *)
 
 Lemma plist_nlist_iso :
     forall (l : _PList),
@@ -78,7 +78,7 @@ Proof.
     - rewrite IHl. reflexivity.
 Defined.
 
-(*  ── Relation between the types ────────────────────────────────────── *)
+(*  ── Relation between the types ────────────────────────────────────────── *)
 
 Definition R_NatList : Param44.Rel _PList NatList.
 Proof.
@@ -89,7 +89,7 @@ Proof.
     - apply nlist_plist_iso.  (* comapK: map ∘ comap = id  *)
 Defined.
 
-(*  ── Relation between the functions ────────────────────────────────── *)
+(*  ── Relation between the functions ────────────────────────────────────── *)
 
 (** Notes:
     [rel R l l']  => l and l' are related; unfolds to [map R l = l']
@@ -167,7 +167,7 @@ Proof.
     reflexivity.
 Defined.
 
-(*  ── Register in Trocq's database ──────────────────────────────────── *)
+(*  ── Register in Trocq's database ──────────────────────────────────────── *)
 
 Trocq Use R_NatList.    (* relation between the types *)
 Trocq Use R__plength.   (* relation between the functions *)
@@ -176,7 +176,7 @@ Trocq Use R__papp.      (* relation between the functions *)
 Trocq Use Param44_nat.  (* from Trocq *)
 Trocq Use Param_add.    (* from Trocq *)
 
-(*  ── The theorem via Trocq ─────────────────────────────────────────── *)
+(*  ── The theorem via Trocq ─────────────────────────────────────────────── *)
 Theorem _plength_papp : forall (l1 l2 : _PList),
     _plength (_papp l1 l2) = _plength l1 + _plength l2.
 Proof.
@@ -220,7 +220,7 @@ Print Assumptions _papp_assoc.
     (e) The main theorem via trocq
 *)
                                                                             
-(*  ── Step (b): Relation between the types ──────────────────────────── *)
+(*  ── Step (b): Relation between the types ──────────────────────────────── *)
 
     (* Trocq uses "parametric relations" instead of simple bijections. The
     strongest class is Param44 (full isomorphism, with proofs in both
@@ -255,7 +255,7 @@ Print Assumptions _papp_assoc.
                 Every relational proof reduces to an equality over the conversion function,
                 which greatly simplifies the reasoning. *)
 
-(*  ── Step (a): Relation between the constructors ───────────────────── *)
+(*  ── Step (a): Relation between the constructors ───────────────────────── *)
 
     (* For each constructor we prove that it "respects" the relation R_NatList.
         Even if the constructors do not appear directly in the theorem we want to
@@ -273,7 +273,7 @@ Print Assumptions _papp_assoc.
 
         [R_in_map_nat hR : h = h'] extracts the equality from the natR relation. *)
 
-(*  ── Step (c): Relation between the functions ──────────────────────── *)
+(*  ── Step (c): Relation between the functions ──────────────────────────── *)
 
     (* For each function appearing in the target theorem we supply a term
         of type: ∀ related inputs -> related outputs. 
@@ -303,7 +303,7 @@ Print Assumptions _papp_assoc.
             = papp l1'                   (nlist_2_plist l2)  [ap ... l1R]
             = papp l1'                   l2'                    [ap ... l2R] *)
 
-(*  ── Step (d): Register in Trocq's database ────────────────────────── *)
+(*  ── Step (d): Register in Trocq's database ────────────────────────────── *)
 
     (* Suggested order:
     
@@ -313,7 +313,7 @@ Print Assumptions _papp_assoc.
     each registered relation — so it suffices to register the strongest
     one (Param44). *)
 
-(*  ── Step (e): The theorem via Trocq ───────────────────────────────── *)
+(*  ── Step (e): The theorem via Trocq ───────────────────────────────────── *)
 
     (* The proof now has TWO lines:
     
@@ -328,7 +328,7 @@ Print Assumptions _papp_assoc.
         Univalence is not needed here because the relation between NatList and
         PList nat is an isomorphism, not merely a type equivalence. *)
 
-(*  ── Step (f): Take notes ───────────────────────────────── *)
+(*  ── Step (f): Take notes ──────────────────────────────────────────────── *)
 
     (* Registration (done ONCE for the pair NatList/PList nat):
         R_NatList   — target type

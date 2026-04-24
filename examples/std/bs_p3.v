@@ -10,7 +10,7 @@ Set Universe Polymorphism.
     proofs directly as functions, using the RECURSOR of each inductive type
     instead of the induction tactic.  *)
 
-(*  ── Monomorphic version as a proof object ────────────────────────
+(*  ── Monomorphic version as a proof object ──────────────────────────────────
 
     For NatList, Rocq automatically generates:
 
@@ -29,7 +29,7 @@ Definition nlength_napp_PO :
     forall (l1 l2 : NatList),
     nlength (napp l1 l2) = nlength l1 + nlength l2 :=
     fun l1 l2 =>
-    (* TODO: Print NatList_rect and NatList_ind; analyse the difference. *)
+    (* TODO: Print NatList_rect and NatList_ind; analyse the difference.     *)
     NatList_rect
         (* motive P *)
         (fun l1 => nlength (napp l1 l2) = nlength l1 + nlength l2)
@@ -40,7 +40,7 @@ Definition nlength_napp_PO :
         (* main argument *)
         l1.
 
-(*  ── Polymorphic version as a proof object ─────────────────────────
+(*  ── Polymorphic version as a proof object ──────────────────────────────────
 
     For PList, Rocq generates:
 
