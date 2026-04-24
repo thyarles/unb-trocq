@@ -17,3 +17,6 @@
 # Website
 website/_site/
 examples/std/*.pdf
+
+# python
+.venv
