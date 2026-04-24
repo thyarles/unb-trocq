@@ -24,7 +24,8 @@ Fixpoint nsum (l : NatList) : nat :=
     Type-safety note: the monomorphic alias  _PList := PList nat  already
     restricts the element type to nat at the definition site.  There is no
     need for an explicit runtime guard — Rocq's type system statically
-    prevents passing a  PList string  (or any non-nat PList) to  psum. *)
+    prevents passing a  PList string  (or any non-nat PList) to  psum.
+*)
 Fixpoint psum (l : _PList) : nat :=
     match l with
     | @PNil _      => O
@@ -37,7 +38,8 @@ Fixpoint psum (l : _PList) : nat :=
     nsum (l1 ++ l2) = nsum l1 + nsum l2.
 
     Step-case arithmetic:  h + (nsum t + nsum l2) = (h + nsum t) + nsum l2
-    This is just associativity of addition, discharged by lia. *)
+    This is just associativity of addition, discharged by lia.
+*)
 Theorem nsum_napp : forall (l1 l2 : NatList),
     nsum (napp l1 l2) = nsum l1 + nsum l2.
 Proof.
@@ -52,7 +54,8 @@ Defined.
 
 (*  Bridge lemma: psum commutes with the forward conversion.
     Converting a _PList to a NatList and then summing gives the same result
-    as summing the _PList directly. *)
+    as summing the _PList directly.
+*)
 Lemma psum_eq_nsum : forall (l : _PList),
     psum l = nsum (plist_2_nlist l).
 Proof.
@@ -84,6 +87,17 @@ Proof.
     rewrite nsum_napp.
     rewrite <- psum_eq_nsum.
     rewrite <- psum_eq_nsum.
+    reflexivity.
+Defined.
+
+(* TODO: we need to stablish the way to count lines *)
+Theorem psum_papp_manual' : forall (l1 l2 : _PList),
+    psum (_papp l1 l2) = psum l1 + psum l2.
+Proof.
+    intros l1 l2.
+    rewrite !psum_eq_nsum.
+    rewrite plist_2_nlist_app.
+    rewrite nsum_napp.
     reflexivity.
 Defined.
 
