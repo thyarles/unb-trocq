@@ -1,6 +1,6 @@
 """
 ROI Analysis — Trocq vs Manual Proof Transfer
-Generates 4 publication-quality PNG graphs for the presentation slides.
+Generates 5 publication-quality PNG graphs for the presentation slides.
 
 Output files (saved in the same directory as this script):
   graph_01_cost.png   — First Try:  cost lines  C_manual vs C_trocq
@@ -371,6 +371,108 @@ def graph_02_const():
     print(f"Saved {path}")
 
 
+# ══════════════════════════════════════════════════════════════════════════
+# Graph 05 — Third Try: ROI 3D Surface  (three-variable cost equation)
+#
+# Full ROI equation (slide 365):
+#
+#   ROI(n, f, c_avg) = [ n·(k·c_avg − 2) − f·W_trocq ]
+#                      ─────────────────────────────────
+#                      C_base(f) + f·W_trocq + 2n
+#
+# Here we fix f = 1 and sweep (n, c_avg) to visualise how the two
+# remaining variables jointly drive ROI.  The surface makes explicit that
+# c_avg multiplies n — a single complex theorem (large c_avg, small n)
+# can immediately push ROI above zero.
+#
+# Parameters (consistent with bs_p6.v / graph_04):
+#   k        = 2.2   tactics per function application in a manual proof
+#                     (empirical: 11 steps / 5 applications in bs_p6.v)
+#   W_trocq  = 11    Trocq setup cost per function
+#   C_base   = 13    fixed shared proof obligations (both approaches pay)
+#   f        = 1     number of transferred functions (held constant)
+#
+#   C_trocq_fixed = C_base + f·W_trocq = 24
+#   ROI(n, c_avg) = (n·(k·c_avg − 2) − 11) / (24 + 2n)
+#   Asymptote (n→∞): (k·c_avg − 2) / 2
+#     at c_avg=6: (2.2×6 − 2)/2 = 5.6   (matches slide)
+# ══════════════════════════════════════════════════════════════════════════
+def graph_05_roi_3d():
+    from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 (registers 3D projection)
+    from matplotlib import cm as mpl_cm
+
+    # Parameter values (f = 1, consistent with bs_p6.v / graph_04)
+    k       = 2.2
+    W_trocq = 11
+    C_base  = 13
+    f       = 1
+
+    C_T_fixed = C_base + f * W_trocq   # 24
+
+    # Grid axes — extend n to ~50 so the asymptotic plateau is visible
+    n_vals    = np.linspace(0.5, 50,  180)   # theorems transferred
+    c_vals    = np.linspace(1.0,  8,  120)   # average theorem complexity
+    N, C = np.meshgrid(n_vals, c_vals)
+
+    ROI = (N * (k * C - 2) - f * W_trocq) / (C_T_fixed + 2 * N)
+
+    # Colour limits: floor at -1; ceiling = actual surface max (rounded up)
+    roi_max = float(np.nanmax(ROI))
+    vmax = np.ceil(roi_max)          # e.g. 8.0 for k=2.2, c_avg_max=8
+
+    # ── Figure ────────────────────────────────────────────────────────────
+    fig = plt.figure(figsize=(11, 7))
+    ax  = fig.add_subplot(111, projection="3d")
+
+    surf = ax.plot_surface(
+        N, C, ROI,
+        cmap=mpl_cm.RdYlGn,      # red (negative) → yellow → green (positive)
+        vmin=-1.0, vmax=vmax,
+        alpha=0.88,
+        linewidth=0,
+        antialiased=True,
+    )
+
+    # Zero-ROI contour projected onto the ROI plane (z = 0)
+    ax.contour(N, C, ROI, levels=[0], colors=["black"], linewidths=1.8, offset=0)
+
+    # Colour bar
+    cbar = fig.colorbar(surf, ax=ax, shrink=0.55, aspect=14, pad=0.08)
+    cbar.set_label(r"$\mathrm{ROI}(n,\,c_{\mathrm{avg}})$", fontsize=10)
+    cbar.ax.yaxis.set_major_formatter(
+        ticker.FuncFormatter(lambda y, _: f"{y:.1f}×"))
+
+    # Reference plane at ROI = 0
+    n_plane = np.array([[n_vals[0], n_vals[-1]],
+                         [n_vals[0], n_vals[-1]]])
+    c_plane = np.array([[c_vals[0], c_vals[0]],
+                         [c_vals[-1], c_vals[-1]]])
+    ax.plot_surface(n_plane, c_plane,
+                    np.zeros_like(n_plane),
+                    alpha=0.18, color="grey")
+
+    # Labels & title
+    ax.set_xlabel(r"Theorems  ($n$)",         fontsize=10, labelpad=8)
+    ax.set_ylabel(r"Complexity  ($c_{\mathrm{avg}}$)", fontsize=10, labelpad=8)
+    ax.set_zlabel(r"$\mathrm{ROI}$",          fontsize=10, labelpad=6)
+    ax.set_title(
+        "Third Try — ROI 3D Surface over $(n,\\,c_{\\mathrm{avg}})$\n"
+        r"$\mathrm{ROI} = \dfrac{n(k\,c_{\mathrm{avg}}-2) - f\,W_{\mathrm{trocq}}}"
+        r"{C_{\mathrm{base}} + f\,W_{\mathrm{trocq}} + 2n}$"
+        r"  ($f=1,\ k=2.2,\ W_{\mathrm{trocq}}=11$)",
+        fontsize=11,
+        pad=14,
+    )
+
+    ax.view_init(elev=28, azim=-55)
+
+    fig.tight_layout()
+    path = os.path.join(OUT, "_graphs/graph_05_roi_3d.png")
+    fig.savefig(path, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved {path}")
+
+
 # ── Entry point ───────────────────────────────────────────────────────────
 if __name__ == "__main__":
     graph_01()
@@ -378,4 +480,5 @@ if __name__ == "__main__":
     graph_02_const()
     graph_03()
     graph_04()
+    graph_05_roi_3d()
     print("\nAll graphs generated successfully.")
