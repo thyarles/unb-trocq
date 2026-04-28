@@ -11,6 +11,9 @@ bs_p4.v
 bs_p5.v
 bs_p6.v
 bs_p7.v
+bs_p8_t1.v
+bs_p8_t2.v
+bs_p8_t3.v
 baby_steps.v
 # flt3_step.v
 # int_to_Zp.v
