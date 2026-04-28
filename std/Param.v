@@ -19,6 +19,7 @@ Require Export Param_Type Param_arrow Param_forall.
 
 From Trocq.Elpi.generation Extra Dependency "pparam-type.elpi" as pparam_type_generation.
 From Trocq.Elpi Extra Dependency "tactic.elpi" as tactic.
+From Trocq.Elpi Extra Dependency "coercion.elpi" as coercion.
 
 Set Universe Polymorphism.
 Unset Universe Minimization ToSet.
@@ -45,4 +46,16 @@ Elpi Tactic trocq.
 Elpi Accumulate Db trocq.db.
 Elpi Accumulate File tactic.
 
-Tactic Notation "trocq" ident_list(l) := elpi trocq ltac_string_list:(l).
+Elpi Export trocq.
+
+Tactic Notation "trocq" := elpi trocq.
+Tactic Notation "trocq" "to" constr(g) := elpi trocq "to" ltac_term:(g).
+Tactic Notation "trocq" "with" ident_list(l) := elpi trocq "with" ltac_string_list:(l).
+Tactic Notation "trocq" "to" constr(g) "with" ident_list(l) := elpi trocq "to" ltac_term:(g) "with" ltac_string_list:(l).
+
+Declare ML Module "rocq-elpi.coercion".
+Elpi Tactic trocqoercion.
+Elpi Accumulate Db trocq.db.
+Elpi Accumulate File coercion.
+
+Elpi CoercionFallbackTactic trocqoercion.

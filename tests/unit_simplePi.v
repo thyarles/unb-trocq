@@ -11,32 +11,26 @@
 (*                            * see LICENSE file for the text of the license *)
 (*****************************************************************************)
 
-From Trocq Require Import Trocq.
+From Trocq Require Import Stdlib Trocq.
 
 Set Universe Polymorphism.
 
 Section SimplePi.
-    Variable (A A' : Type) (f : A -> A').
+
+    Variable (A A' : Type).
+    Variable (f : A -> A').
+    Definition RA := mkParam2a0 f.
+
     Variable (B : A -> Type) (B' : A' -> Type).
-    Variable (g : forall (X:A) (X':A'), B' X' -> B X).
-    Variable (U : Type).
+    Variable (m : forall (X : A) (X' : A') (RX : RA X X'), (B' X') -> (B X)).
+    Definition RL (X : A) (X' : A') (XR : RA X X') := mkParam01 (m X X' XR). 
 
-    Definition Rf := mkParam2a0 f.
-    Trocq Use Rf.
-
-    Definition Rg (X : A) (X' : A')
-        : Param01.Rel (B X) (B' X')
-        := mkParam01 (g X X').
-
-    Trocq Use Rg.
-
-    Print Param01_forall.
+    Trocq Use RA RL.
 
     (* D(0,1) = ((2a,0),(0,1)) *)
     Goal forall X : A, B X.
         trocq.
-        enough (forall X' : A', B' X') by exact x.
+        enough (x : forall X' : A', B' X') by exact x.
     Abort.
-
 
 End SimplePi.

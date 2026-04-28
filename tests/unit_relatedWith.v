@@ -27,12 +27,12 @@ Section RelatedWith.
     Trocq RelatedWith R2 R2.
 
     Goal A.
-        trocq R1.
+        trocq with R1.
         enough (x : B) by exact x.
     Abort.
 
     Goal A.
-        trocq R2.
+        trocq with R2.
         enough (x : C) by exact x.
     Abort.
 End RelatedWith.

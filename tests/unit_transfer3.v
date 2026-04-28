@@ -30,8 +30,8 @@ Section Transfer.
     Variable peR2 : forall (m : I) (m' : I') (rm : (Rf) m m')
         (n : I) (n' : I') (rn : (Rf) n n'),
         pe' n' m' -> pe n m.
-    Definition Rpe (m : I) (m' : I') (rm : (Rf) m m')
-        (n : I) (n' : I') (rn : (Rf) n n')
+    Definition Rpe (n : I) (n' : I') (rn : (Rf) n n')
+        (m : I) (m' : I') (rm : (Rf) m m')
         : Param11.Rel (pe n m) (pe' n' m') :=
         mkParam11 (peR1 m m' rm n n' rn) (peR2 m m' rm n n' rn).
     Trocq Use Rpe.
@@ -45,7 +45,7 @@ Section Transfer.
 
     Goal forall m : I, forall n : I, pe m (p n n) -> pe m n.
         trocq.
-        enough (forall m' : I', forall n' : I', pe' m' (p' n' n') -> pe' m' n') by exact x.
+        enough (x : forall m' : I', forall n' : I', pe' m' (p' n' n') -> pe' m' n') by exact x.
     Abort.
 
 End Transfer.

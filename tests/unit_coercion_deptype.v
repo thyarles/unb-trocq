@@ -15,19 +15,22 @@ From Trocq Require Import Stdlib Trocq.
 
 Set Universe Polymorphism.
 
-Section TypeArrow.
+Section TrocqDepType.
+
+    Variable (A A' : Type).
+    Variable (f : A -> A').
+    Definition RA := mkParam10 f.
 
     Variable (L L' : Type -> Type).
-    Variable (f : forall (A : Type) (A' : Type), (A -> A') -> L' A' -> L A).
+    Variable (m : forall (X : Type) (X' : Type) (f : X -> X'), (L X) -> (L' X')).
+    
+    Definition RL (X : Type) (X' : Type) (XR : Param10.Rel X X') : Param10.Rel (L X) (L' X') := mkParam10 (m X X' (map XR)).
 
-    Definition RL (A : Type) (A' : Type) (AR : Param10.Rel A A')
-        : Param01.Rel (L A) (L' A') := mkParam01 (f A A' (map AR)).
+    Trocq Use RA RL.
 
-    Trocq Use RL.
-
-    Goal (forall A : Type, L A).
-        trocq.
-        enough (x : forall A' : Type, L' A') by exact x.
+    Trocq Coercion On.
+    Goal L' A'.
+        enough (x : L A) by exact x.
     Abort.
 
-End TypeArrow.
+End TrocqDepType.

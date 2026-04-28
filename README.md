@@ -87,17 +87,24 @@ In short, the plugin provides a tactic:
 - `trocq` (without arguments) which attempts to run a translation on
   a given goal, using the information provided by the user with the
   commands described below.
-- `trocq R1 R2 ...` which works similarly to its argumentless counterpart
+- `trocq with R1 R2 ...` which works similarly to its argumentless counterpart
   except that it also uses translations associated to the relations `R1`,
   `R2`... ; see below regarding how to associated translations to a relation.
+- `trocq to A` which attempts to translate the goal to a new goal `A`.
+- `trocq to A with R1 R2` is a combination of the two options above
 
-And four commands:
+And some commands:
 - `Trocq Use t` to use a translation `t` during the subsequent calls
   to the tactic `trocq`.
 - `Trocq Register Univalence u` to declare a univalence axiom `u`.
 - `Trocq Register Funext fe` to declare a function extensionality
   axiom `fe`.
 - `Trocq RelatedWith R t1 t2 ...` to associate `t1`, `t2`, ... to `R`.
-  Subsequent calls to `trocq R` will be able to use the translations `t1`,
+  Subsequent calls to `trocq with R` will be able to use the translations `t1`,
   `t2`, ...
+- `Trocq Coercion "Off"|"On"` to enable or disable trocq being used as a fallback for Rocq's coercion.
 - `Trocq Logging "off"|"info"|"debug"|"trace"` to set the verbosity level.
+- `Trocq Usage` to print a small help message describing available trocq commands.
+- `Trocq Print Translations` to print a list of all currently registered Trocq translations.
+- `Trocq Print Translations G` prints the list of translations registered for a specific Gref `G`.
+  it also prints all registered levels for each translation.

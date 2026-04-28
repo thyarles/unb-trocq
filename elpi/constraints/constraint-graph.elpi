@@ -40,7 +40,7 @@ kind constraint-type type.
 type ct.pi constraint-type.
 type ct.arrow constraint-type.
 type ct.type constraint-type.
-type ct.gref gref -> aterm -> term -> gref -> constraint-type.
+type ct.gref gref -> aterm -> term -> term -> constraint-type.
 type ct.geq constraint-type.
 
 typeabbrev
@@ -77,11 +77,11 @@ add-dep-type ID IDR (constraint-graph G) (constraint-graph G') :-
 % the constraint is represented here by one node from C to all the C_i
 % we store information in the node about K, its type, and the output variables
 func add-dep-gref
-  class-id, gref, aterm, term, gref, list class-id, constraint-graph -> constraint-graph.
-add-dep-gref ID GR T Tm' GRR IDs (constraint-graph G) (constraint-graph G') :-
+  class-id, gref, aterm, term, term, list class-id, constraint-graph -> constraint-graph.
+add-dep-gref ID GR T Tm' TRR IDs (constraint-graph G) (constraint-graph G') :-
   % the classes C_i (IDs) are not really "higher" than the output class C (ID)
   % here, higher is a way to say that they must be instantiated later than the output class
-  util.map.update ID (internal.add-higher-node (node.var (ct.gref GR T Tm' GRR) IDs)) G G1,
+  util.map.update ID (internal.add-higher-node (node.var (ct.gref GR T Tm' TRR) IDs)) G G1,
   std.fold IDs G1 (id\ g\ g'\
     util.map.update id (internal.add-lower-node (node.var (ct.gref _ _ _ _) [ID])) g g')
       G'.
@@ -161,14 +161,13 @@ instantiate.aux ID Class (node.var ct.type [IDR]) G G' :- std.do![
     (util.map.update IDR (internal.add-lower-node (node.const (pc map4 map4))) G1 G')
     (G' = G1)
 ].
-instantiate.aux ID Class (node.var (ct.gref GR T Tm' GRR) IDs) G G' :- std.do! [
+instantiate.aux ID Class (node.var (ct.gref GR T Tm' TRR) IDs) G G' :- std.do! [
   std.fold {std.filter IDs (id\ id > 0)} G (id\ g\ g'\
     util.map.update id (internal.remove-lower-node (node.var (ct.gref _ _ _ _) [ID])) g g')
       G1,
   aterm.util.classes T TCs _,
   % find the output constant and proof, as well as the required classes Cs
-  trocq.data.gref GR Class Cs GR' GRR, !,
-  coq.env.global GR' Tm',
+  (trocq.data.gref GR Class Cs Tm' TRR ; trocq.error.translation-not-found GR Class Cs Tm'), !,
   % make sure the classes are consistent
   instantiate.gref IDs TCs Cs G1 G'
   ].

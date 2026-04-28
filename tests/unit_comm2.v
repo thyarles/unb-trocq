@@ -17,7 +17,6 @@ Set Universe Polymorphism.
 
 Section N.
 
-    Trocq Logging trace.
     Inductive N : Set :=
     | Z : N
     | S : N -> N.
@@ -31,7 +30,7 @@ Section N.
     Trocq Use NR.
     Definition NS {n n': N} (Rr : NR n n'): NR (S n) (S n'). admit. Admitted.
     Trocq Use NS.
-    Definition Nad {n n' m m' : N} (Rr : NR n n') (Rr' : NR m m'): NR (ad n m) (ad n' m'). admit. Admitted.
+    Definition Nad {n n' : N} (Rr : NR n n') {m m' : N} (Rr' : NR m m'): NR (ad n m) (ad n' m'). admit. Admitted.
     Trocq Use Nad. 
 
     Variable A : Type.
@@ -63,7 +62,10 @@ Trocq Use Nappend.
     Goal forall {n1 n2 : N}
         (v1 : T n1) (v2 : T n2),
         P (append v1 v2).
-    trocq.
+        trocq.
+        enough (x : forall {n1 n2 : N}
+            (v1 : T' n1) (v2 : T' n2),
+            P' (append' v1 v2)) by exact x.
     Abort.
 
 End N.

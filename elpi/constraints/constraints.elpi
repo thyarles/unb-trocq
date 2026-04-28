@@ -30,7 +30,7 @@ pred dep-arrow i:param-class, o:param-class, o:param-class.
 pred dep-type i:param-class, i:param-class.
 
 % D_K(C, C_1, ..., C_n)
-pred dep-gref i:gref, i:aterm, o:term, o:gref.
+pred dep-gref i:gref, i:aterm, o:term, o:term.
 
 % C >= C'
 pred geq i:param-class, i:param-class.

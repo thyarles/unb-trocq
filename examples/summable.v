@@ -202,6 +202,6 @@ Trocq RelatedWith Rrseq seq_nnR_add.
 (* we get a proof over non negative reals for free,
    from the analogous proof over the extended ones *)
 Lemma sum_nnR_add : forall (u v : summable), (Σ (u + v) = Σ u + Σ v)%nnR.
-Proof. trocq R_nnR Rrseq; exact: sum_xnnR_add. Qed.
+Proof. trocq with R_nnR Rrseq; exact: sum_xnnR_add. Qed.
 
 Print Assumptions sum_nnR_add.

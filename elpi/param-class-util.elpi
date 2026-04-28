@@ -68,7 +68,7 @@ type->classes.main X [] Class GR GR' :- !,
     std.rev Ts [T', T | _],
     coq.term->gref T GR, coq.term->gref T' GR'.
 
-% TODO Split this predicate and remove duplication with classes in annot.elpi (Issue #62)
+% TODO Split this predicate and remove duplication with classes in aterm.elpi (Issue #62)
 pred type->classes i:term, o:param-class, o:list param-class, o:gref, o:gref.
 type->classes T OutClass DepClasses GR GR' :-
   type->classes.main T DepClasses LastClass GR GR',

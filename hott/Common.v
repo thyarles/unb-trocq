@@ -196,3 +196,6 @@ Definition mkParam2b0 {X Y : Type} (f : X -> Y) : Param2b0.Rel X Y
 
 Definition mkParam30 {X Y : Type} (f : X -> Y) : Param30.Rel X Y
   := Param30.BuildRel X Y (fun x y => f x = y) (Map3.BuildHas X Y _ f (fun _ _ e => e) (fun _ _ e => e)) (Map0.BuildHas Y X _).
+
+Definition mkParam03 {X Y : Type} (f : X -> Y) : Param03.Rel Y X
+  := Param03.BuildRel Y X (fun y x => f x = y) (Map0.BuildHas Y X _) (Map3.BuildHas X Y _ f (fun _ _ e => e) (fun _ _ e => e)).

@@ -115,9 +115,58 @@ namespace trocq.data {
     ),
     W = fun _ _ t\ fun _ _ t'\ fun _ _ tr\ WF t t' tr.
 
+  % data.traslations.grefs is the list of grefs that Trocq knows how to translate
+  func translations.grefs.extract (pred) -> gref.
+  translations.grefs.extract (trocq.db.gref G _ _ _ _) G :- !.
+  pred translations.grefs -> list gref.
+  translations.grefs Goals :- do-not-fail => (
+    std.findall (trocq.db.gref _ _ _ _ _) Translations,
+    std.map Translations translations.grefs.extract Goals
+  ).
+
+  % translations.of G is the list of registered translation goal of gref G
+  func translations.of.extract (pred) -> gref.
+  translations.of.extract (trocq.db.gref _ _ _ G' _) G' :- !.
+  pred translations.of gref -> list gref.
+  translations.of G Goals :- do-not-fail => (
+    std.findall (trocq.db.gref G _ _ _ _) Translations,
+    std.map Translations translations.of.extract Goals
+  ).
+
+  % translations.ins G is the list of registered input class levels for translation G ~ G'
+  func translations.ins.extract (pred) -> list param-class.
+  translations.ins.extract (trocq.db.gref _ _ Ins _ _) Ins :- !.
+  pred translations.ins gref, gref -> list (list param-class).
+  translations.ins G G' Inss :- do-not-fail => (
+    std.findall (trocq.db.gref G _ _ G' _) Translations,
+    std.map Translations translations.ins.extract Inss
+  ).
+
+  % translations.out G G' Ins is the list of registered translation goal of gref G
+  % with annotations Ins to goal G'.
+  func translations.out.extract (pred) -> param-class.
+  translations.out.extract (trocq.db.gref _ L _ _ _) L :- !.
+  pred translations.out gref, gref, list param-class -> list param-class.
+  translations.out G G' InLvl OutLvls :- do-not-fail => (
+    std.findall (trocq.db.gref G _ InLvl G' _) Translations,
+    std.map Translations translations.out.extract OutLvls
+  ).
+
 } % trocq.data
 
+namespace trocq {
+  % {gref G α L T TR} looks up the database to find a relation such that
+  % G @ (α,L) ~ T ∵ TR
+  pred data.gref i:gref, i:param-class, i:list param-class, o:term, o:term.
+  data.gref G Alpha List T TR :- var T, !,
+    % If T is uvar, we take the first matching rule from the database
+    trocq.db.gref G Alpha List TG TRG, !,
+    coq.env.global TG T,
+    coq.env.global TRG TR.
+  data.gref G Alpha List T TR :- coq.env.global TG T, !,
+    (trocq.db.gref G Alpha List TG TRG ; trocq.error.translation-not-found G Alpha List {coq.env.global TG}), !,
+    coq.env.global TRG TR.
+  data.gref G Alpha List T TR :- !,
+    trocq.error "NYI Registering trocq to a non-gref term".
 
-pred trocq.data.gref o:gref, o:param-class, o:list param-class, o:gref, o:gref.
-trocq.data.gref GR Out Classes GR' GRR :- trocq.db.gref GR Out Classes GR' GRR.
-trocq.data.gref GR Out _ _ _ :- trocq.error "cannot find" GR "at out class" Out.
+} % trocq

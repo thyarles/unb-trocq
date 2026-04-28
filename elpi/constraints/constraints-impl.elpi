@@ -59,18 +59,17 @@ dep-type C CR :-
     % are no constraints on it. 
 
 % D_K(C, C_1, ..., C_n)
-dep-gref GR T Tm' GRR :- 
-  logging.trace (coq.say "[dep-gref]" GR "at" T "to" Tm' "with" GRR), fail.
-dep-gref GR AT Tm' GRR :-
+dep-gref GR T Tm' TRR :- 
+  logging.trace (coq.say "[dep-gref]" GR "at" T "to" Tm' "with" TRR), fail.
+dep-gref GR AT Tm' TRR :-
   aterm.util.classes AT TCs OutOpt,
   util.option.value OutOpt (pc map0 map0) Out,
   if (var Out) (
     internal.link? Out ID,
     std.map TCs internal.link? IDs,
-    declare_constraint (internal.c.dep-gref ID GR AT Tm' GRR IDs) [_]
+    declare_constraint (internal.c.dep-gref ID GR AT Tm' TRR IDs) [_]
   ) (
-    trocq.data.gref GR Out Cs GR' GRR, !,
-    coq.env.global GR' Tm', !,
+    trocq.data.gref GR Out Cs Tm' TRR,
     std.forall2 TCs Cs eq
   ).
 
@@ -163,7 +162,7 @@ func c.db list prop.
 func c.dep-pi class-id, class-id, class-id.
 func c.dep-arrow class-id, class-id, class-id.
 func c.dep-type class-id, class-id.
-func c.dep-gref class-id, gref, aterm, term, gref, list class-id.
+func c.dep-gref class-id, gref, aterm, term, term, list class-id.
 func c.geq or class-id param-class, or class-id param-class.
 
 % trigger reduction of the graph
@@ -182,8 +181,8 @@ constraint c.graph c.dep-pi c.dep-arrow c.dep-type c.dep-gref c.geq c.reduce-gra
     cstr-graph.add-dep-type ID IDR G G',
     declare_constraint (c.graph G') [_]
   ).
-  rule \ (c.graph G) (c.dep-gref ID GR T Tm' GRR IDs) <=> (
-    cstr-graph.add-dep-gref ID GR T Tm' GRR IDs G G',
+  rule \ (c.graph G) (c.dep-gref ID GR T Tm' TRR IDs) <=> (
+    cstr-graph.add-dep-gref ID GR T Tm' TRR IDs G G',
     declare_constraint (c.graph G') [_]
   ).
   rule \ (c.graph G) (c.geq IDorC1 IDorC2) <=> (

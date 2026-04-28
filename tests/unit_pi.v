@@ -15,19 +15,22 @@ From Trocq Require Import Stdlib Trocq.
 
 Set Universe Polymorphism.
 
-Section TypeArrow.
+Section TrocqPi.
 
-    Variable (L L' : Type -> Type).
-    Variable (f : forall (A : Type) (A' : Type), (A -> A') -> L' A' -> L A).
+    Variable (A A' : Type).
+    Variable (f : A -> A').
 
-    Definition RL (A : Type) (A' : Type) (AR : Param10.Rel A A')
-        : Param01.Rel (L A) (L' A') := mkParam01 (f A A' (map AR)).
+    Definition Rf := mkParam30 f.
+    Trocq Use Rf.
 
-    Trocq Use RL.
+    Variable (B : A -> Type) (B' : A' -> Type).
+    Variable (BR : forall (a : A) (a' : A'), Rf a a' -> Param01.Rel (B a) (B' a')).
 
-    Goal (forall A : Type, L A).
+    Trocq Use BR.
+
+    Goal forall (a : A), B a.
         trocq.
-        enough (x : forall A' : Type, L' A') by exact x.
+        enough (x : forall a' : A', B' a') by exact x.
     Abort.
 
-End TypeArrow.
+End TrocqPi.
