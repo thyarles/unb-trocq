@@ -86,6 +86,13 @@ pred univalence o:constant.
 % The functional extentionality axiom, if one was added by `Trocq Register Funext`
 pred funext o:constant.
 
+
+%%% TROCQ UI
+
+pred coercion-enabled.
+:name "coercion-enabled"
+coercion-enabled :- false.
+
 } % trocq.db
 
 % gref GR ω [α_1, ..., α_n] GR' GRR

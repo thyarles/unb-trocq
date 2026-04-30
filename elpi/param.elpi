@@ -47,13 +47,13 @@ func param.store aterm -> aterm, term, term.
 % ==================================================================================================
 
 % TrocqConv + TrocqConst
-param Tm AT' Tm' GrefR :- aterm.util.global Tm GR, !, std.do! [
+param Tm AT' Tm' Witness :- aterm.util.global Tm GR, !, std.do! [
   logging.debug (coq.say "[param] Rule const :" Tm "@" AT'),
   annot.typecheck Tm AT,
   annot.sub-type AT AT',
-  cstr.dep-gref GR AT Tm' GRR,
-  weaken AT AT' {aterm->term Tm} Tm' (pglobal GRR _) GrefR, %TODO We should replace with a coq.env.global here
-  logging.debug (coq.say "[param] Out rule const :" Tm' "∵" GrefR)
+  cstr.dep-gref GR AT Tm' TRR,
+  weaken AT AT' {aterm->term Tm} Tm' TRR Witness,
+  logging.debug (coq.say "[param] Out rule const :" Tm' "∵" Witness)
 ].
 
 % TrocqConv + TrocqVar
@@ -65,6 +65,8 @@ param X T2 X' Witness :- name X, !,
   logging.debug (coq.say "[param] Out rule var :" X' "∵" Witness).
 
 % TrocqSort
+% TODO: This will fail if we don't have the same sort before and after ~
+% We should add a unify-eq between S and S'
 param
   (asort S CR as T)
   (asort _ C as AT)
@@ -157,8 +159,8 @@ param.args (aprod _ T Bk) B [X|Xs] [X'|Xs'] [X_T, X', XR|XRs] B0 :- !,
 param.args FunTy AB L _ _ _ :-
   trocq.error "[param.args] unsupported combination:" FunTy "&" AB "&" L.
 
-param X T _ _ :-
-  trocq.error "[param] unsupported combination:" X "@" T.
+param X T X' Witness :-
+  trocq.error "[param] unsupported combination:" X "@" T "~" X' "∵" Witness.
 
 % ==================================================================================================
 

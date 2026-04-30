@@ -17,10 +17,10 @@ Set Universe Polymorphism.
 
 Section N.
 
-    Trocq Logging trace.
     Inductive N : Set :=
     | Z : N
     | S : N -> N.
+    
     Fixpoint ad (n m : N) : N :=
         match n with
         | Z => m
@@ -31,7 +31,7 @@ Section N.
     Trocq Use NR.
     Definition NS {n n': N} (Rr : NR n n'): NR (S n) (S n'). admit. Admitted.
     Trocq Use NS. 
-    Definition Nad {n n' m m' : N} (Rr : NR n n') (Rr' : NR m m'): NR (ad n m) (ad n' m'). admit. Admitted.
+    Definition Nad {n n' : N} (Rr : NR n n') {m m' : N} (Rr' : NR m m'): NR (ad n m) (ad n' m'). admit. Admitted.
     Trocq Use Nad. 
 
     Variable (T : Type -> N -> Type) (T' : Type -> N -> Type).
@@ -41,24 +41,24 @@ Section N.
     Variable (cons' : forall {A : Type} {n : N}, A -> T' A n -> T' A (S n)).
 
     Definition NT {A A' : Type} (AR : Param00.Rel A A')
-{n n' : N} (nR : NR n n'): Param2a2b.Rel (T A n) (T' A' n'). admit. Admitted.
-Trocq Use NT.
+        {n n' : N} (nR : NR n n'): Param2a2b.Rel (T A n) (T' A' n'). admit. Admitted.
+    Trocq Use NT.
 
 
-Definition Ncons {A A' : Type} (AR : Param00.Rel A A')
-    {n n' : N} (nR : NR n n')
-    {a : A} {a' : A'} (aR : AR a a')
-    {t : T A n} {t' : T' A' n'} (tR : NT AR nR t t') :
-    NT AR (NS nR) (cons a t) (cons' a' t'). admit. Admitted. 
-Trocq Use Ncons.
+    Definition Ncons {A A' : Type} (AR : Param00.Rel A A')
+        {n n' : N} (nR : NR n n')
+        {a : A} {a' : A'} (aR : AR a a')
+        {t : T A n} {t' : T' A' n'} (tR : NT AR nR t t') :
+        NT AR (NS nR) (cons a t) (cons' a' t'). admit. Admitted. 
+    Trocq Use Ncons.
 
-Definition Nappend {A A' : Type} (AR : Param00.Rel A A')
-    {n n' : N} (nR : NR n n')
-    {m m' : N} (mR : NR m m')
-    {t : T A n} {t' : T' A' n'} (tR : NT AR nR t t')
-    {u : T A m} {u' : T' A' m'} (uR : NT AR mR u u') :
-    NT AR (Nad nR mR) (append t u) (append' t' u'). admit. Admitted. 
-Trocq Use Nappend.
+    Definition Nappend {A A' : Type} (AR : Param00.Rel A A')
+        {n n' : N} (nR : NR n n')
+        {m m' : N} (mR : NR m m')
+        {t : T A n} {t' : T' A' n'} (tR : NT AR nR t t')
+        {u : T A m} {u' : T' A' m'} (uR : NT AR mR u u') :
+        NT AR (Nad nR mR) (append t u) (append' t' u'). admit. Admitted. 
+    Trocq Use Nappend.
 
     Variable (P : forall {A : Type} {n : N}, T A n -> Type).
     Variable (P' : forall {A : Type} {n : N}, T' A n -> Type).
@@ -72,7 +72,10 @@ Trocq Use Nappend.
     Goal forall {A : Type} {n1 n2 : N}
         (v1 : T A n1) (v2 : T A n2) (a : A),
         P (cons a (append v1 v2)).
-    trocq.
+        trocq.
+        enough (x : forall {A' : Type} {n1' n2' : N}
+            (v1' : T' A' n1') (v2' : T' A' n2') (a' : A'),
+            P' (cons' a' (append' v1' v2'))) by exact x.
     Abort.
 
 End N.

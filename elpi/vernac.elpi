@@ -12,6 +12,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 accumulate "Trocq.Elpi/param-class-util".
+accumulate "Trocq.Elpi/aterm".
+accumulate "Trocq.Elpi/data".
 
 % command to register the univalence axiom
 main [str "Register", str "Univalence", str S] :- !, std.do! [
@@ -73,6 +75,10 @@ main [str "Use", X] :- !, std.do! [
   coq.elpi.accumulate _ "trocq.db"
     (clause _ _
       (trocq.db.gref GR Class CList GR' GRR)),
+  % We check that inferred Class and CList are valid for given gref.
+  coq.env.typeof GR TGR,
+  (aterm.util.mk-aterm TGR CList (some Class) _; trocq.error "Trocq could not infer classes levels for this term"), !,
+
   std.forall {param-class.all-weakenings-from Class} subclass\
       sigma WTRR Suffix WName WCRR \
     if (trocq.db.gref GR subclass _ _ _) true (std.do! [
@@ -152,6 +158,42 @@ main [str "Logging", str StrLevel] :- !,
     log-level Level
   ).
 
+main [str "Coercion", str "On"] :- !,
+  coq.elpi.accumulate _ "trocq.db" (
+    clause "coercion-enabled-on" (before "coercion-enabled") (trocq.db.coercion-enabled)
+  ).
+
+main [str "Coercion", str "Off"] :- !,
+  coq.elpi.accumulate _ "trocq.db" (
+    clause _ (remove "coercion-enabled-on") (trocq.db.coercion-enabled :- !, fail)
+  ).
+
+main [str "Print", str "Translations"] :- !,
+  trocq.data.translations.grefs Goals,
+  std.forall {util.cmp-undup cmp_term Goals} (G\ sigma GS\
+    trocq.data.translations.of G GS,
+    coq.info {coq.gref->string G} "->" {util.cmp-undup cmp_term {std.map GS coq.gref->string}}
+  ).
+
+main [str "Print", str "Translations", Obj] :- !,
+  util.argument->gref Obj G,
+  coq.info "Registered translations of" {coq.gref->string G} ":",
+  trocq.data.translations.of G GS,
+  std.forall {util.cmp-undup cmp_term GS} (G'\ sigma SG' Inss InssU\
+    coq.gref->string G' SG',
+    coq.info "->" SG',
+    trocq.data.translations.ins G G' Inss,
+    util.cmp-undup {util.lexicographic-cmp cmp_term} Inss InssU,
+    std.forall InssU (Ins\ sigma Outs UOuts SUOuts SIns\
+      trocq.data.translations.out G G' Ins Outs,
+      % We only show upper bounds as we suppose that all weakenings have been generated
+      param-class.upper-bounds Outs UOuts,
+      std.map UOuts param-class.to_string SUOuts,
+      std.map Ins param-class.to_string SIns,
+      coq.info "lvl" SIns "->" SUOuts
+    )
+  ).
+
 main _ :- trocq.error {std.string.concat "\n" ["command syntax error", {usage-msg}]}.
 
 pred usage-msg o:string.
@@ -162,6 +204,8 @@ usage-msg U :-
     "- Trocq Register Funext <f>",
     "- Trocq Use <RTrocq>+",
     "- Trocq RelatedWith <Relation> <RTrocq>+",
-    "- Trocq Logging [\"off\"|\"info\"|\"debug\"|\"trace\"]",
+    "- Trocq Logging (\"off\"|\"info\"|\"debug\"|\"trace\")",
+    "- Trocq Coercion (\"On\"|\"Off\")",
+    "- Trocq Print Translations [Gref]",
     "", "",
   ] U.

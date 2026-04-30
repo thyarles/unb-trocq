@@ -129,7 +129,7 @@ Lemma IntRedModZp :
  forall (m n : int),  m = int_mul n n -> eqmodp m n.
 Proof.
 move=> Hyp.
-trocq Rp; simpl.
+trocq with Rp; simpl.
 exact: Hyp.
 Qed.
 

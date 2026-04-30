@@ -41,7 +41,7 @@ Section Transfer.
     Trocq Use Rqe.
 
     Goal forall (m : I), qe m m -> pe m.
-        assert (H : True) by trivial.
+        assert (H : True -> True) by exact (fun x => x).
         trocq.
         enough (x : forall m : I', qe' m m -> pe' m) by exact x.
     Abort.

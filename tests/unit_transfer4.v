@@ -32,7 +32,7 @@ Section Transfer.
     Trocq Use Rpe.
 
     Goal forall (m : I), m = m -> pe m.
-        assert (H : True) by trivial.
+        assert (H : True -> True) by exact (fun x => x).
         trocq.
         enough (x : forall m : I', m = m -> pe' m) by exact x.
     Abort.

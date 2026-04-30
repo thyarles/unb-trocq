@@ -2,9 +2,9 @@ all: hott std
 .PHONY: all
 
 hott:
-	$(MAKE) -C hott all
 	rm -f _CoqProject
 	ln -s hott/_CoqProject _CoqProject
+	$(MAKE) -C hott all
 .PHONY: hott
 
 install-hott: hott
@@ -13,9 +13,9 @@ install-hott: hott
 
 
 std:
-	$(MAKE) -C std all
 	rm -f _CoqProject
 	ln -s std/_CoqProject _CoqProject
+	$(MAKE) -C std all
 .PHONY: std
 
 install-std: std
@@ -24,15 +24,15 @@ install-std: std
 
 
 test-std: std
-	$(MAKE) COQPROJECTFILE=./_CoqProject.std -C tests all
 	rm -f tests/_CoqProject
-	ln -s tests/_CoqProject.std tests/_CoqProject
+	ln -sr tests/_CoqProject.std tests/_CoqProject
+	$(MAKE) COQPROJECTFILE=./_CoqProject.std -C tests all
 .PHONY: test-std
 
 test-hott: hott
-	$(MAKE) COQPROJECTFILE=./_CoqProject.hott -C tests all
 	rm -f tests/_CoqProject
-	ln -s tests/_CoqProject.hott tests/_CoqProject
+	ln -sr tests/_CoqProject.hott tests/_CoqProject
+	$(MAKE) COQPROJECTFILE=./_CoqProject.hott -C tests all
 .PHONY: test-hott
 
 clean:

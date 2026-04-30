@@ -270,6 +270,19 @@ to-string (pc M N) String :- std.do! [
   String is MStr ^ NStr
 ].
 
+% Returns the set of upper bounds of input list
+func upper-bounds list param-class -> list param-class.
+upper-bounds [] [] :- !.
+upper-bounds [X|Xs] T :-
+  upper-bounds Xs T,
+  std.exists! T (y\ geq y X), !.
+upper-bounds [X|Xs] [X|T'] :-
+  upper-bounds Xs T,
+  std.exists! T (y\ geq X y), !,
+  std.filter T (y\ not (geq X y)) T'.
+upper-bounds [X|Xs] [X|T] :-
+  upper-bounds Xs T, !.
+
 % succeed if the parametricity class contains a map class over 2b
 % this means that a translation of a sort at this class will require univalence,
 % and the translation of a dependent product will require funext

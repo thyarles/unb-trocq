@@ -5,35 +5,25 @@
 -R ../elpi/ Trocq.Elpi
 
 unit_arrow_contravariant.v
-unit_simpleArrow.v
+unit_coercion_deptype.v
+unit_coercion_onoff.v
+unit_coercion_pi.v
+unit_coercion.v
+unit_comm1.v
+unit_comm2.v
+unit_lambda_type.v
+unit_n.v
+unit_pi.v
+unit_print_translations.v
 unit_relatedWith.v
-unit_type.v
+unit_simpleArrow.v
+unit_simplePi.v
+unit_to.v
 unit_transfer1.v
 unit_transfer2.v
+unit_transfer3.v
 unit_transfer4.v
 unit_transfer5.v
-unit_n.v
-
-
-# Trocq produces an ill-typed term
-#unit_transfer3.v
-#unit_comm1.v
-#unit_comm2.v
-
-# Bug with trocq ?
-# The generated type has the wrong type
-# Trocq generates the following term that does not typecheck
-# Param01_forall A A' Rf B B' (fun (X : A) (X' : A') (XR : Param2a0.R A A' Rf X X') => Rg X X' XR
-# The XR makes the typechecking fail
-# unit_simplePi.v
-
-# Bug with trocq ?
-# The generated term has the wrong type
-# unit_typeArrow.v
-
-# Waiting for 'trocq to' syntax to be implemented and working
-# unit_twoTranslations.v
-
-# Failing with a elpi error «Unification problem outside the pattern fragment.»
-# Actually uses the constraint graph
-# unit_lambda_type.v
+unit_twoTranslations.v
+unit_typeArrow.v
+unit_type.v
