@@ -1,8 +1,8 @@
 From Trocq Require Import Relnm. 
 Require Import coverage.
 
-Elpi derive False.
-Check False_rel44.
+Elpi derive testFalse.
+Check testFalse_rel44.
 
 Elpi derive testUnit.
 Check  testUnit_rel44.

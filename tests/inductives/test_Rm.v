@@ -2,9 +2,9 @@ From Trocq Require Import Rm.
 Require Import coverage.
 Unset Uniform Inductive Parameters.
 
-Elpi derive.param2 False.
-Elpi derive.mymap False.
-Elpi derive.Rm False.
+Elpi derive.param2 testFalse.
+Elpi derive.mymap testFalse.
+Elpi derive.Rm testFalse.
 
 Elpi derive.param2 testUnit.
 Elpi derive.mymap testUnit.

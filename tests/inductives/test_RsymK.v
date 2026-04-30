@@ -3,10 +3,10 @@ From elpi.apps Require Import derive.param2.
 From Trocq Require Import sym symK RsymK.
 Require Import coverage.
 
-Elpi derive.param2 False.
-Elpi derive.sym False.
-Elpi derive.symK False.
-Elpi derive.rsymK False.
+Elpi derive.param2 testFalse.
+Elpi derive.sym testFalse.
+Elpi derive.symK testFalse.
+Elpi derive.rsymK testFalse.
 
 Elpi derive.param2 testUnit.
 Elpi derive.sym testUnit.

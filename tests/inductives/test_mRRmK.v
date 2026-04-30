@@ -2,15 +2,15 @@ From Trocq Require Import mR Rm injK mRRmK.
 Require Import coverage.
 Unset Uniform Inductive Parameters.
 
-Elpi derive.param2 False.
-Elpi derive.mymap False.
-Elpi derive.projK False.
-Elpi derive.injections False.
-Elpi derive.isK False.
-Elpi derive.mR False.
-Elpi derive.Rm False.
-Elpi derive.injK False.
-Elpi derive.mRRmK False.
+Elpi derive.param2 testFalse.
+Elpi derive.mymap testFalse.
+Elpi derive.projK testFalse.
+Elpi derive.injections testFalse.
+Elpi derive.isK testFalse.
+Elpi derive.mR testFalse.
+Elpi derive.Rm testFalse.
+Elpi derive.injK testFalse.
+Elpi derive.mRRmK testFalse.
 
 Elpi derive.param2 testUnit.
 Elpi derive.mymap testUnit.

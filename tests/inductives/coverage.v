@@ -1,6 +1,11 @@
 Unset Universe Polymorphism.
+From elpi Require Import elpi.
+From elpi.apps Require Import derive derive.param2.
 
-Inductive False : Set :=.
+From Trocq Require Import sym.
+Unset Uniform Inductive Parameters. 
+
+Inductive testFalse : Set :=.
 
 Inductive testUnit : Set := 
 | TT : testUnit.

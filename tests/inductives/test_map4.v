@@ -2,8 +2,8 @@ From Trocq Require Import map4.
 Require Import coverage.
 Unset Uniform Inductive Parameters.
 
-Elpi derive False.
-Check False_mRRmK : forall f1 f2 fR, False_mR f1 f2 (False_Rm f1 f2 fR) = fR.
+Elpi derive testFalse.
+Check testFalse_mRRmK : forall f1 f2 fR, testFalse_mR f1 f2 (testFalse_Rm f1 f2 fR) = fR.
 
 Elpi derive testUnit.
 Check testUnit_mRRmK : forall u1 u2 uR, testUnit_mR u1 u2 (testUnit_Rm u1 u2 uR) = uR.
