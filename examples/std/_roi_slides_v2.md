@@ -282,3 +282,198 @@ crosses zero at $n \approx 13.6$, then asymptotes to $1.83\times$.
 
 > Trocq's true competition is the pragmatic developer who copies a working proof
 > and presses **F5**. That developer wins for $n < 14$. Trocq wins for large libraries.
+
+---
+
+<!-- _class: chapter -->
+<!-- _paginate: false -->
+
+# Experiment 2: `bs_a2.v`
+
+*Fixing the cheat — true polymorphism via Typeclasses*
+
+---
+
+## The Design Flaw in `bs_a1.v`
+
+`bs_a1.v` made a quiet design choice that enabled the clean copy-paste:
+
+```coq
+(* bs_a1.v — the cheat: operations typed at PList nat *)
+Fixpoint plength (l : PList nat) : nat := ...
+Fixpoint papp (l1 l2 : PList nat) : PList nat := ...
+Fixpoint prev (l : PList nat) : PList nat := ...
+```
+
+The professor's question exposed it:
+
+> *"Since `PList` is polymorphic, how do you sum its elements? Who is the addition operator?"*
+
+**`bs_a2.v` fixes both problems:**
+
+```coq
+(* bs_a2.v — truly polymorphic structural operations *)
+Fixpoint plength {A : Type} (l : PList A) : nat := ...
+Fixpoint papp    {A : Type} (l1 l2 : PList A) : PList A := ...
+Fixpoint prev    {A : Type} (l : PList A) : PList A := ...
+
+(* Typeclass: who provides addition? *)
+Class Addable (A : Type) := {
+  add        : A -> A -> A;
+  zero       : A;
+  add_assoc  : forall x y z, add (add x y) z = add x (add y z);
+  add_zero_l : forall x, add zero x = x;
+  add_zero_r : forall x, add x zero = x
+}.
+
+Fixpoint psum {A} {H : Addable A} (l : PList A) : A :=
+  match l with PNil => zero | PCons h t => add h (psum t) end.
+```
+
+---
+
+## Phase 3 — Where Copy-Paste Breaks
+
+Structural theorems (`plength`, `papp`, `prev`) still copy-paste perfectly — they traverse the spine only, not the values.
+
+**`psum_papp_manual` breaks in two places:**
+
+<div class="cols">
+
+**`nsum_napp` — NatList (works)**
+```coq
+(* 5 steps *)
+Proof.
+  intros l1 l2.
+  induction l1 as [|h t IH]; simpl.
+  - reflexivity.       (* 0+x=x is definitional *)
+  - rewrite IH. lia.   (* lia handles ℕ arithmetic *)
+Defined.
+```
+
+**`psum_papp_manual` — PList A (diverges)**
+```coq
+(* 8 steps — 2 divergences *)
+Proof.
+  intros A H l1 l2.
+  induction l1 as [|h t IH]; simpl.
+  - symmetry. apply add_zero_l.
+    (* ← DIVERGENCE 1: add_zero_l is an axiom *)
+  - rewrite IH. symmetry. apply add_assoc.
+    (* ← DIVERGENCE 2: lia fails on abstract A *)
+Defined.
+```
+
+</div>
+
+| Step | NatList | PList A | Root cause |
+|---|---|---|---|
+| Base case | `reflexivity` | `symmetry. apply add_zero_l` | `add zero x = x` is an axiom, not definitional |
+| Inductive | `rewrite IH. lia` | `rewrite IH. symmetry. apply add_assoc` | `lia` is ℕ/ℤ only |
+
+**Setup cost: 0.** But the per-theorem cost for `psum` theorems is now **8** instead of 7.
+
+$$P_{\text{paste}}^{a2} = \frac{5 + 5 + 7 + 8}{4} = 6.25 \text{ steps/theorem}$$
+
+---
+
+## Phase 4+5 — Trocq Handles the Typeclass Gap
+
+The new `inst_addable_nat` instance bridges the abstract `add` to `Nat.add`:
+
+```coq
+#[global] Instance inst_addable_nat : Addable nat := {
+  add       := Nat.add;    zero      := 0;
+  add_assoc := ltac:(intros; lia);
+  add_zero_l := ltac:(intros; lia);  add_zero_r := ltac:(intros; lia)
+}.
+```
+
+Because `inst_addable_nat` makes `@add nat inst_addable_nat` **definitionally equal** to `Nat.add`, the existing `Param_add` registration applies directly. The `R__psum` wrapper needs only **5 steps** — same as the structural wrappers:
+
+```coq
+Lemma R__psum (l : _PList) (l' : NatList) (lR : rel R_NatList l l') :
+    natR (_psum l) (nsum l').
+Proof.
+  change (plist_2_nlist l = l') in lR.
+  apply map_in_R_nat.
+  rewrite plist_2_nlist_sum.   (* new bridge lemma *)
+  rewrite lR. reflexivity.
+Defined.
+
+Theorem _psum_papp : forall (l1 l2 : _PList),
+    _psum (_papp l1 l2) = _psum l1 + _psum l2.
+Proof. trocq. apply nsum_napp. Qed.   (* 2 steps *)
+```
+
+| Item | bs\_a1.v | bs\_a2.v |
+|---|---|---|
+| $S_{\text{bij}}$ | 13 | 13 (same) |
+| Bridge lemmas | 17 | 23 (+`_psum`: 6) |
+| R__ wrappers + Use | 20 | 26 (+`R__psum`: 6) |
+| **$S_{\text{setup}}$** | **50** | **62** |
+
+---
+
+## Cost Formulas & Break-Even (bs\_a2.v)
+
+$$C_{\text{manual}}^{a2}(n) = 6.25\,n \qquad C_{\text{trocq}}^{a2}(n) = 62 + 2n$$
+
+$$6.25\,n^* = 62 + 2n^* \implies 4.25\,n^* = 62 \implies n^* = \frac{62}{4.25} \approx 14.6$$
+
+**From $n = 15$ onwards, Trocq is strictly cheaper** (up from 14 in `bs_a1.v`).
+
+| $n$ | $C_M^{a1}$ | $C_T^{a1}$ | $C_M^{a2}$ | $C_T^{a2}$ |
+|-----|------|------|------|------|
+| 5   | 28   | 60   | 31   | 72   |
+| 10  | 57   | 70   | 63   | 82   |
+| 15  | 85   | 80✓  | 94   | 92✓  |
+| 20  | 113  | 90   | 125  | 102  |
+| 30  | 170  | 110  | 188  | 122  |
+
+---
+
+## Cost Comparison Graph
+
+![width:720px](_graphs_v2/graph_03_cost_comparison.png)
+
+**Solid lines** = `bs_a1.v` (monomorphic PList nat).
+**Dashed lines** = `bs_a2.v` (truly polymorphic + Typeclass).
+Both Trocq lines are parallel (slope = 2); manual lines diverge slightly due to higher $P_M^{a2}$.
+
+---
+
+## ROI Comparison Graph
+
+![width:720px](_graphs_v2/graph_04_roi_comparison.png)
+
+| Metric | `bs_a1.v` | `bs_a2.v` | Δ |
+|---|---|---|---|
+| $P_{\text{paste}}$ | $\approx 5.67$ | $6.25$ | +0.58 |
+| $S_{\text{setup}}$ | $50$ | $62$ | +12 |
+| $n^*$ | $\approx 13.6$ | $\approx 14.6$ | +1 |
+| $\text{ROI}_\infty$ | $\approx 1.83\times$ | $\approx 2.125\times$ | **+0.3×** |
+
+The Typeclass divergence adds 1 theorem to the break-even, but raises the long-run ceiling by 0.3×.
+
+---
+
+## Takeaway: What `bs_a2.v` Teaches
+
+**The Typeclass divergence cost is modest and mostly absorbed by setup:**
+
+- `psum_papp_manual` cost 8 steps instead of 7 (+1 step, +2 explicit axiom rewrites)
+- Trocq handled the same divergence in its existing 5-step `R__psum` wrapper — no extra complexity
+- The break-even shifted from $n \approx 14$ to $n \approx 15$ — a rounding of 1
+
+**The key asymmetry:**
+
+| | Manual (copy-paste) | Trocq |
+|---|---|---|
+| Typeclass axiom mismatch | Divergence visible in every proof body | Absorbed once into `R__psum` + `inst_addable_nat` |
+| Each new `psum`-style theorem | 8 steps (forever) | 2 steps (forever) |
+| As vocabulary grows ($f \uparrow$) | $P_M$ stays constant | $S_{\text{setup}}$ grows, $n^*$ rises |
+
+> **Refined lesson:** Trocq does not eliminate the cost of Typeclass abstractions —
+> it **relocates** that cost to the one-time setup, away from each individual theorem.
+> For large libraries, this relocation is the dominant economic advantage.

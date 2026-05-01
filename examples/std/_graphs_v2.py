@@ -196,8 +196,163 @@ def graph_02_roi():
     print(f"Saved {path}")
 
 
+# ── bs_a2.v constants ───────────────────────────────────────────────────────
+#
+#   Phase 3  (Manual — Ctrl+C / Ctrl+V, 4 theorems):
+#     plength_papp_manual = 5, papp_assoc_manual = 5,
+#     prev_papp_manual = 7,  psum_papp_manual = 8  (2 Typeclass divergences)
+#     P_PASTE_A2 = (5 + 5 + 7 + 8) / 4 = 6.25 steps/theorem
+#     C_manual_a2(n) = P_PASTE_A2 * n
+#
+#   Phase 4+5  (Trocq):
+#     S_bij = 13  (same)
+#     Bridge lemmas: 5 + 6 + 6 + 6 = 23
+#     R__ wrappers:  5 + 7 + 5 + 5 = 22
+#     Trocq Use x4 (per-function) = 4
+#     S_SETUP_A2 = 13 + 23 + 22 + 4 = 62
+#     C_trocq_a2(n) = 62 + 2*n
+#
+#   Break-even: 6.25n = 62 + 2n  =>  4.25n = 62  =>  n* = 62/4.25 ≈ 14.6
+#   ROI_inf_a2 = (6.25 - 2) / 2 = 4.25/2 = 2.125
+#
+P_PASTE_A2 = 6.25
+S_SETUP_A2 = 62
+N_STAR_A2  = 62 / 4.25     # ≈ 14.6
+ROI_INF_A2 = 4.25 / 2      # = 2.125
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# graph_03_cost_comparison
+# All four cost lines on one plot:
+#   C_manual_a1(n) = (17/3)*n ≈ 5.67n   C_trocq_a1(n) = 50 + 2n
+#   C_manual_a2(n) = 6.25*n              C_trocq_a2(n) = 62 + 2n
+# Both break-even points marked.
+# ══════════════════════════════════════════════════════════════════════════
+def graph_03_cost_comparison():
+    n = np.linspace(0, 30, 600)
+
+    c_m_a1 = P_PASTE    * n
+    c_t_a1 = S_SETUP    + 2 * n
+    c_m_a2 = P_PASTE_A2 * n
+    c_t_a2 = S_SETUP_A2 + 2 * n
+
+    ORANGE2 = "#e6820e"   # darker orange for a2 manual
+    BLUE2   = "#0a4f8c"   # darker blue  for a2 trocq
+
+    fig, ax = plt.subplots(figsize=(9, 5.5))
+
+    ax.plot(n, c_m_a1, color=ORANGE, lw=2.5, ls="-",
+            label=r"$C_M^{a1}(n)=\frac{17}{3}n\approx5.67n$  (bs\_a1, copy-paste)")
+    ax.plot(n, c_t_a1, color=BLUE,   lw=2.5, ls="-",
+            label=r"$C_T^{a1}(n)=50+2n$  (bs\_a1, Trocq)")
+    ax.plot(n, c_m_a2, color=ORANGE2, lw=2.5, ls="--",
+            label=r"$C_M^{a2}(n)=6.25n$  (bs\_a2, copy-paste)")
+    ax.plot(n, c_t_a2, color=BLUE2,   lw=2.5, ls="--",
+            label=r"$C_T^{a2}(n)=62+2n$  (bs\_a2, Trocq)")
+
+    # Break-even markers
+    for n_star, p_paste, s_setup, color, label in [
+        (N_STAR,    P_PASTE,    S_SETUP,    "black",  r"$n^*_{a1}\approx13.6$"),
+        (N_STAR_A2, P_PASTE_A2, S_SETUP_A2, "#444444", r"$n^*_{a2}\approx14.6$"),
+    ]:
+        y_star = p_paste * n_star
+        ax.axvline(n_star, color=GREY, lw=1.2, ls=":")
+        ax.scatter([n_star], [y_star], color=color, zorder=5, s=55)
+        ax.annotate(label,
+                    xy=(n_star, y_star),
+                    xytext=(n_star + 0.8, y_star + 7),
+                    fontsize=9,
+                    arrowprops=dict(arrowstyle="->", color=color, lw=1))
+
+    ax.set_xlabel("Number of theorems transferred  ($n$)", fontsize=11)
+    ax.set_ylabel("Total tactic steps", fontsize=11)
+    ax.set_title(
+        "Cost Comparison: bs\_a1.v vs bs\_a2.v\n"
+        "Solid = bs\_a1 (PList nat, 3 theorems), "
+        "Dashed = bs\_a2 (PList A + Typeclass, 4 theorems)",
+        fontsize=11,
+    )
+    ax.legend(fontsize=8.5, loc="upper left")
+    ax.set_xlim(0, 30)
+    ax.set_ylim(0, 190)
+
+    fig.tight_layout()
+    path = os.path.join(OUT, "graph_03_cost_comparison.png")
+    fig.savefig(path, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved {path}")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# graph_04_roi_comparison
+# Two ROI curves on one axes:
+#   ROI_a1(n) = ((11/3)*n - 50) / (50 + 2n)   asymptote 1.83x
+#   ROI_a2(n) = (4.25*n  - 62) / (62 + 2n)    asymptote 2.125x
+# Both zero-crossings and both asymptotes marked.
+# ══════════════════════════════════════════════════════════════════════════
+def graph_04_roi_comparison():
+    n = np.linspace(0, 60, 800)
+
+    roi_a1 = ((P_PASTE    - 2) * n - S_SETUP)    / (S_SETUP    + 2 * n)
+    roi_a2 = ((P_PASTE_A2 - 2) * n - S_SETUP_A2) / (S_SETUP_A2 + 2 * n)
+
+    fig, ax = plt.subplots(figsize=(9, 5))
+
+    ax.fill_between(n, roi_a1, 0,
+                    where=(roi_a1 >= 0), alpha=0.08, color=GREEN)
+    ax.fill_between(n, roi_a2, 0,
+                    where=(roi_a2 >= 0), alpha=0.08, color=BLUE)
+
+    ax.plot(n, roi_a1, color=ORANGE, lw=2.5,
+            label=r"$\mathrm{ROI}_{a1}(n)$  (bs\_a1, $P_M\approx5.67$, $S=50$)")
+    ax.plot(n, roi_a2, color=BLUE,   lw=2.5, ls="--",
+            label=r"$\mathrm{ROI}_{a2}(n)$  (bs\_a2, $P_M=6.25$, $S=62$)")
+
+    ax.axhline(0, color="black", lw=1.0)
+
+    # Asymptote lines
+    ax.axhline(ROI_INF,    color=ORANGE, lw=1.2, ls=":", alpha=0.7)
+    ax.axhline(ROI_INF_A2, color=BLUE,   lw=1.2, ls=":", alpha=0.7)
+    ax.text(53, ROI_INF    + 0.05, r"$\to1.83\times$ (a1)", fontsize=8.5, color=ORANGE)
+    ax.text(53, ROI_INF_A2 + 0.05, r"$\to2.125\times$ (a2)", fontsize=8.5, color=BLUE)
+
+    # Zero-crossing markers
+    for n_star, color in [(N_STAR, ORANGE), (N_STAR_A2, BLUE)]:
+        ax.axvline(n_star, color=GREY, lw=1.2, ls=":")
+        ax.scatter([n_star], [0], color=color, zorder=5, s=55)
+
+    ax.annotate(r"$n^*_{a1}\approx13.6$", xy=(N_STAR, 0),
+                xytext=(N_STAR + 1.5, -0.28), fontsize=9,
+                arrowprops=dict(arrowstyle="->", color=ORANGE, lw=1))
+    ax.annotate(r"$n^*_{a2}\approx14.6$", xy=(N_STAR_A2, 0),
+                xytext=(N_STAR_A2 + 1.5, -0.45), fontsize=9,
+                arrowprops=dict(arrowstyle="->", color=BLUE, lw=1))
+
+    ax.set_xlabel("Number of theorems transferred  ($n$)", fontsize=11)
+    ax.set_ylabel(r"$\mathrm{ROI}(n) = (C_M - C_T)\,/\,C_T$", fontsize=11)
+    ax.set_title(
+        "ROI Comparison: bs\_a1.v vs bs\_a2.v\n"
+        "True polymorphism raises both $P_M$ and $S_{\\rm setup}$, "
+        "but lifts the long-run ceiling from 1.83× to 2.125×",
+        fontsize=11,
+    )
+    ax.legend(fontsize=9.5, loc="upper left")
+    ax.set_xlim(0, 60)
+    ax.set_ylim(-1.4, 2.8)
+    ax.yaxis.set_major_formatter(
+        ticker.FuncFormatter(lambda y, _: f"{y:.2g}x"))
+
+    fig.tight_layout()
+    path = os.path.join(OUT, "graph_04_roi_comparison.png")
+    fig.savefig(path, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved {path}")
+
+
 # ── Entry point ─────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     graph_01_cost()
     graph_02_roi()
+    graph_03_cost_comparison()
+    graph_04_roi_comparison()
     print("\nAll graphs generated successfully.")
