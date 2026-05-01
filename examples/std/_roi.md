@@ -272,3 +272,80 @@ For a vocabulary of only `psum`/`nsum`, Trocq's long-run surplus is **250%** —
 ## 7. Key Takeaway from `bs_p7.v`
 
 > `bs_p7.v` validates the Third Try model: the break-even is governed by theorem complexity ($c_{\text{avg}}$), not by which function is being transferred. Two functions with the same syntactic complexity yield the same ROI curve. Trocq's advantage is consistent and predictable across the function vocabulary.
+
+# ROI - Fifth Try
+
+## The Ctrl+C, Ctrl+V Realisation
+
+All previous analyses shared a hidden flaw in the *manual* baseline: they modelled manual proof transfer as requiring explicit **bijections**, **conversion functions**, and **bridge lemmas** — the same infrastructure Trocq needs. A real human developer does none of that. They just copy-paste the NatList proof, rename the types, and run it.
+
+`bs_a1.v` formalises this reality. The monomorphic design choice — typing `plength`, `papp`, `prev` as `PList nat → …` instead of `∀ {A}, PList A → …` — ensures that every copy-paste proof body is **tactic-identical** to its NatList source. No `intros A`. No extra rewrites. Pure renaming.
+
+## 1. Concrete Counts from `bs_a1.v`
+
+**Phase 2 — Copy-Paste Manual:**
+
+| Lemma / Theorem | Tactic steps |
+|---|---|
+| `papp_nil_r` (auxiliary) | 4 |
+| `plength_papp_manual` | 5 |
+| `papp_assoc_manual` | 5 |
+| `prev_papp_manual` | 7 |
+| **Fixed setup cost** | **0** |
+
+$$P_{\text{paste}} = \frac{5 + 5 + 7}{3} = \frac{17}{3} \approx 5.67 \text{ steps/theorem}$$
+
+**Phase 3 — Trocq (full bureaucracy):**
+
+| Item | Tactic steps |
+|---|---|
+| `plist_nlist_iso` | 4 |
+| `nlist_plist_iso` | 4 |
+| `R_NatList` via `Iso.toParam` | 5 |
+| Shared `Trocq Use` ×3 | 3 |
+| `_plength`: bridge(5) + `R__`(5) + `Use`(1) | 11 |
+| `_papp`: bridge(6) + `R__`(7) + `Use`(1) | 14 |
+| `_prev`: bridge(6) + `R__`(5) + `Use`(1) | 12 |
+| **$S_{\text{setup}}$ total** | **50** |
+| Per theorem ×3 (`trocq.` + `apply`) | 6 |
+
+## 2. The New Cost Formulas
+
+$$C_{\text{manual}}(n) = n \cdot P_{\text{paste}} = \frac{17}{3} \cdot n \approx 5.67 \cdot n$$
+
+$$C_{\text{trocq}}(n) = \underbrace{S_{\text{bij}} + f \cdot (S_{\text{bridge}} + W_{\text{trocq}})}_{S_{\text{setup}} = 50} + n \cdot 2 = 50 + 2n$$
+
+where $f = 3$ functions, $S_{\text{bij}} = 13$, and $f \cdot (S_{\text{bridge}} + W_{\text{trocq}}) = 37$.
+
+## 3. Break-Even Point
+
+$$C_{\text{manual}}(n^*) = C_{\text{trocq}}(n^*) \implies \frac{17}{3} n^* = 50 + 2n^* \implies \frac{11}{3} n^* = 50 \implies n^* = \frac{150}{11} \approx 13.6$$
+
+**Trocq becomes cheaper only from $n \geq 14$ theorems.**
+
+## 4. Comparison Table
+
+| | Fourth Try | **Fifth Try (Ctrl+C/Ctrl+V)** |
+|---|---|---|
+| Manual strategy | bijection + rewrite script | pure copy-paste |
+| Manual fixed cost | shared with Trocq | **0** |
+| $P_{\text{manual}}$ per theorem | 7 steps | **5.67 steps** |
+| $S_{\text{setup}}$ (Trocq) | 15 steps | **50 steps** |
+| Break-even $n^*$ | ≈ 1.2 | **≈ 13.6** |
+| $\text{ROI}_{\infty}$ | 2.5× | **1.83×** |
+
+The break-even increased by a factor of **~11**. The long-run payoff dropped from 2.5× to 1.83×.
+
+## 5. Long-Run ROI
+
+$$\text{ROI}_{\infty} = \frac{P_{\text{paste}} - 2}{2} = \frac{17/3 - 2}{2} = \frac{11/6} \approx 1.83\times$$
+
+## 6. What This Means
+
+When the manual baseline is a realistic Ctrl+C/Ctrl+V, Trocq is competing against a **much cheaper opponent**. The heavy 50-step setup only pays off if:
+
+1. **The theorem library is large** ($n \geq 14$): the setup cost is amortised across many theorems.
+2. **The types diverge structurally** so that copy-paste proofs break: if `papp` and `napp` have different induction schemes, the copied script fails and the manual cost rises sharply.
+3. **The vocabulary is stable**: once the `R__` wrappers are registered, every future theorem is just 2 steps. A library of 50+ theorems over 3 functions is where Trocq genuinely wins.
+
+> **Key lesson:** Trocq's true competition is not the mathematician with pen and paper writing bijection proofs — it is the pragmatic developer who copies a working proof and presses F5.

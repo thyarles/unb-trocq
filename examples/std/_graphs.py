@@ -473,6 +473,100 @@ def graph_05_roi_3d():
     print(f"Saved {path}")
 
 
+# ══════════════════════════════════════════════════════════════════════════
+# Graph 06 — Fifth Try: Ctrl+C/Ctrl+V baseline vs Trocq
+#
+# Key numbers from bs_a1.v (Phase 2 & Phase 3):
+#
+#   Manual (copy-paste, no setup):
+#     plength_papp_manual  : 5 steps
+#     papp_assoc_manual    : 5 steps
+#     prev_papp_manual     : 7 steps
+#     P_paste = 17/3 ≈ 5.67 steps/theorem
+#     C_manual(n) = (17/3) * n
+#
+#   Trocq (full bureaucracy):
+#     S_setup = S_bij(13) + f*(S_bridge+W_trocq)(37) = 50
+#     C_trocq(n) = 50 + 2n
+#
+#   Break-even: (17/3)*n = 50 + 2n  =>  n* = 150/11 ≈ 13.6
+#   ROI_inf = (P_paste - 2) / 2 = (11/3) / 2 = 11/6 ≈ 1.83
+# ══════════════════════════════════════════════════════════════════════════
+def graph_06_cpv_cost():
+    n = np.linspace(0, 30, 600)
+
+    P_paste   = 17 / 3          # ≈ 5.67 steps/theorem (copy-paste)
+    S_setup   = 50              # one-time Trocq bureaucracy (bs_a1.v)
+    n_star    = 150 / 11        # ≈ 13.6
+
+    c_manual = P_paste * n
+    c_trocq  = S_setup + 2 * n
+    y_star   = P_paste * n_star
+
+    fig, ax = plt.subplots(figsize=(9, 5.5))
+
+    # Shaded regions
+    ax.fill_between(n, c_manual, c_trocq,
+                    where=(n < n_star),
+                    alpha=0.12, color=ORANGE, label="_nolegend_")
+    ax.fill_between(n, c_manual, c_trocq,
+                    where=(n >= n_star),
+                    alpha=0.12, color=BLUE,   label="_nolegend_")
+
+    # Cost lines
+    ax.plot(n, c_manual, color=ORANGE, lw=2.5,
+            label=r"$C_{\mathrm{manual}}(n) = \frac{17}{3}\,n\approx 5.67n$"
+                  r"  (Ctrl+C/Ctrl+V, setup $=0$)")
+    ax.plot(n, c_trocq,  color=BLUE,   lw=2.5,
+            label=r"$C_{\mathrm{trocq}}(n) = 50 + 2n$"
+                  r"  (full bureaucracy)")
+
+    # Trocq setup-cost marker
+    ax.axhline(S_setup, color=BLUE, lw=1.0, ls=":", alpha=0.5)
+    ax.text(0.4, S_setup + 1.5,
+            r"$S_{\mathrm{setup}} = 50$",
+            fontsize=8.5, color=BLUE, alpha=0.8)
+
+    # Break-even marker
+    ax.axvline(n_star, color=GREY, lw=1.4, ls="--")
+    ax.scatter([n_star], [y_star], color="black", zorder=5, s=60)
+    ax.annotate(r"Break-even $n^* \approx 13.6$",
+                xy=(n_star, y_star),
+                xytext=(n_star + 1.0, y_star + 6),
+                fontsize=10,
+                arrowprops=dict(arrowstyle="->", color="black", lw=1))
+
+    # Region labels
+    ax.text(3,  110, "Manual cheaper",  fontsize=9, color=ORANGE, alpha=0.9)
+    ax.text(19,  30, "Trocq cheaper",   fontsize=9, color=BLUE,   alpha=0.9)
+
+    # Previous break-even for comparison
+    ax.axvline(150/11, color=GREY, lw=0, ls="-")   # already drawn above
+    ax.axvline(6/5,    color=RED,  lw=1.2, ls=":", alpha=0.6)
+    ax.text(6/5 + 0.3, 135,
+            r"Fourth Try $n^*\approx 1.2$",
+            fontsize=7.5, color=RED, alpha=0.7)
+
+    ax.set_xlabel("Number of theorems transferred  ($n$)", fontsize=11)
+    ax.set_ylabel("Total proof obligations (tactic steps)", fontsize=11)
+    ax.set_title(
+        "Fifth Try — Ctrl+C/Ctrl+V Baseline vs. Trocq\n"
+        r"$C_M = \frac{17}{3}n$ (no setup),  "
+        r"$C_T = 50+2n$ (full bureaucracy);  "
+        r"$n^* = \frac{150}{11} \approx 13.6$",
+        fontsize=11,
+    )
+    ax.legend(fontsize=9, loc="upper left")
+    ax.set_xlim(0, 30)
+    ax.set_ylim(0, 175)
+
+    fig.tight_layout()
+    path = os.path.join(OUT, "_graphs/graph_06_cpv_cost.png")
+    fig.savefig(path, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved {path}")
+
+
 # ── Entry point ───────────────────────────────────────────────────────────
 if __name__ == "__main__":
     graph_01()
@@ -481,4 +575,5 @@ if __name__ == "__main__":
     graph_03()
     graph_04()
     graph_05_roi_3d()
+    graph_06_cpv_cost()
     print("\nAll graphs generated successfully.")

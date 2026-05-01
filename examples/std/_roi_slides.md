@@ -587,3 +587,135 @@ $$\text{ROI}_\infty = \frac{k \cdot c_{\text{avg}} - 2}{2} = \frac{4.4 - 2}{2} =
 
 > Trocq shines when theorems are **numerous** or **complex** over a **small shared vocabulary**.
 > Manual is competitive only in early-stage, small-vocabulary, simple-goal scenarios.
+
+---
+
+<!-- _class: chapter -->
+<!-- _paginate: false -->
+
+# Fifth Try
+
+*The Ctrl+C, Ctrl+V Realisation*
+
+---
+
+## Fifth Try — The New Manual Baseline
+
+All previous analyses modelled the **manual** approach as requiring bijections, conversion functions, and bridge lemmas — the same infrastructure Trocq needs.
+
+A real developer does **none of that**. They:
+
+1. Copy the `NatList` proof body
+2. Find-and-replace the type names
+3. Press **Ctrl+C, Ctrl+V**. Done.
+
+`bs_a1.v` formalises this. Functions `plength`, `papp`, `prev` are typed **monomorphically** (`PList nat → …`) so every copy-paste proof body is **tactic-identical** to its NatList source — no `intros A`, no extra rewrites.
+
+```coq
+(* NatList source — Phase 1 *)            (* PList nat copy — Phase 2 *)
+Theorem nlength_napp :                    Theorem plength_papp_manual :
+  forall (l1 l2 : NatList),                forall (l1 l2 : PList nat),
+  nlength (napp l1 l2) =                    plength (papp l1 l2) =
+  nlength l1 + nlength l2.                  plength l1 + plength l2.
+Proof.                                    Proof.
+  intros l1 l2.                             intros l1 l2.
+  induction l1 as [|h t IH]; simpl.        induction l1 as [|h t IH]; simpl.
+  - reflexivity.                            - reflexivity.
+  - rewrite IH. reflexivity.               - rewrite IH. reflexivity.
+Defined.                                  Defined.
+```
+
+**Setup cost: 0.** Every new theorem is just a renamed copy.
+
+---
+
+## Fifth Try — Concrete Counts (`bs_a1.v`)
+
+<div class="cols">
+
+**Phase 2 — Copy-Paste Manual (setup = 0)**
+
+| Theorem | Steps |
+|---|---|
+| `papp_nil_r` (aux) | 4 |
+| `plength_papp_manual` | 5 |
+| `papp_assoc_manual` | 5 |
+| `prev_papp_manual` | 7 |
+| **Fixed setup** | **0** |
+| $P_{\text{paste}}$ (avg/theorem) | **5.67** |
+
+**Phase 3 — Trocq (full bureaucracy)**
+
+| Item | Steps |
+|---|---|
+| `plist_nlist_iso` | 4 |
+| `nlist_plist_iso` | 4 |
+| `R_NatList` | 5 |
+| Shared `Trocq Use` ×3 | 3 |
+| `plength`: bridge+R__+Use | 11 |
+| `papp`: bridge+R__+Use | 14 |
+| `prev`: bridge+R__+Use | 12 |
+| **$S_{\text{setup}}$ total** | **50** |
+| Per theorem × 3 | 6 |
+
+</div>
+
+---
+
+## Fifth Try — New Cost Formulas
+
+$$C_{\text{manual}}(n) = n \cdot P_{\text{paste}} = \frac{17}{3}\,n \approx 5.67\,n \qquad \textbf{(no fixed cost)}$$
+
+$$C_{\text{trocq}}(n) = \underbrace{S_{\text{bij}} + f \cdot (S_{\text{bridge}} + W_{\text{trocq}})}_{S_{\text{setup}}\,=\,50} + 2n = 50 + 2n$$
+
+**Break-even:**
+
+$$\frac{17}{3}\,n^* = 50 + 2n^* \implies \frac{11}{3}\,n^* = 50 \implies n^* = \frac{150}{11} \approx 13.6$$
+
+**Long-run ROI:**
+
+$$\text{ROI}_{\infty} = \frac{P_{\text{paste}} - 2}{2} = \frac{17/3 - 2}{2} = \frac{11}{6} \approx 1.83\times$$
+
+---
+
+## Fifth Try — Cost Graph
+
+![width:720px](_graphs/graph_06_cpv_cost.png)
+
+The manual line now starts at the **origin** (no setup). Trocq's intercept jumps to **50**. Break-even is at $n^* \approx 13.6$ — eleven times higher than the Fourth Try's $n^* \approx 1.2$.
+
+---
+
+## Fifth Try — Comparison
+
+| | Fourth Try | **Fifth Try** |
+|---|---|---|
+| Manual strategy | bijection + rewrite | **Ctrl+C / Ctrl+V** |
+| Manual fixed cost | shared with Trocq | **0** |
+| $P_{\text{manual}}$ per theorem | 7 | **5.67** |
+| $S_{\text{setup}}$ (Trocq) | 15 | **50** |
+| Break-even $n^*$ | ≈ 1.2 | **≈ 13.6** |
+| $\text{ROI}_{\infty}$ | 2.5× | **1.83×** |
+
+The break-even increased **11×**. The long-run payoff dropped from 2.5× to 1.83×.
+
+---
+
+## Updated Conclusion — When Does Trocq Pay Off?
+
+| Scenario | Winner | Key factor |
+|---|---|---|
+| Few theorems ($n < 14$), types similar | **Manual** | Copy-paste is free; Trocq overhead not amortised |
+| Many theorems ($n \geq 14$) | **Trocq** | 50-step setup finally amortised |
+| Types diverge (copy-paste script breaks) | **Trocq** | Manual cost rises; Trocq unaffected |
+| Large vocabulary ($f \gg 1$), few theorems | **Manual** | $f \cdot W_{\text{trocq}}$ grows; no theorems to amortise it |
+| Massive library ($n \to \infty$) | **Trocq** | ROI $\to 1.83\times$ |
+
+**The new tipping factors:**
+
+1. **Volume** ($n \geq 14$): Trocq's setup only pays off with a large theorem library.
+2. **Structural divergence**: if copy-paste proofs break, Trocq's advantage is immediate.
+3. **Vocabulary stability**: once `R__` wrappers are registered, every future theorem is 2 steps free.
+
+> Trocq's true competition is the pragmatic developer who presses **Ctrl+C, Ctrl+V** and
+> walks away. That developer wins for small libraries. Trocq wins for large ones.
