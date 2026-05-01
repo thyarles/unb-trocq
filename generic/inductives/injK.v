@@ -7,13 +7,15 @@ From Trocq Require Export injection_lemmas.
 From Trocq Require Import DeriveLib HoTTNotations Stdlib Hierarchy.
 
 Unset Uniform Inductive Parameters. 
+Unset Universe Minimization ToSet.
 
+Unset Universe Polymorphism.
 Definition conv (A : Type) (x y : A) (p: x = y) 
-    (P : forall x0 : A, x = x0 -> Prop) (P0 : P x idpath) :=
+    (P : forall x0 : A, x = x0 -> Type) (P0 : P x idpath) :=
   match p as p0 in _ = t return (P t p0)
    with idpath => P0 end.
-
 Register conv as trocq.conv.
+Set Universe Polymorphism.
 
 Elpi Db derive.injectionsK.db lp:{{
 
@@ -23,6 +25,7 @@ Elpi Db derive.injectionsK.db lp:{{
   %  a natural number > 0 (representing the constructor number)
   %  with the list of injectionK lemmas for that constructor
   pred injectionsK-db i:term, i:int, o:term.
+  pred injectionsK-def i:gref, i:int, o:gref.
 
   % [injectionsK-done T K] means T K was already derived
   pred injectionsK-done o:inductive. 
@@ -45,6 +48,15 @@ Elpi Accumulate lp:{{
   usage :- coq.error "Usage: derive.Rm <object name>".
 }}. 
 
+#[superglobal] Elpi Accumulate derive.injectionsK.db lp:{{ 
+
+  injectionsK-db K N R :-
+    coq.env.global (indc GRK) K,
+    injectionsK-def (indc GRK) N GRR,
+    coq.env.global GRR R.
+
+}}.
+
 (* hook into derive *)
 Elpi Accumulate derive Db derive.injectionsK.db.
 Elpi Accumulate derive File algo_utils.
@@ -56,4 +68,3 @@ dep1 "injK" "injections".
 derivation (indt T) Prefix ff (derive "injK" (derive.injK.main T Prefix) (injectionsK-done T)).
 
 }}.
-

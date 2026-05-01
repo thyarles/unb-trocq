@@ -8,7 +8,7 @@ Unset Uniform Inductive Parameters.
 
 Elpi Db derive.mymap.db lp:{{
   % [mymap-def I C] brings the constant defined for mapping inductive I.
-  pred mymap-def i:term, o:term.
+  pred mymap-def i:gref, o:gref.
 
   % [mymap T1 T2 D] for T1 and T2 brings a map D from T1 to T2. 
   pred mymap-db i:term, i:term, o:term.

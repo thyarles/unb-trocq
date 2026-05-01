@@ -1,8 +1,4 @@
 Unset Universe Polymorphism.
-From elpi Require Import elpi.
-From elpi.apps Require Import derive derive.param2.
-
-From Trocq Require Import sym.
 Unset Uniform Inductive Parameters. 
 
 Inductive testFalse : Set :=.
@@ -15,32 +11,32 @@ Inductive testBool : Set :=
 | Trueb.
 
 Inductive Wrap : Set :=
-| KWrap1 : testUnit -> Wrap.
+| KWrap1 : forall _ : testUnit, Wrap.
 
 Inductive WrapMore : Set :=
-| KWrap : testUnit -> testBool -> WrapMore
-| KWrapWrap : Wrap -> WrapMore
-| F : testUnit -> testUnit -> testUnit -> WrapMore.
+| KWrap : forall (_: testUnit) (_ : testBool), WrapMore
+| KWrapWrap : forall (_ : Wrap), WrapMore
+| F : forall (_ : testUnit) (_ : testUnit) (_ : testUnit), WrapMore.
 
 Inductive Nat : Set :=
 | O' 
-| S' : Nat -> Nat.
+| S' : forall (_ : Nat), Nat.
 
 Inductive Box (A : Type) : Type :=
-| B : A -> Box A.
+| B : forall (_: A), Box A.
 
 Inductive Option (A : Type) : Type :=
 | None' : Option A 
-| Some' : A -> Option A.
+| Some' : forall (_ : A), Option A.
 
 Inductive Prod (A B : Type) : Type :=
-| PR : A -> B -> Prod A B. 
+| PR : forall (_ : A) (_ : B), Prod A B. 
 
 Inductive ThreeTypes (A B C : Type) :=
-| C1 : A -> ThreeTypes A B C
-| C2 : B -> ThreeTypes A B C
-| C3 : C -> ThreeTypes A B C.
+| C1 : forall (_ : A), ThreeTypes A B C
+| C2 : forall (_ : B), ThreeTypes A B C
+| C3 : forall (_ : C), ThreeTypes A B C.
 
 Inductive List (A : Type) : Type :=
 | Nil : List A 
-| Cons : A -> List A -> List A.
+| Cons : forall (_ : A) (_ : List A), List A.

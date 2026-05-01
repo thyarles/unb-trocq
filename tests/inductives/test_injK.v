@@ -2,9 +2,9 @@ From Trocq Require Import injK.
 Require Import coverage.
 Unset Uniform Inductive Parameters.
 
-Elpi derive.projK False.
-Elpi derive.injections False.
-Elpi derive.injK False.
+Elpi derive.projK testFalse.
+Elpi derive.injections testFalse.
+Elpi derive.injK testFalse.
 
 Elpi derive.projK testUnit.
 Elpi derive.injections testUnit.

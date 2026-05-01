@@ -17,7 +17,18 @@ From Trocq Require Export HoTTNotations.
 Set Universe Polymorphism.
 Unset Universe Minimization ToSet.
 
-Elpi derive Bool.
-Definition BoolR := bool_R.
+#[prefix="Bool_"] Elpi derive Bool.
+
+(* Enables to generically deal with Bool
+despite one is a notation to bool and the other an inductive Bool*)
+(* The inductive generates Bool_R = [| Bool |], 
+and the notation generates bool_R = [| Bool |]*)
+(* Since param declares monomorphic definitions [| Bool |] has to be wrapped with a universe polymorphic definition *)
+Module FakeBool.
+    Definition Bool := Bool.
+End FakeBool.
+Elpi derive.param2 FakeBool.Bool.
+
+Definition BoolR := Bool_R.
 Definition trueR := true_R.
-Definition Param44_Bool := bool_rel44.
+Definition Param44_Bool := Bool_rel44.

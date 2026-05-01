@@ -13,11 +13,23 @@ Elpi Db derive.mRRmK.db lp:{{
   % [ar-db A1 A2 AR] returns the relation between a type A1 and A2.
   pred ar-db i:term, i:term, o:term. 
 
-  % [mRRmK-db T D] links a type T to its corresponding R in map.
-  pred mRRmK-db i:term, o:term.
+  % [mRRmK-def T D] links an inductive type T to its corresponding R in mapK.
+  pred mRRmK-def i:gref, o:gref.
+  
+  pred mRRmK-db i:term, o:term, o:term.
 
   % [mRRmK-done T] mean T was already derived
   pred mRRmK-done o:inductive.
+}}.
+
+#[superglobal] Elpi Accumulate derive.mRRmK.db lp:{{ 
+  
+  % refactor db dispatchers
+  mRRmK-db I _ R :-
+    coq.env.global (indt GRI) I,
+    mRRmK-def (indt GRI) GRR,
+    coq.env.global GRR R.
+
 }}.
 
 Elpi Command derive.mRRmK.
@@ -38,6 +50,7 @@ Elpi Accumulate Db Header derive.mRRmK.db.
 Elpi Accumulate Db derive.mRRmK.db.
 Elpi Accumulate File mRRmK.
 Elpi Accumulate lp:{{
+
   main [str I] :- !, coq.locate I (indt GR),
     coq.gref->id (indt GR) Tname,
     Prefix is Tname ^ "_",
@@ -47,7 +60,6 @@ Elpi Accumulate lp:{{
   pred usage.
   usage :- coq.error "Usage: derive.mRRmK <object name>".
 }}. 
-
 
 
 (* hook into derive *)

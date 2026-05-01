@@ -3,7 +3,7 @@ shorten derive.algo-utils.{gen-names-map}.
 namespace derive.mapn {
 
 % TyParamNo
-% Arity 
+% Arity
 % Ind
 % IndR
 % TyArgs1
@@ -25,14 +25,14 @@ mk-mapn-type-priv N (prod TN Ty t\ (Bo t)) IndL IndR Rel MTy
     coq.mk-app IndR [t2] (NIndR t2),
     coq.mk-app Rel [t1,t2,ar] (NRel t1 t2 ar),
     mk-mapn-type-priv M (Bo t1) (NIndL t1) (NIndR t2) (NRel t1 t2 ar) MTy (R t1 t2 ar ur).
-  
+
 % TyParamNo Arity Ind MapTy Rel
 pred mk-mapn-type i:int, i:term, i:term, i:term, i:term, o:term.
 mk-mapn-type TyParamNo Arity Ind Rel MTy R :-
   mk-mapn-type-priv TyParamNo Arity Ind Ind Rel MTy R.
 
-% TyParamNo MapnTy IndL IndR Rel listReqs IndMap MR RM MRRMK 
-pred implement-mapn i:int, i:term, i:term, i:term, i:term, i: list term, i:term, o:term. 
+% TyParamNo MapnTy IndL IndR Rel listReqs IndMap MR RM MRRMK
+pred implement-mapn i:int, i:term, i:term, i:term, i:term, i: list term, i:term, o:term.
 implement-mapn 0 _ IndL IndR Rel Reqs BH R :-
   coq.mk-app BH [IndL,IndR,Rel | Reqs] R.
 implement-mapn N (prod TN1 Ty1 t1\ prod TN2 Ty2 t2\ prod TRN (ARTy t1 t2) ar\ prod URN (UMTy t1 t2 ar) ur\ (Bo t1 t2 ar ur)) IndL IndR Rel Reqs BH (fun TN1 Ty1 t1\ fun TN2 Ty2 t2\ fun TRN (ARTy t1 t2) ar\ fun URN (UMTy t1 t2 ar) ur\ (R t1 t2 ar ur)) :-
@@ -45,36 +45,38 @@ implement-mapn N (prod TN1 Ty1 t1\ prod TN2 Ty2 t2\ prod TRN (ARTy t1 t2) ar\ pr
     coq.mk-app IndR [t2] (NIndR t2),
     coq.mk-app Rel [t1,t2,ar] (NRel t1 t2 ar),
     std.map Reqs (x\ r\ sigma TMP\ coq.mk-app x [t1,t2,ar,ur] TMP, r = TMP) (NewReqs t1 t2 ar ur),
-    implement-mapn M (Bo t1 t2 ar ur) (NIndL t1) (NIndR t2) (NRel t1 t2 ar) 
+    implement-mapn M (Bo t1 t2 ar ur) (NIndL t1) (NIndR t2) (NRel t1 t2 ar)
                       (NewReqs t1 t2 ar ur) BH (R t1 t2 ar ur).
 
 pred build-has-of i:map-class, o:gref.
-build-has-of M R :- 
+build-has-of M R :-
   coq.locate {calc ("Map" ^ {map-class.to_string M} ^ ".BuildHas")} R.
 
-pred map-reqs i:map-class, i:term, o: list term.
+pred map-reqs i:map-class, i:gref, o: list gref.
 map-reqs map0 _ [].
 map-reqs map1 Ind [IndMap] :-
   std.assert! (mymap-def Ind IndMap) "derive.mapn: use derive.mymap before".
 map-reqs map2a Ind [MR | M1] :-
   map-reqs map1 Ind M1,
-  std.assert! (mR-db Ind MR) "derive.mapn: use derive.mR before".
+  std.assert! (mR-def Ind MR) "derive.mapn: use derive.mR before".
 map-reqs map2b Ind [RM | M1] :-
   map-reqs map1 Ind M1,
-  std.assert! (rm-db Ind RM) "derive.mapn: use derive.Rm before".
+  std.assert! (rm-def Ind RM) "derive.mapn: use derive.Rm before".
 map-reqs map3 Ind [RM | M2a] :-
   map-reqs map2a Ind M2a,
-  std.assert! (rm-db Ind RM) "derive.mapn: use derive.Rm before".
+  std.assert! (rm-def Ind RM) "derive.mapn: use derive.Rm before".
 map-reqs map4 Ind [MRRMK | M3] :-
   map-reqs map3 Ind M3,
-  std.assert! (mRRmK-db Ind MRRMK) "derive.mapn: use derive.MRRMK before".
+  std.assert! (mRRmK-def Ind MRRMK) "derive.mapn: use derive.MRRMK before".
 
 pred implement-mapM i:map-class, i:inductive, o: term.
 implement-mapM M GR RMapn :-
   coq.env.indt GR _ TyParamNo _ Arity _ _,
-  Ind = (global (indt GR)),
+  coq.env.global (indt GR) Ind,
   std.assert! (param Ind Ind IndR) "derive.mapn: use derive.param2 before",
-  std.rev {map-reqs M Ind} Reqs,
+  std.rev {map-reqs M (indt GR)} ReqsGR,
+  std.map ReqsGR (x\ r\ r = {coq.env.global x}) Reqs,
+
   trocq.db.map->class M UM,
   build-has-of M BH4,
   % todo: address universe polymorphism
@@ -85,13 +87,13 @@ implement-mapM M GR RMapn :-
 
 func main inductive, string -> list prop.
 main GR Prefix Clauses :- std.do! [
-  Ind = (global (indt GR)),
+  coq.env.global (indt GR) Ind,
   std.fold {map-class.all-of-kind all} [] (M\ C\ C'\ sigma RMapn NameMapn FNameMapn CMapn Entry\
     implement-mapM M GR RMapn,
     NameMapn is Prefix ^ "map" ^ {map-class.to_string M},
     coq.ensure-fresh-global-id NameMapn FNameMapn,
     coq.env.add-const FNameMapn RMapn _ _ CMapn,
-    Entry = trocq.db.map-ind Ind M (global (const CMapn)),
+    Entry = trocq.db.map-def (indt GR) M (const CMapn),
     coq.elpi.accumulate _ "trocq.db" (clause _ _ Entry),
     C' = [Entry | C]
   ) MClauses,

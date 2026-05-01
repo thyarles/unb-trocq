@@ -53,7 +53,7 @@ get-eq-map map4  {{ lib:trocq.eq_map4 }}.
 pred generate-relNM i:inductive, i:param-class, o: term, o: term.
 generate-relNM GR (pc N M as PC) ReTy Re :-
   coq.env.indt GR _ TyParamNo _ _ KNs KTys,
-  Ind = (global (indt GR)),
+  coq.env.global (indt GR) Ind,
   std.assert! (param Ind Ind TR) "derive.relNM: use derive.param2 before",
   coq.typecheck TR TRTy _,
   trocq.db.rel PC PRelNM BuildNM _ CovNM ContraNM,
@@ -68,7 +68,7 @@ generate-relNM GR (pc N M as PC) ReTy Re :-
 
 func main inductive, string -> list prop.
 main GR Prefix Clauses :- std.do! [
-  I = global (indt GR),
+  coq.env.global (indt GR) I,
   std.fold {param-class.all-of-kind all} [] 
   (PC\ Cls\ Cls'\ 
     sigma N M C ReTy Re Name FName\

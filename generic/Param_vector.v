@@ -208,13 +208,14 @@ Proof.
 elim: vR => // {}n {}n' {}nR a a' aR {}v {}v' vR {2}<-/=; rewrite /g/=.
 move: (tR_sym_f _ _ _)=> vR'; move: vR'.
 move: ((nat_symK _ _ _))=> p.
+set f := (X in (X nR _ )).
 by refine (match p as p0 in (_ = nRR)
 return
 forall vR' : tR A A' (sym_rel (sym_rel AR)) n n' (nat_sym n' n (nat_sym n n' nR)) v v',
-transport _ (eq_ind nRR (fun t1 : nat_R n n' => S_R n n' t1 = S_R n n' nRR) 1 _ p0^)
+transport _ (f nRR (fun t1 : nat_R n n' => S_R n n' t1 = S_R n n' nRR) 1 _ p0^)
   (consR A A' (sym_rel (sym_rel AR)) n n' (nat_sym n' n (nat_sym n n' nR)) a a' aR v v' vR')
 = consR A A' AR n n' nRR a a' aR v v' (transport _ p0 vR')
-with eq_refl => _ end
+with idpath => _ end
 ).
 Qed.
 

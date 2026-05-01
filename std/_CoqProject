@@ -33,13 +33,13 @@ generic/inductives/Relnm.v
 generic/Database.v
 generic/Param_Empty.v
 generic/Param_bool.v
-generic/Param_list.v
 generic/Param_nat.v
 generic/Param_option.v
-generic/Param_paths.v
 generic/Param_prod.v
-generic/Param_sigma.v
 generic/Param_sum.v
+generic/Param_list.v
+generic/Param_paths.v
+generic/Param_sigma.v
 generic/Param_trans.v
 generic/Param_vector.v
 generic/Trocq.v

@@ -17,6 +17,7 @@ Elpi Db derive.rsymK.db lp:{{
   % [rsymK I S] links I inductive type, 
   %  with the function showing i1 i2, [| I |]^ i2 i1 <->> [| I |] i1 i2
   pred rsymK-db i:term, o:term.
+  pred rsymK-def i:gref, o:gref.
 
   % [rsymK-done T K] means T K was already derived
   pred rsymK-done o:inductive. 
@@ -49,6 +50,15 @@ Elpi Accumulate lp:{{
   usage :- coq.error "Usage: derive.rsymK <object name>".
 }}. 
 
+#[superglobal] Elpi Accumulate derive.rsymK.db lp:{{ 
+
+  % refactor db dispatchers
+  rsymK-db I R :-
+    coq.env.global (indt GRI) I,
+    rsymK-def (indt GRI) GRR,
+    coq.env.global GRR R.
+
+}}.
 (* hook into derive *)
 Elpi Accumulate derive Db Header derive.rsymK.db.
 Elpi Accumulate derive Db derive.rsymK.db.

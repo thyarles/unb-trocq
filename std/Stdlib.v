@@ -14,6 +14,7 @@ Require Import ssreflect.
 From Trocq Require Import HoTTNotations.
 From elpi Require Export elpi.
 
+Register paths as trocq.paths.
 Register idpath as trocq.idpath.
 Register concat as trocq.concat. 
 Register inverse as trocq.inverse.

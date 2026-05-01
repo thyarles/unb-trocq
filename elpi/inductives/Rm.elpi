@@ -1,5 +1,6 @@
 shorten derive.common-algo.{mk-mR-type-Rm}.
-shorten derive.algo-utils.{mk-chain, type-of-args}.
+shorten derive.algo-utils.{mk-chain, type-of-args, elim-into-path-suffix}.
+shorten derive.algo-utils.{cmp-indt}.
 
 namespace derive.Rm {
 
@@ -17,56 +18,57 @@ build-Rm-args [A1|Args1] [A2|Args2] T R :-
 
 pred build-Rm i:term, i:term, o:term.
 build-Rm STy ITyTy R :-
-  coq.safe-dest-app STy Ind Args1, 
-  coq.safe-dest-app ITyTy Ind2 Args2, 
-  rm-db Ind RM,
-  if (Ind = Ind2)
+  cmp-indt STy ITyTy SInd Ind,
+  coq.safe-dest-app STy _ Args1,
+  coq.safe-dest-app ITyTy _ Args2,
+  rm-db SInd _ RM,
+  if (Ind = SInd)
     (R = RM)
-    (build-Rm-args Args1 Args2 RM RSkel, 
-     coq.elaborate-skeleton RSkel _ R ok).
+    (build-Rm-args Args1 Args2 RM RSkel,
+     (@keepunivs! => coq.elaborate-skeleton RSkel _ R ok)).
 
-pred mk-equalities i:list term, i:term, i: list term, o:list term.
-mk-equalities [] _ [] [].
-mk-equalities [STy| SrcTys] ITyTy [DA|Dargs] [R|RS] :-
-  param DA A AR,
+pred mk-equalities i:list term, i:term, i: list term, i: list term, o:list term.
+mk-equalities [] _ [] [] [].
+mk-equalities [STy| SrcTys] ITyTy [_|Sargs] [DA|Dargs] [R|RS] :-
+  paramR A DA AR,
   build-Rm STy ITyTy RM,
   coq.mk-app RM [A, DA, AR] R,
-  mk-equalities SrcTys ITyTy Dargs RS.
+  mk-equalities SrcTys ITyTy Sargs Dargs RS.
 
 % Ksource, Kdest, remaining args, number of type args, KRTy, Type of args Ksource, Type of args KDest, Goal,
 pred process-args i:term, i:term, i:int, i:int, i:term, i:term, i:list term, i:list term, i:term, o:term.
-process-args Ksrc Kdest 0 TyArgsNo _ Goal TySrc TyDest ITyTy R:- 
+process-args Ksrc Kdest 0 TyArgsNo _ Goal TySrc TyDest ITyTy R:-
   coq.mk-app Goal [Ksrc, Kdest, {{ Type }}] EqTy, %discards the relation between Ksrc and Kdest, we want the equality.
   % todo: change elpi.eq for trocq.idpath
-  whd EqTy [] {{lib:@elpi.eq}} [ITyTy,MapA,B],
-  whd MapA [] _ TySrcMappedArgs,
+  whd EqTy [] {{lib:@trocq.paths }} [ITyTy,MapA,B],
+  whd MapA [] K TySrcMappedArgs,
+  coq.env.global (indc _) K, !,
   whd B [] KDest TyDestArgs,
   std.drop TyArgsNo TySrcMappedArgs SrcArgs,
   std.drop TyArgsNo TyDestArgs DestArgs,
   coq.mk-app KDest {std.take TyArgsNo TyDestArgs} KAppTyArgs,
-  mk-equalities TySrc ITyTy DestArgs Eqs,
-  mk-chain SrcArgs DestArgs TyDest KAppTyArgs Eqs ITyTy B R. 
-process-args Ksrc Kdest N TyArgsNo (prod AN1 A1Ty a1\ prod AN2 A2Ty a2\ prod ARN (ARTy a1 a2) ar\ (Bo a1 a2 ar)) Goal TySrc TyDest ITyTy 
-                                   (fun AN1 A1Ty a1\ fun AN2 A2Ty a2\ fun ARN (ARTy a1 a2) ar\ (RF a1 a2 ar)):- 
+  mk-equalities TySrc ITyTy SrcArgs DestArgs Eqs,
+  mk-chain SrcArgs DestArgs TyDest KAppTyArgs Eqs ITyTy B R.
+process-args Ksrc Kdest N TyArgsNo (prod AN1 A1Ty a1\ prod AN2 A2Ty a2\ prod ARN (ARTy a1 a2) ar\ (Bo a1 a2 ar)) Goal TySrc TyDest ITyTy
+                                   (fun AN1 A1Ty a1\ fun AN2 A2Ty a2\ fun ARN (ARTy a1 a2) ar\ (RF a1 a2 ar)):-
   M is N - 1,
   @pi-decl AN1 A1Ty a1\
   @pi-decl AN2 A2Ty a2\
   @pi-decl ARN (ARTy a1 a2) ar\
     coq.mk-app Ksrc [a1] (NewKS a1),
     coq.mk-app Kdest [a2] (NewKD a2),
-    (param a2 a1 ar =!=>
+    (paramR a1 a2 ar =!=>
     process-args (NewKS a1) (NewKD a2) M TyArgsNo (Bo a1 a2 ar) Goal TySrc TyDest ITyTy (R a1 a2 ar)),
     % if the type of the argument is an instance of the inductive type add an induction hypothesis
-    whd ITyTy _ Ind _,
-    whd A2Ty _ IndD _,
+    cmp-indt A2Ty ITyTy IndD Ind,
     if (Ind = IndD)
        (coq.mk-app Goal [a1, a2, ar] (EqTy a1 a2 ar),
         (RF a1 a2 ar) = fun `e` (EqTy a1 a2 ar) e\ (R a1 a2 ar))
         (RF = R).
 
-% invariant: all type arguments were already processed. 
-% Constructor src, Constructor dest, Constructor dest Type, No of Arguments to process, 
-% constructorR Type, type of i2, something of type : i1 i2 iR => goal. 
+% invariant: all type arguments were already processed.
+% Constructor src, Constructor dest, Constructor dest Type, No of Arguments to process,
+% constructorR Type, type of i2, something of type : i1 i2 iR => goal.
 pred mkBranch i:term, i:term, i:int, i:term, i:term, i:term, o:term.
 mkBranch KS KD N KTyR ITyTy Goal Eq:-
   type-of-args KTyR N SrcArgs DestArgs,
@@ -80,11 +82,11 @@ mkBranches [KS|KsS] [KD|KsD] [KTy|KTys] [KTyR|KTyRs] ITyTy Goal [R|Rs] :-
   mkBranches KsS KsD KTys KTyRs ITyTy Goal Rs.
 
 pred implement-Rm i:int, i:int, i:term, i:list term, i:list term, i:list term, i:list term, i:term, i:term, o:term.
-% Pred comes with Type parameters applied 
-% RInd comes with Type parameters applied 
+% Pred comes with Type parameters applied
+% RInd comes with Type parameters applied
 implement-Rm 0 _TyParamNo (prod IN1 ITy1 i1\ prod IN2 ITy2 i2\ prod ARN (ARTy i1 i2) ar\ (Bo i1 i2 ar)) KsS KsD KTys KTyRs Pred RInd
             (fix `f` 2 RT f\ fun IN1 ITy1 i1\ fun IN2 ITy2 i2\ fun ARN (ARTy i1 i2) ar\ (R f i1 i2 ar)) :-
-  coq.safe-dest-app ITy1 Ind _, 
+  coq.safe-dest-app ITy2 Ind _,
   coq.env.global (indt GR) Ind,
   coq.env.recursive? GR, !,
   RT = (prod IN1 ITy1 i1\ prod IN2 ITy2 i2\ prod ARN (ARTy i1 i2) ar\ (Bo i1 i2 ar)),
@@ -93,13 +95,13 @@ implement-Rm 0 _TyParamNo (prod IN1 ITy1 i1\ prod IN2 ITy2 i2\ prod ARN (ARTy i1
   @pi-decl IN1 ITy1 i1\
   @pi-decl IN2 ITy2 i2\
   @pi-decl ARN (ARTy i1 i2) ar\
-    (rm-db Ind f => 
+    (rm-db Ind Ind f =>
       mkBranches KsS KsD KTys KTyRs ITy2 Pred (Brs f)),
     std.append (Brs f) [i1,i2,ar] (IndArgs f i1 i2 ar),
     coq.mk-app RIndP (IndArgs f i1 i2 ar) (R f i1 i2 ar).
 implement-Rm 0 _TyParamNo (prod IN1 ITy1 i1\ prod IN2 ITy2 i2\ prod ARN (ARTy i1 i2) _) KsS KsD KTys KTyRs Pred RInd
             (fun IN1 ITy1 i1\ fun IN2 ITy2 i2\ fun ARN (ARTy i1 i2) ar\ (R i1 i2 ar)) :-
-  coq.mk-app RInd [Pred] RIndP,
+  coq.mk-app RInd [Pred] RIndP, !,
   @pi-decl IN1 ITy1 i1\
   @pi-decl IN2 ITy2 i2\
   @pi-decl ARN (ARTy i1 i2) ar\
@@ -116,7 +118,7 @@ implement-Rm N TyParamNo (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 
 
     coq.mk-app Pred [a1,a2,ar,am] (NewPred a1 a2 ar am),
     coq.mk-app RInd [a1,a2,ar] (NewRIndSkel a1 a2 ar),
-    coq.elaborate-skeleton (NewRIndSkel a1 a2 ar) _ (NewRInd a1 a2 ar) ok,
+    (@keepunivs! => coq.elaborate-skeleton (NewRIndSkel a1 a2 ar) _ (NewRInd a1 a2 ar) ok),
 
     std.map KsS (x\ r\ sigma TMP\ coq.mk-app x [a1] TMP, r = TMP) (NewKsS a1),
     std.map KsD (x\ r\ sigma TMP\ coq.mk-app x [a2] TMP, r = TMP) (NewKsD a2),
@@ -126,7 +128,7 @@ implement-Rm N TyParamNo (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 
     coq.env.global {{:gref lib:trocq.map2b.r_in_map }} Rm,
     coq.mk-app Rm [a1, a2, ar, am] (RMS a1 a2 ar am),
     ar-db a1 a2 ar ==>
-    rm-db a1 (RMS a1 a2 ar am) ==>
+    rm-db a1 a2 (RMS a1 a2 ar am) ==>
     implement-Rm M TyParamNo (Bo a1 a2 ar am) (NewKsS a1) (NewKsD a2) (NewKTys a2) (NewKTyRs a1 a2 ar) (NewPred a1 a2 ar am) (NewRInd a1 a2 ar) (R a1 a2 ar am).
 
 
@@ -134,29 +136,26 @@ func main inductive, string -> list prop.
 main GR Prefix Clauses :- std.do! [
 
   coq.env.indt GR _ TyParamNo _ _ KNs KTys,
-  Ind = (global (indt GR)),
-  std.assert! (param Ind Ind TR) "derive.Rm: use derive.param2 before",
-  % param Ind Ind TR,
+  coq.env.global (indt GR) Ind,
+  std.assert! (paramR Ind Ind TR) "derive.Rm: use derive.param2 before",
   coq.typecheck TR TRTy _,
-  % mymap-def Ind IndMap,
-  std.assert! (mymap-def Ind IndMap) "derive.Rm: use derive.mymap before",
-  mk-mR-type-Rm TyParamNo TRTy IndMap {{ Type }} TR MRTy,
-  std.assert-ok! (coq.elaborate-skeleton MRTy _ MRTyE) "derive.Rm generates illtyped type",
-  TR = global (indt GRR),
+  std.assert! (mymap-def (indt GR) IndMapGR) "derive.Rm: use derive.mymap before",
+  mk-mR-type-Rm TyParamNo TRTy {coq.env.global IndMapGR} {{ Type }} TR MRTy,
+  (@keepunivs! => std.assert-ok! (coq.elaborate-skeleton MRTy _ MRTyE) "derive.Rm generates illtyped type"),
+  coq.env.global (indt GRR) TR,
   coq.gref->id (indt GRR) Rname,
-  RInductionName is Rname ^ "_ind",
+  elim-into-path-suffix Rname Suff,
+  RInductionName is Rname ^ Suff,
   coq.locate RInductionName RInd,
   coq.prod->fun MRTyE Pred,
   coq.env.indt GRR _ _ _ _ _ KTyRs,
-  std.map KNs (x\ r\ r = (global (indc x))) Ks,
-  implement-Rm TyParamNo TyParamNo MRTyE Ks Ks KTys KTyRs Pred (global RInd) R,
-  % coq.elaborate-skeleton R MRTyE Re ok,
-  std.assert-ok! (coq.elaborate-skeleton R MRTyE Re) "derive.Rm generates illtyped term",
+  std.map KNs (x\ r\ r = {coq.env.global (indc x)}) Ks,
+  implement-Rm TyParamNo TyParamNo MRTyE Ks Ks KTys KTyRs Pred {coq.env.global RInd} R,
+  std.assert-ok! (coq.elaborate-skeleton R TyE Re) "derive.Rm generates illtyped term",
   Name is Prefix ^ "Rm",
   coq.ensure-fresh-global-id Name FName,
-  coq.env.add-const FName Re MRTyE _ C,
-  I = global (indt GR),
-  Clauses = [rm-done GR, rm-db I (global (const C))],
+  coq.env.add-const FName Re TyE _ C,
+  Clauses = [rm-done GR, rm-def (indt GR) (const C)],
   std.forall Clauses (x\
     coq.elpi.accumulate _ "derive.Rm.db" (clause _ _ x)
   ),

@@ -13,9 +13,20 @@ Elpi Db derive.sym.db lp:{{
   % [sym I S] links I inductive type, 
   %  with the function showing symmetry 
   pred sym-db i:term, o:term.
+  pred sym-def i:gref, o:gref.
 
   % [sym-done T K] means T K was already derived
   pred sym-done o:inductive. 
+}}.
+
+#[superglobal] Elpi Accumulate derive.sym.db lp:{{ 
+
+  % refactor db dispatchers
+  sym-db I R :-
+    coq.env.global (indt GRI) I,
+    sym-def (indt GRI) GRR,
+    coq.env.global GRR R.
+
 }}.
 
 Elpi Command derive.sym.
@@ -42,7 +53,6 @@ Elpi Accumulate lp:{{
 }}. 
 
 (* hook into derive *)
-
 
 
 Elpi Accumulate derive Db Header derive.sym.db.

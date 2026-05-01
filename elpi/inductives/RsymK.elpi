@@ -18,7 +18,7 @@ implement-rsymK 0 (prod IN1 ITy1 i1\ prod IN2 ITy2 i2\ _) Sym SymK LRev (fun IN1
     (G i1 i2) = {{ lp:GSym lp:i1 lp:i2 }},
     (FGK i1 i2) = {{ lp:SymKSym lp:i2 lp:i1 }},
     (R i1 i2) = {{ lib:trocq.exist _ lp:{{ (F i1 i2) }} (lib:trocq.exist _ lp:{{ (G i1 i2) }} lp:{{ (FGK i1 i2) }}) }}.
-implement-rsymK N (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 a2) ar\ (Bo a1 a2 ar)) Sym SymK L 
+implement-rsymK N (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 a2) ar\ (Bo a1 a2 ar)) Sym SymK L
             (fun AN1 ATy1 a1\ fun AN2 ATy2 a2\ fun ARN (ARTy a1 a2) ar\ (R a1 a2 ar)) :-
   M is N - 1,
   @pi-decl AN1 ATy1 a1\ %A1 : Type
@@ -32,7 +32,7 @@ func main inductive, string -> list prop.
 main GR Prefix Clauses :- std.do! [
 
   coq.env.indt GR _ TyParamNo _ _ KNs KTys,
-  Ind = (global (indt GR)),
+  coq.env.global (indt GR) Ind,
   std.assert! (param Ind Ind TR) "derive.rsymK: use derive.param2 before",
   coq.typecheck TR TRTy _,
   mk-mR-type-rsymK TyParamNo TRTy TR {{ fun (A B : Type) => A <->> B }} SymKTy,
@@ -44,8 +44,7 @@ main GR Prefix Clauses :- std.do! [
   Name is Prefix ^ "rsymK",
   coq.ensure-fresh-global-id Name FName,
   coq.env.add-const FName Re SymKTyE _ C,
-  I = global (indt GR),
-  Clauses = [rsymK-done GR, rsymK-db I (global (const C))],
+  Clauses = [rsymK-done GR, rsymK-def (indt GR) (const C)],
   std.forall Clauses (x\
     coq.elpi.accumulate _ "derive.rsymK.db" (clause _ _ x)
   ),

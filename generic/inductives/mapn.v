@@ -7,8 +7,9 @@ Unset Uniform Inductive Parameters.
 
 (* I have to use Trocq db due to a dependency of type declaration of predicates in umap-db *)
 (* if the class file is accumulated in umap-db then accumulating trocq.db is an issue *)
-(* Elpi Db derive.umap.db lp:{{ }}. 
-Elpi Accumulate derive.umap.db Db trocq.db. *)
+(* Elpi Db derive.umap.db lp:{{ }}.  *)
+
+(* Elpi Accumulate derive.umap.db Db trocq.db. *)
 (* Elpi Accumulate derive Db trocq.db. *)
 (* Elpi Db derive.umap.db lp:{{
   % [umap-db T D]
@@ -46,6 +47,14 @@ Elpi Accumulate lp:{{
   usage :- coq.error "Usage: derive.rel40 <object name>".
 }}. 
 
+#[superglobal] Elpi Accumulate trocq.db lp:{{ 
+
+  trocq.db.map-ind I M R :-
+    coq.env.global (indt GRI) I,
+    trocq.db.map-def (indt GRI) M GRR,
+    coq.env.global GRR R.
+
+}}.
 Elpi Accumulate derive Db trocq.db.
 Elpi Accumulate derive File common.
 Elpi Accumulate derive File algo_utils.

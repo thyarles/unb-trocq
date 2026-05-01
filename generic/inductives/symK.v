@@ -8,7 +8,7 @@ From Trocq Require Import sym.
 
 From elpi.apps Require Import derive derive.param2.
 
-From Trocq Require Export Hierarchy.
+From Trocq Require Export Hierarchy Stdlib.
 Unset Uniform Inductive Parameters. 
 
 Elpi Db derive.symK.db lp:{{
@@ -16,9 +16,19 @@ Elpi Db derive.symK.db lp:{{
   % [symK I S] links I inductive type, 
   %  with the function showing symmetry is "involutive" 
   pred symK-db i:term, o:term.
+  pred symK-def i:gref, o:gref.
 
   % [symK-done T K] means T K was already derived
   pred symK-done o:inductive. 
+}}.
+#[superglobal] Elpi Accumulate derive.symK.db lp:{{ 
+
+  % refactor db dispatchers
+  symK-db I R :-
+    coq.env.global (indt GRI) I,
+    symK-def (indt GRI) GRR,
+    coq.env.global GRR R.
+
 }}.
 
 Elpi Command derive.symK.

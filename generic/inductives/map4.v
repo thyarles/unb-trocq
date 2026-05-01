@@ -4,3 +4,4 @@ From Trocq Require Export mR.
 From Trocq Require Export Rm.
 From Trocq Require Export injK.
 From Trocq Require Export mRRmK.
+From Trocq Require Export Stdlib Hierarchy. 

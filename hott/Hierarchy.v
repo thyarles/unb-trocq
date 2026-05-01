@@ -104,7 +104,6 @@ Elpi Query lp:{{register-map-classes}}.
 Definition sym_rel@{i} {A B : Type@{i}} (R : A -> B -> Type@{i}) := fun b a => R a b.
 
 Register sym_rel as trocq.sym_rel.
-Register paths as trocq.paths.
 
 Elpi Query lp:{{
   coq.elpi.accumulate _ "trocq.db" (clause _ _ (trocq.db.sym-rel {{:gref lib:trocq.sym_rel}})),

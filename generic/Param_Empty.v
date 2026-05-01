@@ -16,16 +16,15 @@ From Trocq Require Import HoTTNotations Relnm.
 (* translations of inductives in Prop is not yet supported, 
 but we can still generate everything for False by manually defining its parametricity translation and making it land in Type. *)
 Unset Universe Polymorphism.
-Inductive EmptyR : Empty -> Empty -> Type :=.
+Inductive EmptyR : Empty -> Empty -> Type :=. 
 (* param2 does not handle universe polymorphic inductives.
    Hence we have define EmptyR before seting Universe Polymorphism. *)
 Elpi derive.param2.register "False" "EmptyR".
-Elpi derive.param2.register "Empty" "EmptyR".
 
 Set Universe Polymorphism.
 Unset Universe Minimization ToSet.
 
-Elpi derive Empty.
-Definition Param01_Empty := False_rel01.
-Definition Param10_Empty := False_rel10.
+#[prefix="Empty_"] Elpi derive Empty.
+Definition Param01_Empty := Empty_rel01.
+Definition Param10_Empty := Empty_rel10.
 

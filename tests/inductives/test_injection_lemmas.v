@@ -2,8 +2,8 @@ From Trocq Require Import injection_lemmas.
 Require Import coverage.
 Unset Uniform Inductive Parameters.
 
-Elpi derive.projK False.
-Elpi derive.injections False.
+Elpi derive.projK testFalse.
+Elpi derive.injections testFalse.
 
 Elpi derive.projK testUnit.
 Elpi derive.injections testUnit.
