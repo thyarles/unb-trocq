@@ -210,8 +210,16 @@ Compute (showTwo (10, false) (7, true)).
 
     [] *)
 
-Definition showOne' {A : Type} (a : A) : string :=
+(* Definition showOne' {A : Type} (a : A) : string :=
   "The value is " ++ show a.
+
+The following term contains unresolved implicit arguments:
+  (fun (A : Type) (a : A) => "The value is " ++ show a)
+More precisely: 
+- ?Show: Cannot infer the implicit parameter Show of show whose type is "Show A"
+(no type class instance found) in environment:
+A : Type
+a : A *)
 
 (** Of course, [Show] is not the only interesting typeclass.  There
     are many other situations where it is useful to be able to
@@ -262,9 +270,14 @@ Instance eqNat : Eq nat :=
     checking equality makes perfect sense.  Write an [Eq] instance for
     this type. *)
 
-(* FILL IN HERE
+Instance eqBoolArrowBool : Eq (bool -> bool) :=
+  {
+    eqb := fun f g =>
+      andb (Bool.eqb (f true) (g true))
+           (Bool.eqb (f false) (g false))
+  }.
 
-    [] *)
+Compute (eqb false true).
 
 (* ================================================================= *)
 (** ** Parameterized Instances: New Typeclasses from Old *)
