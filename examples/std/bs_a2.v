@@ -381,11 +381,17 @@ Defined.
 (* ── 1. Addable nat instance ────────────────────────────────── *)
 
 (*  Instantiate [Addable] for [nat] using Rocq's standard Nat
-    library. The [#[global]] attribute makes the instance visible
+    library.
+    
+    Sometimes the [#[global]] attribute makes the instance visible
     throughout the file without explicit [Local Instance].
+
+    #[global] Instance addableNat : Addable nat := { ... }.
+
     This is also what connects Trocq's [Param_add] (which covers
-    Nat.add) to our abstract [add] field.                         *)
-#[global] Instance addable : Addable nat := {
+    Nat.add) to our abstract [add] field.
+*)
+Instance addableNat : Addable nat := {
     add        := Nat.add;
     zero       := 0;
     add_assoc  := ltac:(intros; lia);
@@ -398,7 +404,7 @@ Defined.
    (gref) of each term. The aliases fix the gref so that lookups
    always hit the right registered witness.
 
-   [_psum] is concretized at [nat] via [addable]. Trocq
+   [_psum] is concretized at [nat] via [addableNat]. Trocq
    will then rewrite [_psum l] into [nsum (plist_2_nlist l)] via
    the bridge lemma [plist_2_nlist_sum].
 *)
@@ -409,7 +415,7 @@ Definition _PCons   : nat -> _PList -> _PList    := @PCons nat.
 Definition _plength : _PList -> nat              := @plength nat.
 Definition _papp    : _PList -> _PList -> _PList := @papp nat.
 Definition _prev    : _PList -> _PList           := @prev nat.
-Definition _psum    : _PList -> nat              := @psum nat addable.
+Definition _psum    : _PList -> nat              := @psum nat addableNat.
 
 (* ── 3. Conversion functions ────────────────────────────────── *)
 
@@ -501,7 +507,7 @@ Defined.
     NEW bridge (not in bs_a1.v): connects [_psum l] to
     [nsum (plist_2_nlist l)].
 
-    Key insight: [addable] makes [@add nat addable]
+    Key insight: [addableNat] makes [@add nat addableNat]
     definitionally equal to [Nat.add]. The inductive step therefore
     simplifies without any explicit rewrite of the [add] field.       *)
 Lemma plist_2_nlist_sum : forall (l : _PList),
@@ -543,7 +549,7 @@ Defined.
      if l ~ l'  (i.e. plist_2_nlist l = l')  then  f l ~ g l'.
 
    R__psum is the key new wrapper: it maps the abstract [_psum]
-   (backed by [addable]) to [nsum], using the bridge
+   (backed by [addableNat]) to [nsum], using the bridge
    [plist_2_nlist_sum].  Trocq finds [Param_add] in the database
    to handle the [add / Nat.add] identity automatically.
 *)
@@ -592,7 +598,7 @@ Defined.
     KEY WRAPPER: connects abstract [_psum] (Addable nat) to [nsum].
 
     [Param_add] is already registered (Trocq Use #3 in Phase 4).
-    Since [addable] makes [_psum]'s internal [add] equal
+    Since [addableNat] makes [_psum]'s internal [add] equal
     to [Nat.add] definitionally, [Param_add] covers all arithmetic
     steps automatically — no extra Typeclass reasoning needed here.
     The bridge lemma [plist_2_nlist_sum] does the heavy lifting.    *)
