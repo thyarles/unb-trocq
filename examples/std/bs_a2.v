@@ -72,7 +72,7 @@ Fixpoint nsum (l : NatList) : nat :=
      plength / papp / prev work for ANY element type A.
      They carry an implicit {A : Type} parameter.
      The sum operation is deliberately EXCLUDED here — it requires
-     knowing how to combine elements (Phase 2).
+     knowing how to combine elements.
 *)
 
 Inductive PList (A : Type) : Type :=
@@ -171,36 +171,36 @@ Defined.
 (* ============================================================
    PHASE 2 -- The Typeclass Addable and psum
    ============================================================
-   The professor's question: "Since PList is polymorphic, how do
-   you sum its elements?  Who is the addition operator?"
+   Question: "Since PList is polymorphic, how do you sum its 
+              elements? Who is the addition operator?"
 
-   Answer: we abstract the addition operator and its algebraic
-   laws into a Typeclass [Addable A].  Any type that has an
-   [Addable] instance can be used as the element type of psum.
+   Answer: "we abstract the addition operator and its algebraic
+   laws into a Typeclass [Addable A]. Any type that has an
+   Addable instance can be used as the element type of psum."
 
-   DESIGN CHOICE — Option B (both identity laws):
+   DESIGN CHOICE:
      [add_zero_l] is required by the [psum_papp] proof:
-       base case produces  add zero (psum l2)  which needs
+       base case produces add zero (psum l2) which needs
        left identity to reduce to  psum l2.
      [add_zero_r] is included for completeness (it covers
        right-fold variants and future lemmas that append at
-       the right).  The cost is one extra axiom in the class,
+       the right). The cost is one extra axiom in the class,
        but it makes the Typeclass a proper Monoid interface.
 *)
 
 Class Addable (A : Type) : Type := {
-    add        :  A -> A -> A;
-    zero       :  A;
-    add_assoc  :  forall x y z : A, add (add x y) z = add x (add y z);
-    add_zero_l :  forall x : A, add zero x = x;
-    add_zero_r :  forall x : A, add x zero = x
+    add        : A -> A -> A;
+    zero       : A;
+    add_assoc  : forall x y z : A, add (add x y) z = add x (add y z);
+    add_zero_l : forall x : A, add zero x = x;
+    add_zero_r : forall x : A, add x zero = x
 }.
 
 (*  psum: sum the elements of a PList A using the Addable instance.
 
     The instance is passed as a typeclass argument [{H : Addable A}],
-    so Rocq infers it automatically at call sites once an instance
-    is registered.  Without [Addable A], this definition cannot be
+    so Rocq infers it automatically at call it once an instance
+    is registered. Without [Addable A], this definition cannot be
     written — that was the flaw in bs_a1.v.
 *)
 Fixpoint psum {A : Type} {H : Addable A} (l : PList A) : A :=
@@ -213,23 +213,23 @@ Fixpoint psum {A : Type} {H : Addable A} (l : PList A) : A :=
     ┌──────────────────────────────────────────────────────────┐
     │  Class Addable A  —  a minimal commutative Monoid        │
     │                                                          │
-    │  add        :  binary operation                          │
-    │  zero       :  neutral element                           │
-    │  add_assoc  :  (x+y)+z = x+(y+z)    (associativity)      │
-    │  add_zero_l :  0+x = x              (left  identity)     │
-    │  add_zero_r :  x+0 = x              (right identity)     │
+    │  add        : binary operation                           │
+    │  zero       : neutral element                            │
+    │  add_assoc  : (x + y) + z = x + (y + z) (associativity)  │
+    │  add_zero_l : 0 + x = x                 (left identity)  │
+    │  add_zero_r : x + 0 = x                (right identity)  │
     │                                                          │
-    │  psum  is a right-fold:                                  │
+    │  psum is a right-fold:                                   │
     │    psum (h :p: t) = add h (psum t)                       │
     │  so the base case of psum_papp produces                  │
-    │    add zero (psum l2)  which needs add_zero_l.           │
+    │    add zero (psum l2) which needs add_zero_l.            │
     └──────────────────────────────────────────────────────────┘
 *)
 
 (* ============================================================
    PHASE 3 -- The Honest Manual Transfer (Ctrl+C / Ctrl+V)
    ============================================================
-   We now attempt to transfer the four NatList theorems to PList A
+   We now try to transfer the four NatList theorems to PList A
    by pure copy-paste / rename.
 
    For the structural theorems (plength, papp, prev) the rename
@@ -244,14 +244,12 @@ Fixpoint psum {A : Type} {H : Addable A} (l : PList A) : A :=
        [add] operator.
      - We must manually rewrite with [add_zero_l] (base case) and
        [add_assoc] (inductive step).
-   Comments below mark every point where the tactic diverges from
-   the original NatList proof.
 *)
 
 (* ── Auxiliary (from napp_nil_r) ────────────────────────────── *)
 
-(*  papp_nil_r                                  Tactic steps: 4
-    COPY-PASTE STATUS: identical rename — works perfectly.         *)
+(*  papp_nil_r                                      Tactic steps: 4
+    COPY-PASTE STATUS: identical rename — works perfectly.       *)
 Lemma papp_nil_r : forall {A : Type} (l : PList A), papp l PNil = l.
 Proof.
     intros A.
@@ -262,10 +260,10 @@ Defined.
 
 (* ── Copy-paste theorems ────────────────────────────────────── *)
 
-(*  plength_papp_manual                         Tactic steps: 5
+(*  plength_papp_manual                             Tactic steps: 5
     COPY-PASTE STATUS: identical rename — works perfectly.
     Structural recursion on the spine; no element-type knowledge
-    needed (plength counts nodes, not values).                     *)
+    needed (plength counts nodes, not values).                   *)
 Theorem plength_papp_manual : forall {A : Type} (l1 l2 : PList A),
     plength (papp l1 l2) = plength l1 + plength l2.
 Proof.
@@ -275,9 +273,9 @@ Proof.
     - rewrite IH. reflexivity.
 Defined.
 
-(*  papp_assoc_manual                           Tactic steps: 5
+(*  papp_assoc_manual                               Tactic steps: 5
     COPY-PASTE STATUS: identical rename — works perfectly.
-    papp recurses on the spine only; [A] is irrelevant.            *)
+    papp recurses on the spine only; [A] is irrelevant.          *)
 Theorem papp_assoc_manual : forall {A : Type} (l1 l2 l3 : PList A),
     papp (papp l1 l2) l3 = papp l1 (papp l2 l3).
 Proof.
@@ -287,10 +285,10 @@ Proof.
     - rewrite IH. reflexivity.
 Defined.
 
-(*  prev_papp_manual                            Tactic steps: 7
+(*  prev_papp_manual                                Tactic steps: 7
     COPY-PASTE STATUS: identical rename — works perfectly.
     Uses [papp_nil_r] and [papp_assoc_manual] in place of their
-    NatList counterparts; tactics are unchanged.                   *)
+    NatList counterparts; tactics are unchanged.                *)
 Theorem prev_papp_manual : forall {A : Type} (l1 l2 : PList A),
     prev (papp l1 l2) = papp (prev l2) (prev l1).
 Proof.
@@ -300,27 +298,29 @@ Proof.
     - rewrite IH. rewrite papp_assoc_manual. reflexivity.
 Defined.
 
-(*  psum_papp_manual                            Tactic steps: 7
+(*  psum_papp_manual                                 Tactic steps: 7
     COPY-PASTE STATUS: FAILS — requires Typeclass rewrites.
 
     Original nsum_napp proof for NatList:
-      induction l1; simpl.
-      - reflexivity.                  (* base: 0 + nsum l2 = nsum l2
-                                         solved by [reflexivity] because
-                                         Nat.add has a defined 0+x = x  *)
-      - rewrite IH. lia.              (* step: h + (nsum t + nsum l2)
-                                                = h + nsum t + nsum l2
-                                         [lia] handles nat arithmetic  *)
+    induction l1; simpl.
+    - reflexivity.        (* base: 0 + nsum l2 = nsum l2
+                            solved by [reflexivity] because
+                            Nat.add has a defined 0 + x = x *)
+    - rewrite IH. lia.    (* step: h + (nsum t + nsum l2)
+                            = h + nsum t + nsum l2
+                            [lia] handles nat arithmetic  *)
 
     For PList A with abstract [Addable A]:
-      - Base case: [reflexivity] fails because [add zero x = x] is
-        an AXIOM (add_zero_l), not a definitional reduction.
-        After simpl the goal is  psum l2 = add zero (psum l2),
-        so we flip it first: [symmetry. apply add_zero_l.]  ← DIVERGENCE 1
-      - Inductive step: [lia] fails because [A] is not ℕ or ℤ.
-        After [rewrite IH], the goal is:
-          add h (add (psum t) (psum l2)) = add (add h (psum t)) (psum l2)
-        We flip and apply: [symmetry. apply add_assoc.]     ← DIVERGENCE 2
+    - Base case: [reflexivity] fails because [add zero x = x] is
+      an AXIOM (add_zero_l), not a definitional reduction.
+      After simpl the goal is psum l2 = add zero (psum l2),
+      so we flip it first: [symmetry. apply add_zero_l.]  
+      ← DIVERGENCE 1
+    - Inductive step: [lia] fails because [A] is not ℕ or ℤ.
+      After [rewrite IH], the goal is:
+      add h (add (psum t) (psum l2)) = add (add h (psum t)) (psum l2)
+      We flip and apply: [symmetry. apply add_assoc.]
+      ← DIVERGENCE 2
 *)
 Theorem psum_papp_manual :
     forall {A : Type} {H : Addable A} (l1 l2 : PList A),
@@ -328,8 +328,10 @@ Theorem psum_papp_manual :
 Proof.
     intros A H l1 l2.
     induction l1 as [| h t IH]; simpl.
-    - symmetry. apply add_zero_l.    (* DIVERGENCE 1: was [reflexivity] in nsum_napp *)
-    - rewrite IH. symmetry. apply add_assoc. (* DIVERGENCE 2: was [lia] *)
+    - symmetry. apply add_zero_l.
+      (* DIVERGENCE 1: was [reflexivity] in nsum_napp *)
+    - rewrite IH. symmetry. apply add_assoc.
+      (* DIVERGENCE 2: was [lia] *)
 Defined.
 
 (*  Phase 3 tactic-step summary
@@ -353,8 +355,8 @@ Defined.
 
     KEY OBSERVATION:
       psum_papp_manual required explicit Typeclass reasoning even for a
-      trivial theorem.  In a real-world scenario with many such lemmas,
-      the "copy-paste" cost per theorem increases.  Trocq handles this
+      trivial theorem. In a real-world scenario with many such lemmas,
+      the "copy-paste" cost per theorem increases. Trocq handles this
       divergence automatically via Param_add and the Addable instance
       (demonstrated in Phase 5).
 *)
@@ -362,7 +364,7 @@ Defined.
 (* ============================================================
    PHASE 4 -- Trocq Setup (The Bureaucracy)
    ============================================================
-   Everything in this phase is one-time fixed cost.  The pattern
+   Everything in this phase is one-time fixed cost. The pattern
    mirrors bs_a1.v exactly, extended with:
      - an [Addable nat] instance (so psum works at nat)
      - a [_psum] monomorphic alias and its bridge lemma
@@ -379,11 +381,11 @@ Defined.
 (* ── 1. Addable nat instance ────────────────────────────────── *)
 
 (*  Instantiate [Addable] for [nat] using Rocq's standard Nat
-    library.  The [#[global]] attribute makes the instance visible
+    library. The [#[global]] attribute makes the instance visible
     throughout the file without explicit [Local Instance].
     This is also what connects Trocq's [Param_add] (which covers
     Nat.add) to our abstract [add] field.                         *)
-#[global] Instance inst_addable_nat : Addable nat := {
+#[global] Instance addable : Addable nat := {
     add        := Nat.add;
     zero       := 0;
     add_assoc  := ltac:(intros; lia);
@@ -393,10 +395,10 @@ Defined.
 
 (* ── 2. Monomorphic aliases ─────────────────────────────────────
    Trocq's internal database is keyed on the head global reference
-   (gref) of each term.  The aliases fix the gref so that lookups
+   (gref) of each term. The aliases fix the gref so that lookups
    always hit the right registered witness.
 
-   [_psum] is concretized at [nat] via [inst_addable_nat].  Trocq
+   [_psum] is concretized at [nat] via [addable]. Trocq
    will then rewrite [_psum l] into [nsum (plist_2_nlist l)] via
    the bridge lemma [plist_2_nlist_sum].
 *)
@@ -407,7 +409,7 @@ Definition _PCons   : nat -> _PList -> _PList    := @PCons nat.
 Definition _plength : _PList -> nat              := @plength nat.
 Definition _papp    : _PList -> _PList -> _PList := @papp nat.
 Definition _prev    : _PList -> _PList           := @prev nat.
-Definition _psum    : _PList -> nat              := @psum nat inst_addable_nat.
+Definition _psum    : _PList -> nat              := @psum nat addable.
 
 (* ── 3. Conversion functions ────────────────────────────────── *)
 
@@ -499,7 +501,7 @@ Defined.
     NEW bridge (not in bs_a1.v): connects [_psum l] to
     [nsum (plist_2_nlist l)].
 
-    Key insight: [inst_addable_nat] makes [@add nat inst_addable_nat]
+    Key insight: [addable] makes [@add nat addable]
     definitionally equal to [Nat.add]. The inductive step therefore
     simplifies without any explicit rewrite of the [add] field.       *)
 Lemma plist_2_nlist_sum : forall (l : _PList),
@@ -541,7 +543,7 @@ Defined.
      if l ~ l'  (i.e. plist_2_nlist l = l')  then  f l ~ g l'.
 
    R__psum is the key new wrapper: it maps the abstract [_psum]
-   (backed by [inst_addable_nat]) to [nsum], using the bridge
+   (backed by [addable]) to [nsum], using the bridge
    [plist_2_nlist_sum].  Trocq finds [Param_add] in the database
    to handle the [add / Nat.add] identity automatically.
 *)
@@ -590,7 +592,7 @@ Defined.
     KEY WRAPPER: connects abstract [_psum] (Addable nat) to [nsum].
 
     [Param_add] is already registered (Trocq Use #3 in Phase 4).
-    Since [inst_addable_nat] makes [_psum]'s internal [add] equal
+    Since [addable] makes [_psum]'s internal [add] equal
     to [Nat.add] definitionally, [Param_add] covers all arithmetic
     steps automatically — no extra Typeclass reasoning needed here.
     The bridge lemma [plist_2_nlist_sum] does the heavy lifting.    *)
@@ -636,7 +638,7 @@ Proof. trocq. apply nrev_napp. Qed.
 (*  _psum_papp                                  Tactic steps: 2
     NEW theorem (not in bs_a1.v).
     After [trocq.], the goal becomes [nsum (napp l1' l2') = nsum l1' + nsum l2'],
-    which is exactly [nsum_napp].  Trocq resolved the Typeclass
+    which is exactly [nsum_napp]. Trocq resolved the Typeclass
     divergence (abstract [add] vs [Nat.add]) automatically via
     [Param_add] and the [R__psum] wrapper.                          *)
 Theorem _psum_papp : forall (l1 l2 : _PList),
@@ -717,7 +719,7 @@ Proof. trocq. apply nsum_napp. Qed.
    Trocq handled this gap entirely through:
      1. [Param_add] (already registered), which covers [Nat.add]
         relationally.
-     2. [inst_addable_nat], which makes [@add nat inst_addable_nat]
+     2. [addable], which makes [@add nat addable]
         definitionally equal to [Nat.add] — so [Param_add] applies
         directly to the [_psum] wrapper without any extra lemma.
      3. [R__psum], whose proof needed only 5 steps (same as the
