@@ -62,6 +62,7 @@
 
 From Stdlib Require Import ssreflect.
 From Stdlib Require Import Lia.
+From Stdlib Require Import ZArith.
 From Trocq Require Import Trocq.
 From Trocq Require Import Param_nat.
 Local Open Scope nat_scope.
@@ -638,7 +639,9 @@ Proof.
 Defined.
 
 (* ── Per-function Trocq Use registrations ───────────────────── *)
-
+Trocq Use R_NatList.     (* Trocq Use #1 *)
+Trocq Use Param44_nat.   (* Trocq Use #2 *)
+Trocq Use Param_add.     (* Trocq Use #3 *)
 Trocq Use R__plength.    (* Trocq Use #3 *)
 Trocq Use R__papp.       (* Trocq Use #4 *)
 Trocq Use R__prev.       (* Trocq Use #5 *)
@@ -1013,4 +1016,135 @@ Defined.
 
     Break-even: after the first type is covered by Phase 6,
     each additional type saves ~25 steps at marginal cost ~2.
+*)
+
+(* ============================================================
+   PHASE 7 -- Amortization: Z as Second Element Type
+   ============================================================
+   Phase 7 demonstrates that Phase 3's POLYMORPHIC proofs amortize
+   over multiple element types at zero marginal proof cost.
+
+   The second element type is Z (the integers from ZArith).
+   We do NOT use [Instance addableZ : Addable Z] — we build the
+   Addable Z evidence as an explicit [Definition] (not typeclass),
+   staying consistent with A3's "no instantiation" principle.
+
+   ── What costs what ──────────────────────────────────────────
+     addable_Z (Definition)          : 0 tactic steps
+     4 theorems (apply Phase 3)      : 1 step each  = 4 steps
+     TOTAL Phase 7                   : 4 tactic steps
+
+   CONTRAST (if reproved from scratch for Z, bs_a1.v style)   : ~26 steps
+   SAVINGS per extra type                                      : ~22 steps
+
+   ── Two amortization routes ───────────────────────────────────
+     (A) Apply Phase 3 polymorphic proofs directly (done here):
+           marginal cost ≈ 0 proof steps + addable definition.
+     (B) Build AddableR witness and call Param_psum / Param_papp
+           (Phase 6 parametric route, also 0 marginal proof steps).
+   Both routes are shown below.
+*)
+
+(* ── Z infrastructure ──────────────────────────────────────── *)
+
+(*  addable_Z                                  Tactic steps: 0
+    Explicit Definition — not an Instance.  Fields are taken
+    directly from ZArith lemmas.                              *)
+Definition addable_Z : Addable Z := {|
+    add        := Z.add;
+    zero       := 0%Z;
+    add_assoc  := Z.add_assoc;
+    add_zero_l := Z.add_0_l;
+    add_zero_r := Z.add_0_r
+|}.
+
+(*  Type alias and derived operations.  Tactic steps: 0.     *)
+Notation IntList := (PList Z).
+Definition zapp : IntList -> IntList -> IntList := @papp Z.
+Definition zsum : IntList -> Z                  := @psum Z addable_Z.
+Definition zprev : IntList -> IntList           := @prev Z.
+Definition zlength : IntList -> nat             := @plength Z.
+
+(* ── Route A: apply Phase 3 polymorphic theorems directly ─── *)
+
+(*  zlength_zapp                               Tactic steps: 1 *)
+Theorem zlength_zapp : forall (l1 l2 : IntList),
+    zlength (zapp l1 l2) = zlength l1 + zlength l2.
+Proof. exact (@plength_papp_manual Z). Qed.
+
+(*  zapp_assoc                                 Tactic steps: 1 *)
+Theorem zapp_assoc : forall (l1 l2 l3 : IntList),
+    zapp (zapp l1 l2) l3 = zapp l1 (zapp l2 l3).
+Proof. exact (@papp_assoc_manual Z). Qed.
+
+(*  zprev_zapp                                 Tactic steps: 1 *)
+Theorem zprev_zapp : forall (l1 l2 : IntList),
+    zprev (zapp l1 l2) = zapp (zprev l2) (zprev l1).
+Proof. exact (@prev_papp_manual Z). Qed.
+
+(*  zsum_zapp                                  Tactic steps: 1
+    Uses psum_papp_manual with explicit Addable Z witness.    *)
+Theorem zsum_zapp : forall (l1 l2 : IntList),
+    zsum (zapp l1 l2) = Z.add (zsum l1) (zsum l2).
+Proof. exact (@psum_papp_manual Z addable_Z). Qed.
+
+(* ── Route B: parametric Trocq via Param_psum (Phase 6) ───── *)
+
+(*  AddableR_Z_eq: witness that Z.add is compatible with        *)
+(*  propositional equality.  Tactic steps: 0.                   *)
+Definition AddableR_Z_eq : AddableR Z Z eq addable_Z addable_Z := {|
+    zeroR := eq_refl;
+    addR  := fun a a' aR b b' bR => f_equal2 Z.add aR bR
+|}.
+
+(*  PListR_refl : every list relates to itself under eq.        *)
+(*  Tactic steps: 4                                             *)
+Lemma PListR_refl : forall (A : Type) (l : PList A),
+    PListR A A eq l l.
+Proof.
+    intros A l.
+    induction l as [| h t IH]; simpl.
+    - exact (PNilR A A eq).
+    - exact (PConsR A A eq h h eq_refl t t IH).
+Defined.
+
+(*  Param_zsum_zapp: the relational version via Phase 6 infra.  *)
+(*  No new proof obligations — direct application.              *)
+(*  Tactic steps: 1                                             *)
+Lemma Param_zsum_zapp : forall (l1 l2 : IntList),
+    eq (zsum (zapp l1 l2)) (Z.add (zsum l1) (zsum l2)).
+Proof.
+    intros l1 l2.
+    exact (Param_psum Z Z eq addable_Z addable_Z AddableR_Z_eq
+             (zapp l1 l2) (Z.add (zsum l1) (zsum l2))
+             (Param_papp Z Z eq
+                l1 l1 (PListR_refl Z l1)
+                l2 l2 (PListR_refl Z l2))).
+Qed.
+
+(*  Phase 7 tactic-step summary
+    ┌─────────────────────────────────────────────┬──────────────┐
+    │  Item                                       │ Tactic steps │
+    ├─────────────────────────────────────────────┼──────────────┤
+    │  addable_Z (Definition)                     │      0       │
+    │  Route A — zlength_zapp                     │      1       │
+    │  Route A — zapp_assoc                       │      1       │
+    │  Route A — zprev_zapp                       │      1       │
+    │  Route A — zsum_zapp                        │      1       │
+    │  Route B — AddableR_Z_eq (Definition)       │      0       │
+    │  Route B — PListR_refl                      │      4       │
+    │  Route B — Param_zsum_zapp                  │      1       │
+    ├─────────────────────────────────────────────┼──────────────┤
+    │  TOTAL Phase 7                              │      9       │
+    │  (Route A alone: 4 steps)                   │              │
+    └─────────────────────────────────────────────┴──────────────┘
+
+    AMORTIZATION ACHIEVED:
+      Manual reproof of 4 theorems for Z from scratch  ≈  26 steps
+      Phase 7 marginal cost (Route A)                  =   4 steps
+      SAVINGS                                          ≈  22 steps
+
+    The savings come entirely from Phase 3's polymorphic proofs.
+    Phase 6's Param_psum (Route B) provides the RELATIONAL version
+    at similar cost and greater generality.
 *)
