@@ -570,3 +570,174 @@ Proof. trocq. apply nrev_napp. Qed.
    │  for the same (NatList, PList nat) vocabulary.          │
    └─────────────────────────────────────────────────────────┘ 
 *)
+
+(* ============================================================
+   ADDENDUM -- Trocq Transfer for PList Z
+   ============================================================
+   Mirrors Phase 3 exactly, substituting:
+     NatList     --> ZList
+     PList nat   --> PList Z
+     plength     --> zplength
+     papp        --> zpapp
+   No Param44_Z needed: Z never appears as a bare quantified
+   variable in the theorem -- it is always inside _ZPList.
+   Param44_nat and Param_add are already registered above.
+*)
+
+From Stdlib Require Import ZArith.
+(* Keep nat_scope open so + in the theorem is Nat.add *)
+
+(* ── ZList: monomorphic list of Z (new source of truth) ─────── *)
+
+Inductive ZList : Type :=
+    | ZNil  : ZList
+    | ZCons : Z -> ZList -> ZList.
+
+Fixpoint zlength (l : ZList) : nat :=
+    match l with
+    | ZNil       => O
+    | ZCons _ t  => S (zlength t)
+    end.
+
+Fixpoint zapp (l1 l2 : ZList) : ZList :=
+    match l1 with
+    | ZNil       => l2
+    | ZCons h t  => ZCons h (zapp t l2)
+    end.
+
+(*  zlength_zapp  (source theorem)              Tactic steps: 5 *)
+Theorem zlength_zapp : forall (l1 l2 : ZList),
+    zlength (zapp l1 l2) = zlength l1 + zlength l2.
+Proof.
+    intros l1 l2.
+    induction l1 as [| h t IH]; simpl.
+    - reflexivity.
+    - rewrite IH. reflexivity.
+Defined.
+
+(* ── PList Z operations (monomorphic at Z) ──────────────────── *)
+(* plength/papp above are fixed at PList nat, so we need new    *)
+(* fixpoints. In bs_a2.v these would just be @plength Z etc.    *)
+
+Fixpoint zplength (l : PList Z) : nat :=
+    match l with
+    | PNil       => O
+    | PCons _ t  => S (zplength t)
+    end.
+
+Fixpoint zpapp (l1 l2 : PList Z) : PList Z :=
+    match l1 with
+    | PNil       => l2
+    | PCons h t  => PCons h (zpapp t l2)
+    end.
+
+(* ── Trocq aliases ──────────────────────────────────────────── *)
+
+Definition _ZPList   : Type                          := PList Z.
+Definition _zplength : _ZPList -> nat                := zplength.
+Definition _zpapp    : _ZPList -> _ZPList -> _ZPList := zpapp.
+
+(* ── Conversions ─────────────────────────────────────────────── *)
+
+Fixpoint zplist_2_zlist (l : _ZPList) : ZList :=
+    match l with
+    | PNil      => ZNil
+    | PCons h t => ZCons h (zplist_2_zlist t)
+    end.
+
+Fixpoint zlist_2_zplist (l : ZList) : _ZPList :=
+    match l with
+    | ZNil      => PNil
+    | ZCons h t => PCons h (zlist_2_zplist t)
+    end.
+
+(*  zplist_zlist_iso                            Tactic steps: 4 *)
+Lemma zplist_zlist_iso : forall (l : _ZPList),
+    zlist_2_zplist (zplist_2_zlist l) = l.
+Proof.
+    induction l as [| h t IH]; simpl.
+    - reflexivity.
+    - rewrite IH. reflexivity.
+Defined.
+
+(*  zlist_zplist_iso                            Tactic steps: 4 *)
+Lemma zlist_zplist_iso : forall (l : ZList),
+    zplist_2_zlist (zlist_2_zplist l) = l.
+Proof.
+    induction l as [| h t IH]; simpl.
+    - reflexivity.
+    - rewrite IH. reflexivity.
+Defined.
+
+(*  R_ZList                                     Tactic steps: 5 *)
+Definition R_ZList : Param44.Rel _ZPList ZList.
+Proof.
+    apply Iso.toParam; unshelve econstructor.
+    - exact zplist_2_zlist.
+    - exact zlist_2_zplist.
+    - exact zplist_zlist_iso.
+    - exact zlist_zplist_iso.
+Defined.
+
+Trocq Use R_ZList.
+(* Param44_nat and Param_add already registered in Phase 3 *)
+
+(* ── Bridge lemmas ──────────────────────────────────────────── *)
+
+(*  _zplength_eq_zlength                        Tactic steps: 5 *)
+Lemma _zplength_eq_zlength : forall (l : _ZPList),
+    _zplength l = zlength (zplist_2_zlist l).
+Proof.
+    unfold _zplength.
+    induction l as [| h t IH]; simpl.
+    - reflexivity.
+    - rewrite IH. reflexivity.
+Defined.
+
+(*  zplist_2_zlist_app                          Tactic steps: 6 *)
+Lemma zplist_2_zlist_app : forall (l1 l2 : _ZPList),
+    zplist_2_zlist (_zpapp l1 l2) = zapp (zplist_2_zlist l1) (zplist_2_zlist l2).
+Proof.
+    unfold _zpapp. intros l1 l2.
+    induction l1 as [| h t IH]; simpl.
+    - reflexivity.
+    - rewrite IH. reflexivity.
+Defined.
+
+(* ── R__ wrappers ────────────────────────────────────────────── *)
+
+(*  R__zplength                                 Tactic steps: 5 *)
+Lemma R__zplength
+    (l : _ZPList) (l' : ZList) (lR : rel R_ZList l l') :
+    natR (_zplength l) (zlength l').
+Proof.
+    change (zplist_2_zlist l = l') in lR.
+    apply map_in_R_nat.
+    rewrite _zplength_eq_zlength.
+    rewrite lR.
+    reflexivity.
+Defined.
+
+(*  R__zpapp                                    Tactic steps: 7 *)
+Lemma R__zpapp
+    (l1 : _ZPList) (l1' : ZList) (l1R : rel R_ZList l1 l1')
+    (l2 : _ZPList) (l2' : ZList) (l2R : rel R_ZList l2 l2') :
+    rel R_ZList (_zpapp l1 l2) (zapp l1' l2').
+Proof.
+    change (zplist_2_zlist l1 = l1') in l1R.
+    change (zplist_2_zlist l2 = l2') in l2R.
+    change (zplist_2_zlist (_zpapp l1 l2) = zapp l1' l2').
+    rewrite zplist_2_zlist_app.
+    rewrite l1R. rewrite l2R.
+    reflexivity.
+Defined.
+
+Trocq Use R__zplength.
+Trocq Use R__zpapp.
+
+(* ── Trocq theorem ──────────────────────────────────────────── *)
+
+(*  _zplength_zpapp                             Tactic steps: 2 *)
+Theorem _zplength_zpapp : forall (l1 l2 : _ZPList),
+    _zplength (_zpapp l1 l2) = _zplength l1 + _zplength l2.
+Proof. trocq. apply zlength_zapp. Qed.
