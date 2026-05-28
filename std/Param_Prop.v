@@ -28,8 +28,8 @@ Local Open Scope param_scope.
   + symmetry MapM_Prop_symNP *)
 
 Elpi Command genmapprop.
-Elpi Accumulate Db trocq.db.
 Elpi Accumulate File param_prop_generation.
+Elpi Accumulate Db trocq.db.
 
 Elpi Query lp:{{
   % cannot have only one binder in the declaration because this line creates a fresh level:

@@ -25,8 +25,8 @@ digraph {
     "util" -> {"aterm" "util-rocq"};
     "util-rocq" -> {"data" "param-class-util" "simple-graph"};
     "class" -> "database";
-    "class" -> "aterm" [style="dashed"];
-    "database" -> {"data" "param-class-util"} [style="dashed"];
+    "class" -> "aterm";
+    "database" -> {"data" "param-class-util"};
     "aterm" -> {"constraints" "vernac"};
     "constraints" -> "simple-graph";
     "simple-graph" -> "constraint-graph";
@@ -39,7 +39,7 @@ digraph {
 
     ## CLUSTERS
     subgraph cluster_trocqdb {
-        label="trocq.db";
+        label="trocq.db header";
         style=filled;
         fillcolor="#dffdc0";
         "class" "database";

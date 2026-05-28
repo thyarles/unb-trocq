@@ -21,3 +21,4 @@ examples/std/*.pdf
 # python
 .venv
 .DS_Store
+docs/_site/

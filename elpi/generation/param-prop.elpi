@@ -1,3 +1,5 @@
+accumulate "Trocq.Elpi/database".
+
 pred generate-fields
   i:map-class, i:term, i:param-class, o:list term.
 generate-fields map0 R _ [R].
