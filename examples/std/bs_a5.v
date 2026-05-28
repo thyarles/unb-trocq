@@ -29,7 +29,7 @@ From mathcomp.boot Require Import all_boot.
 From mathcomp.algebra Require Import all_algebra.
 From Trocq Require Import Stdlib Trocq.
 
-Import GRing.Theory.
+Import GRing.Theory. (* rmorphM, rmorphN *)
 Open Scope ring_scope.
 
 Set Universe Polymorphism.
