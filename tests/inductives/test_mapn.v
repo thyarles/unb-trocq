@@ -1,5 +1,5 @@
 Require Import Database.
-From Trocq Require Import map4 umap.
+From Trocq Require Import map4 mapn.
 From Trocq Require Import coverage.
 Unset Uniform Inductive Parameters.
 

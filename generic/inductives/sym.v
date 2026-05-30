@@ -6,7 +6,7 @@ From Trocq.Elpi Extra Dependency "inductives/sym.elpi" as sym.
 
 From elpi.apps Require Import derive.legacy derive.param2.
 
-From Trocq Require Export Hierarchy.
+From Trocq Require Export Hierarchy Stdlib.
 Unset Uniform Inductive Parameters. 
 
 Elpi Db derive.sym.db lp:{{

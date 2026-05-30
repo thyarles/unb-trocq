@@ -1,6 +1,6 @@
 
 Require Import Database.
-From Trocq Require Import coverage Rel44. 
+From Trocq Require Import coverage Relnm. 
 
 Elpi derive False.
 Check False_rel44.

@@ -20,8 +20,6 @@ Unset Universe Minimization ToSet.
 Import HoTTNotations.
 
 Require Import Database.
-From Trocq Require Import Rel44. 
-Elpi derive prod.
+From Trocq Require Import Relnm. 
 
-Check prod_map4 : forall A A' (AR : A -> A' -> Type) (AM : Map4.Has AR) B B' (BR : B -> B' -> Type) (BM : Map4.Has BR),
-  Map4.Has (prod_R _ _ AR _ _ BR).
+Elpi derive prod.

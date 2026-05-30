@@ -21,10 +21,7 @@ Set Asymmetric Patterns.
 Import HoTTNotations.
 
 Require Import Database.
-From Trocq Require Import Rel44. 
-Elpi derive sum.
-Check sum_map4 : forall (A1 A2 : Type) (AR : A1 -> A2 -> Type),
-IsUMap AR -> forall (B1 B2 : Type) (BR : B1 -> B2 -> Type),
-IsUMap BR -> IsUMap (sum_R A1 A2 AR B1 B2 BR). 
+From Trocq Require Import Relnm. 
 
+Elpi derive sum.
 Definition Param01_sum := sum_rel01.

@@ -188,8 +188,8 @@ pred mk-mR-type-rsymK i:int, i:term, i:term, i:term, o:term.
 mk-mR-type-rsymK N T Rel RSym R :-
   mk-mR-type-priv N T RSym _ Rel 7 [] _ _ raw R.
 
-pred mk-mR-type-rel44 i:int, i:term, i:term, i:term, o:term.
-mk-mR-type-rel44 N T Rel RelSTy R :-
+pred mk-mR-type-relnm i:int, i:term, i:term, i:term, o:term.
+mk-mR-type-relnm N T Rel RelSTy R :-
   mk-mR-type-priv N T _ RelSTy Rel 8 [] _ _ subst R.
 
 }

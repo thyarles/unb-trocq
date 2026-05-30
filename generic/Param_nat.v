@@ -20,24 +20,13 @@ Unset Universe Minimization ToSet.
 Import HoTTNotations.
 
 Require Import Database.
-From Trocq Require Import Rel44. 
+From Trocq Require Import Relnm. 
+
 Elpi derive nat.
 Notation natR := nat_R.
 Definition OR := O_R.
 Definition SR := S_R.
 
-Check nat_R : nat -> nat -> Type.
-Check nat_mymap : nat -> nat. 
-Check nat_mR : forall (b b' : nat) (e : nat_mymap b = b'), nat_R b b'. 
-Check nat_Rm : forall (b b' : nat) (bR : nat_R b b'), nat_mymap b = b'.
-Check nat_mRRmK : forall (b b' : nat) (bR : nat_R b b'), nat_mR _ _  (nat_Rm _ _  bR) = bR.
-Check nat_sym : forall (b b' : nat) (bR : nat_R b b'), nat_R b' b.
-Check nat_symK : forall (b b' : nat) (bR : nat_R b b'), nat_sym _ _ (nat_sym _ _ bR) = bR.
-Check nat_rsymK : forall (b b' : nat), sym_rel nat_R b b' <->> nat_R b b'.
-Check nat_map4 : Map4.Has nat_R.
-Check nat_rel44 : Param44.Rel nat nat.
-Check nat_rel00 : Param00.Rel nat nat.  
-Check nat_rel2a0 : Param2a0.Rel nat nat. 
 Definition Param2a0_nat := nat_rel2a0.
 
 Definition Param_add :

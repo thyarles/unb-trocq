@@ -1,5 +1,5 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
-From Trocq.Elpi Extra Dependency "inductives/umap.elpi" as umap.
+From Trocq.Elpi Extra Dependency "inductives/mapn.elpi" as mapn.
 From Trocq.Elpi Extra Dependency "inductives/common_algo.elpi" as common.
 From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as algo_utils.
 From Trocq Require Import map4.
@@ -19,7 +19,7 @@ Elpi Accumulate derive.umap.db Db trocq.db. *)
   pred umap-done o:inductive, o:map-class.
 }}. *)
 
-Elpi Command derive.umap.
+Elpi Command derive.mapn.
 Elpi Accumulate File derive_hook.
 Elpi Accumulate Db Header derive.param2.db.
 Elpi Accumulate Db derive.param2.db.
@@ -35,12 +35,12 @@ Elpi Accumulate File common.
 Elpi Accumulate File algo_utils.
 
 Elpi Accumulate Db trocq.db.
-Elpi Accumulate File umap.
+Elpi Accumulate File mapn.
 Elpi Accumulate lp:{{
   main [str I] :- !, coq.locate I (indt GR),
     coq.gref->id (indt GR) Tname,
     Prefix is Tname ^ "_",
-    derive.umap.main GR Prefix _.
+    derive.mapn.main GR Prefix _.
   main _ :- usage.
 
   pred usage.
@@ -50,11 +50,11 @@ Elpi Accumulate lp:{{
 Elpi Accumulate derive Db trocq.db.
 Elpi Accumulate derive File common.
 Elpi Accumulate derive File algo_utils.
-Elpi Accumulate derive File umap.
+Elpi Accumulate derive File mapn.
 
 Elpi Accumulate derive lp:{{
 
-dep1 "umap" "mRRmK".
-derivation (indt T) Prefix ff (derive "umap" (derive.umap.main T Prefix) (trocq.db.map-ind-done T)).
+dep1 "mapn" "mRRmK".
+derivation (indt T) Prefix ff (derive "mapn" (derive.mapn.main T Prefix) (trocq.db.map-ind-done T)).
 
 }}.

@@ -3,6 +3,7 @@
 -arg -w -arg +elpi.typechecker
 
 -R . Trocq
+-R ./generic/inductives Trocq
 -R ../elpi/ Trocq.Elpi
 
 Common.v
@@ -26,8 +27,8 @@ generic/inductives/Rm.v
 generic/inductives/injK.v
 generic/inductives/mRRmK.v 
 generic/inductives/map4.v
-generic/inductives/umap.v
-generic/inductives/Rel44.v
+generic/inductives/mapn.v
+generic/inductives/Relnm.v
 
 generic/Database.v
 generic/Param_Empty.v

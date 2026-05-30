@@ -17,7 +17,7 @@ Require Import Stdlib Hierarchy.
 Import HoTTNotations.
 
 Require Import Database.
-From Trocq Require Import Rel44. 
+From Trocq Require Import Relnm. 
 
 (* translations of inductives in Prop is not yet supported, 
 but we can still generate everything for False by manually defining its parametricity translation and making it land in Type. *)
@@ -30,17 +30,5 @@ Set Universe Polymorphism.
 Unset Universe Minimization ToSet.
 
 Elpi derive Empty.
-
-Check EmptyR : False -> False -> Type.
-Check False_mymap : False -> False. 
-Check False_mR : forall (b b' : False) (e : False_mymap b = b'), EmptyR b b'. 
-Check False_Rm : forall (b b' : False) (bR : EmptyR b b'), False_mymap b = b'.
-Check False_mRRmK : forall (b b' : False) (bR : EmptyR b b'), False_mR _ _  (False_Rm _ _  bR) = bR.
-Check False_sym : forall (b b' : False) (bR : EmptyR b b'), EmptyR b' b.
-Check False_symK : forall (b b' : False) (bR : EmptyR b b'), False_sym _ _ (False_sym _ _ bR) = bR.
-Check False_rsymK : forall (b b' : False), sym_rel EmptyR b b' <->> EmptyR b b'.
-Check False_map4 : Map4.Has EmptyR.
-Check False_rel44 : Param44.Rel False False.
-
 Definition Param01_Empty := False_rel01.
 Definition Param10_Empty := False_rel10.

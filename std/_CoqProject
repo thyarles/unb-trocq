@@ -2,6 +2,7 @@
 -arg -w -arg +elpi.typechecker
 
 -R . Trocq
+-R ./generic/inductives Trocq
 -R ../elpi/ Trocq.Elpi
 
 HoTTNotations.v
@@ -25,22 +26,8 @@ generic/inductives/Rm.v
 generic/inductives/injK.v
 generic/inductives/mRRmK.v 
 generic/inductives/map4.v
-generic/inductives/umap.v
-generic/inductives/Rel44.v
-
-algo/tests/coverage.v
-algo/tests/test_sym.v
-algo/tests/test_symK.v
-algo/tests/test_RsymK.v
-algo/tests/test_mymap.v
-algo/tests/test_injection_lemmas.v
-algo/tests/test_mR.v
-algo/tests/test_Rm.v
-algo/tests/test_injK.v
-algo/tests/test_mRRmK.v
-algo/tests/test_map4.v
-algo/tests/test_umap.v
-algo/tests/test_Rel44.v
+generic/inductives/mapn.v
+generic/inductives/Relnm.v
 
 generic/Database.v
 generic/Param_Empty.v
