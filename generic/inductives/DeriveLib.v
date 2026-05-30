@@ -1,6 +1,7 @@
 (* Compatibility layer with elpi's derive *)
 From elpi Require Export elpi.
-From Trocq Require Export Stdlib HoTTNotations.
+From Trocq Require Export Stdlib.
+From Trocq Require Import HoTTNotations.
 
 Definition eq_f := @ap.
 Register eq_f as elpi.derive.eq_f.

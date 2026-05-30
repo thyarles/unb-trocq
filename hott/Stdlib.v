@@ -11,9 +11,9 @@
 (*                            * see LICENSE file for the text of the license *)
 (*****************************************************************************)
 
+(* From elpi Require Export elpi. *)
 From HoTT Require Export HoTT.
 From Trocq Require Export HoTT_additions.
-From elpi Require Export elpi.
 
 Module HoTTNotations.
   (* Stub for compatibility with stdlib version  *)

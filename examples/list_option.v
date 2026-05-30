@@ -67,11 +67,10 @@ Definition mapR
   (l : list A) (l' : list A') (lR : listR A A' AR l l') :
     listR B B' BR (map f l) (map f' l').
 Proof.
-  induction lR; simpl.
+  elim: lR=> /= [| a1 a2 a_R l1 l2 lr].
   - apply nilR.
   - apply consR.
     + apply (fR a1 a2 a_R).
-    + apply IHlR.
 Defined.
 
 Lemma option_to_list_map_morph (A B : Type) (f : A -> B) (xo : option A) :

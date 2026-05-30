@@ -12,7 +12,7 @@
 (*****************************************************************************)
 
 From Trocq Require Import Relnm. 
-From Trocq Require Export HoTTNotations.
+From Trocq Require Import HoTTNotations.
 
 Set Universe Polymorphism.
 Unset Universe Minimization ToSet.
