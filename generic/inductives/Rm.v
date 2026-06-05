@@ -1,7 +1,7 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
-From Trocq.Elpi Extra Dependency "inductives/Rm.elpi" as Rm.
-From Trocq.Elpi Extra Dependency "inductives/common_algo.elpi" as common.
-From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as algo_utils.
+From Trocq.Elpi.inductives Extra Dependency "Rm.elpi" as Rm.
+From Trocq.Elpi.inductives Extra Dependency "common_algo.elpi" as common.
+From Trocq.Elpi.inductives Extra Dependency "utils.elpi" as algo_utils.
 
 From elpi Require Import elpi.
 From Trocq Require Export Hierarchy Param_lemmas mymap.

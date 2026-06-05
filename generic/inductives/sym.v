@@ -1,8 +1,8 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
 From elpi.apps.derive.elpi Extra Dependency "derive_synterp_hook.elpi" as derive_synterp_hook.
-From Trocq.Elpi Extra Dependency "inductives/common_algo.elpi" as common.
-From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as utils.
-From Trocq.Elpi Extra Dependency "inductives/sym.elpi" as sym.
+From Trocq.Elpi.inductives Extra Dependency "common_algo.elpi" as common.
+From Trocq.Elpi.inductives Extra Dependency "utils.elpi" as utils.
+From Trocq.Elpi.inductives Extra Dependency "sym.elpi" as sym.
 
 From elpi.apps Require Export derive derive.param2.
 From Trocq Require Export Hierarchy Stdlib.

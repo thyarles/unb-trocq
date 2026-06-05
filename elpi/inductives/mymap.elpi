@@ -77,9 +77,8 @@ bo-k-args.aux K IndGR [A|As] [T|Ts] (prod _ S Ty) R :-
   coq.mk-app F [A] FA,
   bo-k-args.aux {coq.mk-app K [FA]} IndGR As Ts (Ty FA) R.
 bo-k-args.aux K IndGR [A|As] [T|Ts] (prod _ _ Ty) R :-
-  coq.safe-dest-app T IndT ArgsIndT,
+  coq.safe-dest-app T IndT _,
   coq.env.global IndGR IndT, !,
-  coq.mk-app IndT Args2 TDest,
   mymap-db IndT IndT F,
   coq.mk-app F [A] FA,
   bo-k-args.aux {coq.mk-app K [FA]} IndGR As Ts (Ty FA) R.

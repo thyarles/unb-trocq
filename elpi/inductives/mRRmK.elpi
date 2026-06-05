@@ -132,7 +132,7 @@ process-args Ksrc Kdest 0 InitArgs TyArgsNo _ Goal _ KR InjKs _ MRRMKEq R:-
   collect-arguments TyArgsNo InitArgs MRRM TyArgsDest Args1 Args2 Paths, %paths are all
   feed-injKs InjKs TyArgsDest Args1 Args2 Paths Eqs,
   invert-eqs Eqs IEqs,
-  std.map MRRMKEq (x\ r\ sigma TMP\ @keepunivs! => coq.elaborate-skeleton x _ TMP ok, r = TMP) MRRMKElab,
+  std.map MRRMKEq (x\ r\ sigma TMP\ (@keepunivs! => coq.elaborate-skeleton x _ TMP ok), r = TMP) MRRMKElab,
   invert-eqs {std.rev MRRMKElab} IEqs2,
   End = {{ lib:@trocq.idpath lp:IRTy lp:IR }},
   coq.mk-app HD [IRTy,{whd1 MRRM},IR] RGoal, % KR a1 a2 ar1[I_Rm] b1 b2 br[I_Rm]

@@ -31,7 +31,7 @@ implement-rsymK N (prod AN1 ATy1 a1\ prod AN2 ATy2 a2\ prod ARN (ARTy a1 a2) ar\
 func main inductive, string -> list prop.
 main GR Prefix Clauses :- std.do! [
 
-  coq.env.indt GR _ TyParamNo _ _ KNs KTys,
+  coq.env.indt GR _ TyParamNo _ _ _ _,
   coq.env.global (indt GR) Ind,
   std.assert! (param Ind Ind TR) "derive.rsymK: use derive.param2 before",
   coq.typecheck TR TRTy _,

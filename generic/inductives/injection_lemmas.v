@@ -1,8 +1,8 @@
 From elpi.apps.derive.elpi Extra Dependency "injection.elpi" as injection.
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
 From elpi.apps.derive.elpi Extra Dependency "derive_synterp_hook.elpi" as derive_synterp_hook.
-From Trocq.Elpi Extra Dependency "inductives/injection_lemmas.elpi" as injections.
-From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as algo_utils.
+From Trocq.Elpi.inductives Extra Dependency "injection_lemmas.elpi" as injections.
+From Trocq.Elpi.inductives Extra Dependency "utils.elpi" as algo_utils.
 
 From elpi.apps Require Export derive.
 From elpi.apps Require Export derive.projK. 

@@ -209,7 +209,7 @@ rewrite-with [Eq|Eqs] [Pat|Pats] End R :-
   rewrite-with Eqs Pats End RestSkel,
   (@keepunivs! => coq.elaborate-skeleton RestSkel _ Rest ok),
   RSkel = (T Rest),
-  (@keepunivs! => coq.elaborate-skeleton RSkel _ R Err).
+  (@keepunivs! => coq.elaborate-skeleton RSkel _ R ok).
 
 % checks if two types refer to the same indt, and returns a canonical one.
 pred cmp-indt i:term, i:term, o:term, o:term.

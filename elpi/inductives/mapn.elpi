@@ -87,7 +87,6 @@ implement-mapM M GR RMapn :-
 
 func main inductive, string -> list prop.
 main GR Prefix Clauses :- std.do! [
-  coq.env.global (indt GR) Ind,
   std.fold {map-class.all-of-kind all} [] (M\ C\ C'\ sigma RMapn NameMapn FNameMapn CMapn Entry\
     implement-mapM M GR RMapn,
     NameMapn is Prefix ^ "map" ^ {map-class.to_string M},

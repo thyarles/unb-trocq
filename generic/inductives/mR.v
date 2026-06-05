@@ -1,9 +1,9 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
 From elpi.apps.derive.elpi Extra Dependency "discriminate.elpi" as discr.
-From Trocq.Elpi Extra Dependency "inductives/common_algo.elpi" as common.
-From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as utils.
-From Trocq.Elpi Extra Dependency "inductives/mR.elpi" as mR.
-From Trocq.Elpi Extra Dependency "inductives/injection_lemmas.elpi" as injections.
+From Trocq.Elpi.inductives Extra Dependency "common_algo.elpi" as common.
+From Trocq.Elpi.inductives Extra Dependency "utils.elpi" as utils.
+From Trocq.Elpi.inductives Extra Dependency "mR.elpi" as mR.
+From Trocq.Elpi.inductives Extra Dependency "injection_lemmas.elpi" as injections.
 
 From elpi Require Import elpi.
 From elpi.apps Require Export derive.param2 derive.isK. (* for isK db required by discriminate *)
