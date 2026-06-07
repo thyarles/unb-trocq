@@ -178,6 +178,8 @@ Proof.
       (* DIVERGENCE 2: was [lia] *)
 Defined.
 
+(* addableNat: Addable instance for nat, required to instantiate R_psum_nat
+   and to typecheck psum theorems about PList nat. *)
 Instance addableNat : Addable nat := {
     add        := Nat.add;
     zero       := 0;
@@ -186,269 +188,281 @@ Instance addableNat : Addable nat := {
     add_zero_r := ltac:(intros; lia)
 }.
 
-(* ── 2. Monomorphic aliases ─────────────────────────────────────*)
-
-Definition _PList   : Type                       := PList nat.
-Definition _PNil    : _PList                     := @PNil nat.
-Definition _PCons   : nat -> _PList -> _PList    := @PCons nat.
-Definition _plength : _PList -> nat              := @plength nat.
-Definition _papp    : _PList -> _PList -> _PList := @papp nat.
-Definition _prev    : _PList -> _PList           := @prev nat.
-Definition _psum    : _PList -> nat              := @psum nat addableNat.
-
 (* ── 3. Conversion functions ────────────────────────────────── *)
 
-Fixpoint plist_2_nlist (l : _PList) : NatList :=
+Fixpoint plist_2_nlist {A : Type} (f : A -> nat) (l : PList A) : NatList :=
     match l with
     | PNil      => NNil
-    | PCons h t => NCons h (plist_2_nlist t)
+    | PCons h t => NCons (f h) (plist_2_nlist f t)
     end.
 
-Fixpoint nlist_2_plist (l : NatList) : _PList :=
+Fixpoint nlist_2_plist {A : Type} (f : nat -> A) (l : NatList) : PList A :=
     match l with
     | NNil      => PNil
-    | NCons h t => PCons h (nlist_2_plist t)
+    | NCons h t => PCons (f h) (nlist_2_plist f t)
     end.
 
 (* ── 4. Mutual-inverse proofs + R_NatList ───────────────────── *)
 
-Lemma plist_nlist_iso : forall (l : _PList),
-    nlist_2_plist (plist_2_nlist l) = l.
+Lemma plist_nlist_iso : 
+    forall {A : Type} (f : A -> nat) (g : nat -> A),
+        (forall x : A, g (f x) = x) ->
+            forall (l : PList A),
+    nlist_2_plist g (plist_2_nlist f l) = l.
 Proof.
+    intros A f g Hgf l.
     induction l as [| h t IH]; simpl.
     - reflexivity.
-    - rewrite IH. reflexivity.
+    - rewrite Hgf. rewrite IH. reflexivity.
 Defined.
 
-Lemma nlist_plist_iso : forall (l : NatList),
-    plist_2_nlist (nlist_2_plist l) = l.
+Lemma nlist_plist_iso :
+    forall {A : Type} (f : A -> nat) (g : nat -> A),
+        (forall x : nat, f (g x) = x) ->
+            forall (l : NatList),
+    plist_2_nlist f (nlist_2_plist g l) = l.
 Proof.
+    intros A f g Hfg l.
     induction l as [| h t IH]; simpl.
     - reflexivity.
-    - rewrite IH. reflexivity.
+    - rewrite Hfg. rewrite IH. reflexivity.
 Defined.
 
-Definition R_NatList : Param44.Rel _PList NatList.
+Definition R_NatList {A : Type} (f : A -> nat) (g : nat -> A)
+    (Hgf : forall x : A, g (f x) = x)
+    (Hfg : forall x : nat, f (g x) = x) : Param44.Rel (PList A) NatList.
 Proof.
     apply Iso.toParam; unshelve econstructor.
-    - exact plist_2_nlist.
-    - exact nlist_2_plist.
-    - exact plist_nlist_iso.
-    - exact nlist_plist_iso.
+    - exact (plist_2_nlist f).
+    - exact (nlist_2_plist g).
+    - exact (plist_nlist_iso f g Hgf).
+    - exact (nlist_plist_iso f g Hfg).
 Defined.
 
 (* ── 5. Shared Trocq Use registrations ─────────────────────── *)
 
-Trocq Use R_NatList.     (* Trocq Use #1 *)
-Trocq Use Param44_nat.   (* Trocq Use #2 *)
-Trocq Use Param_add.     (* Trocq Use #3 *)
+(* R_NatList_nat: concrete (no lambda parameters) witness for PList nat <-> NatList.
+   Trocq Use requires a fully concrete gref; R_NatList is generic so we instantiate
+   once at id/id for nat.  The generic R_NatList stays available for manual proofs. *)
+Definition R_NatList_nat : Param44.Rel (PList nat) NatList.
+Proof. exact (R_NatList id id (fun _ => eq_refl) (fun _ => eq_refl)). Defined.
+
+Trocq Use R_NatList_nat.  (* Trocq Use #1 *)
+Trocq Use Param44_nat.    (* Trocq Use #2 *)
+Trocq Use Param_add.      (* Trocq Use #3 *)
 
 (* ── 6. Bridge lemmas ───────────────────────────────────────────*)
 
-Lemma _plength_eq_nlength : forall (l : _PList),
-    _plength l = nlength (plist_2_nlist l).
+Lemma plength_eq_nlength : forall {A : Type} (f : A -> nat) (l : PList A),
+    plength l = nlength (plist_2_nlist f l).
 Proof.
-    unfold _plength.
+    intros A f l.
     induction l as [| h t IH]; simpl.
     - reflexivity.
     - rewrite IH. reflexivity.
 Defined.
 
-Lemma plist_2_nlist_app : forall (l1 l2 : _PList),
-    plist_2_nlist (_papp l1 l2) = napp (plist_2_nlist l1) (plist_2_nlist l2).
+Lemma plist_2_nlist_app : forall {A : Type} (f : A -> nat) (l1 l2 : PList A),
+    plist_2_nlist f (papp l1 l2) = napp (plist_2_nlist f l1) (plist_2_nlist f l2).
 Proof.
-    unfold _papp.
-    intros l1 l2.
+    intros A f l1 l2.
     induction l1 as [| h t IH]; simpl.
     - reflexivity.
     - rewrite IH. reflexivity.
 Defined.
 
-Lemma plist_2_nlist_rev : forall (l : _PList),
-    plist_2_nlist (_prev l) = nrev (plist_2_nlist l).
+Lemma plist_2_nlist_rev : forall {A : Type} (f : A -> nat) (l : PList A),
+    plist_2_nlist f (prev l) = nrev (plist_2_nlist f l).
 Proof.
+    intros A f l.
     induction l as [| h t IH]; simpl.
     - reflexivity.
     - rewrite plist_2_nlist_app. simpl. rewrite IH. reflexivity.
 Defined.
 
-Lemma plist_2_nlist_sum : forall (l : _PList),
-    _psum l = nsum (plist_2_nlist l).
+Lemma plist_2_nlist_sum : forall {A : Type} {H : Addable A}
+    (f : A -> nat)
+    (Hz : f zero = O)
+    (Hf : forall x y : A, f (add x y) = f x + f y)
+    (l : PList A),
+    f (psum l) = nsum (plist_2_nlist f l).
 Proof.
-    unfold _psum.
+    intros A H f Hz Hf l.
     induction l as [| h t IH]; simpl.
-    - reflexivity.
-    - rewrite IH. reflexivity.
+    - exact Hz.
+    - rewrite Hf. rewrite IH. reflexivity.
 Defined.
 
-(* ── R__ relational wrappers ────────────────────────────────── *)
+(* ── R_ relational wrappers ────────────────────────────────── *)
 
-Lemma R__plength
-    (l : _PList) (l' : NatList) (lR : rel R_NatList l l') :
-    natR (_plength l) (nlength l').
+Lemma R_plength {A : Type} (f : A -> nat) (g : nat -> A)
+    (Hgf : forall x : A, g (f x) = x)
+    (Hfg : forall x : nat, f (g x) = x)
+    (l : PList A) (l' : NatList) (lR : rel (R_NatList f g Hgf Hfg) l l') :
+    natR (plength l) (nlength l').
 Proof.
-    change (plist_2_nlist l = l') in lR.
+    change (plist_2_nlist f l = l') in lR.
     apply map_in_R_nat.
-    rewrite _plength_eq_nlength.
+    rewrite (plength_eq_nlength f).
     rewrite lR.
     reflexivity.
 Defined.
 
-Lemma R__papp
-    (l1 : _PList) (l1' : NatList) (l1R : rel R_NatList l1 l1')
-    (l2 : _PList) (l2' : NatList) (l2R : rel R_NatList l2 l2') :
-    rel R_NatList (_papp l1 l2) (napp l1' l2').
+Lemma R_papp {A : Type} (f : A -> nat) (g : nat -> A)
+    (Hgf : forall x : A, g (f x) = x)
+    (Hfg : forall x : nat, f (g x) = x)
+    (l1 : PList A) (l1' : NatList) (l1R : rel (R_NatList f g Hgf Hfg) l1 l1')
+    (l2 : PList A) (l2' : NatList) (l2R : rel (R_NatList f g Hgf Hfg) l2 l2') :
+    rel (R_NatList f g Hgf Hfg) (papp l1 l2) (napp l1' l2').
 Proof.
-    change (plist_2_nlist l1 = l1') in l1R.
-    change (plist_2_nlist l2 = l2') in l2R.
-    change (plist_2_nlist (_papp l1 l2) = napp l1' l2').
+    change (plist_2_nlist f l1 = l1') in l1R.
+    change (plist_2_nlist f l2 = l2') in l2R.
+    change (plist_2_nlist f (papp l1 l2) = napp l1' l2').
     rewrite plist_2_nlist_app.
     rewrite l1R. rewrite l2R.
     reflexivity.
 Defined.
 
-Lemma R__prev
-    (l : _PList) (l' : NatList) (lR : rel R_NatList l l') :
-    rel R_NatList (_prev l) (nrev l').
+Lemma R_prev {A : Type} (f : A -> nat) (g : nat -> A)
+    (Hgf : forall x : A, g (f x) = x)
+    (Hfg : forall x : nat, f (g x) = x)
+    (l : PList A) (l' : NatList) (lR : rel (R_NatList f g Hgf Hfg) l l') :
+    rel (R_NatList f g Hgf Hfg) (prev l) (nrev l').
 Proof.
-    change (plist_2_nlist l = l') in lR.
-    change (plist_2_nlist (_prev l) = nrev l').
+    change (plist_2_nlist f l = l') in lR.
+    change (plist_2_nlist f (prev l) = nrev l').
     rewrite plist_2_nlist_rev.
     rewrite lR.
     reflexivity.
 Defined.
 
-Lemma R__psum
-    (l : _PList) (l' : NatList) (lR : rel R_NatList l l') :
-    natR (_psum l) (nsum l').
+Lemma R_psum {A : Type} {HA : Addable A} (f : A -> nat) (g : nat -> A)
+    (Hgf : forall x : A, g (f x) = x)
+    (Hfg : forall x : nat, f (g x) = x)
+    (Hz : f zero = O)
+    (Hf : forall x y : A, f (add x y) = f x + f y)
+    (l : PList A) (l' : NatList) (lR : rel (R_NatList f g Hgf Hfg) l l') :
+    natR (f (psum l)) (nsum l').
 Proof.
-    change (plist_2_nlist l = l') in lR.
+    change (plist_2_nlist f l = l') in lR.
     apply map_in_R_nat.
-    rewrite plist_2_nlist_sum.
+    rewrite (plist_2_nlist_sum f Hz Hf).
     rewrite lR.
     reflexivity.
 Defined.
 
 (* ── Per-function Trocq Use registrations ───────────────────── *)
+(* Trocq Use requires that the conclusion's head term is a concrete global
+   reference.  The generic R_plength/R_papp/R_prev/R_psum have a lambda-
+   bound 'f' as head of the left argument (e.g. 'f (psum l)' for R_psum,
+   where f = c2, a pi-variable with no gref).  We provide concrete wrappers
+   whose conclusions have the real function names as heads. *)
 
-Trocq Use R__plength.    (* Trocq Use #4 *)
-Trocq Use R__papp.       (* Trocq Use #5 *)
-Trocq Use R__prev.       (* Trocq Use #6 *)
-Trocq Use R__psum.       (* Trocq Use #7  ← new vs bs_a1.v *)
+(* R_plength_nat: head of conclusion is 'plength' (global), not 'f' *)
+Lemma R_plength_nat (l : PList nat) (l' : NatList) (lR : rel R_NatList_nat l l') :
+    natR (plength l) (nlength l').
+Proof.
+    change (plist_2_nlist id l = l') in lR.
+    apply map_in_R_nat.
+    rewrite (plength_eq_nlength id), lR.
+    reflexivity.
+Qed.
 
-(* ── Final Trocq theorems ───────────────────────────────────────*)
+(* R_papp_nat: head of conclusion is 'papp' (global) *)
+Lemma R_papp_nat
+    (l1 : PList nat) (l1' : NatList) (l1R : rel R_NatList_nat l1 l1')
+    (l2 : PList nat) (l2' : NatList) (l2R : rel R_NatList_nat l2 l2') :
+    rel R_NatList_nat (papp l1 l2) (napp l1' l2').
+Proof.
+    change (plist_2_nlist id l1 = l1') in l1R.
+    change (plist_2_nlist id l2 = l2') in l2R.
+    change (plist_2_nlist id (papp l1 l2) = napp l1' l2').
+    rewrite plist_2_nlist_app, l1R, l2R.
+    reflexivity.
+Qed.
 
-Theorem _plength_papp : forall (l1 l2 : _PList),
-    _plength (_papp l1 l2) = _plength l1 + _plength l2.
+(* R_prev_nat: head of conclusion is 'prev' (global) *)
+Lemma R_prev_nat (l : PList nat) (l' : NatList) (lR : rel R_NatList_nat l l') :
+    rel R_NatList_nat (prev l) (nrev l').
+Proof.
+    change (plist_2_nlist id l = l') in lR.
+    change (plist_2_nlist id (prev l) = nrev l').
+    rewrite plist_2_nlist_rev, lR.
+    reflexivity.
+Qed.
+
+(* R_psum_nat: head of conclusion is 'psum' (global).
+   R_psum's conclusion is 'natR (f (psum l)) ...' — with f = c2 (pi-variable),
+   Trocq Use fails with "term->gref: no gref: c2".  Here f = id so the head
+   is definitionally 'psum'.  Coq infers the Addable nat instance automatically. *)
+Lemma R_psum_nat (l : PList nat) (l' : NatList) (lR : rel R_NatList_nat l l') :
+    natR (psum l) (nsum l').
+Proof.
+    change (plist_2_nlist id l = l') in lR.
+    apply map_in_R_nat.
+    rewrite <- lR.
+    apply (plist_2_nlist_sum id).
+    - reflexivity.
+    - intros. reflexivity.
+Qed.
+
+Trocq Use R_plength_nat.  (* Trocq Use #4 *)
+Trocq Use R_papp_nat.     (* Trocq Use #5 *)
+Trocq Use R_prev_nat.     (* Trocq Use #6 *)
+Trocq Use R_psum_nat.     (* Trocq Use #7  ← new vs bs_a1.v *)
+
+(* ── Final Trocq theorems ─────────────────────────────────────*)
+(* State theorems using the polymorphic PList nat functions directly;
+   no monomorphic aliases needed because R_XXX_nat have the right gref heads. *)
+
+Theorem plength_papp_nat : forall (l1 l2 : PList nat),
+    plength (papp l1 l2) = plength l1 + plength l2.
 Proof. trocq. apply nlength_napp. Qed.
 
-Theorem _papp_assoc : forall (l1 l2 l3 : _PList),
-    _papp (_papp l1 l2) l3 = _papp l1 (_papp l2 l3).
+Theorem papp_assoc_nat : forall (l1 l2 l3 : PList nat),
+    papp (papp l1 l2) l3 = papp l1 (papp l2 l3).
 Proof. trocq. apply napp_assoc. Qed.
 
-Theorem _prev_papp : forall (l1 l2 : _PList),
-    _prev (_papp l1 l2) = _papp (_prev l2) (_prev l1).
+Theorem prev_papp_nat : forall (l1 l2 : PList nat),
+    prev (papp l1 l2) = papp (prev l2) (prev l1).
 Proof. trocq. apply nrev_napp. Qed.
 
-Theorem _psum_papp : forall (l1 l2 : _PList),
-    _psum (_papp l1 l2) = _psum l1 + _psum l2.
+Theorem psum_papp_nat : forall (l1 l2 : PList nat),
+    psum (papp l1 l2) = psum l1 + psum l2.
 Proof. trocq. apply nsum_napp. Qed.
 
-(* Manual version: ZList as monomorphic source *)
+(* ── PList Z: manual transfer using generic bridge lemmas ────────────
+   The bridge lemmas (plength_eq_nlength, plist_2_nlist_app, etc.) are
+   truly polymorphic in A.  For Z we use (fun _ => O) as a dummy mapping;
+   plength/papp/prev only count/rearrange structure so element values are
+   irrelevant.  This demonstrates the infrastructure is NOT nat-specific.
+   No Trocq tactic is used here. *)
 
 From Stdlib Require Import ZArith.
 
+(* plength_papp_Z: manual transfer via the generic bridge to NatList *)
 Theorem plength_papp_Z : forall (l1 l2 : PList Z),
     plength (papp l1 l2) = plength l1 + plength l2.
-Proof. apply plength_papp_manual. Qed.
-
-(* Trocq version: ZList as monomorphic source, mirrors NatList pattern *)
-
-Inductive ZList : Type :=
-    | ZNil  : ZList
-    | ZCons : Z -> ZList -> ZList.
-
-Fixpoint zlength (l : ZList) : nat :=
-    match l with ZNil => O | ZCons _ t => S (zlength t) end.
-
-Fixpoint zapp (l1 l2 : ZList) : ZList :=
-    match l1 with ZNil => l2 | ZCons h t => ZCons h (zapp t l2) end.
-
-Theorem zlength_zapp : forall (l1 l2 : ZList),
-    zlength (zapp l1 l2) = zlength l1 + zlength l2.
 Proof.
-    intros l1 l2. induction l1 as [|h t IH]; simpl.
-    - reflexivity.
-    - rewrite IH. reflexivity.
-Defined.
+    intros l1 l2.
+    (* Step 1: plength = nlength after any f : Z -> nat *)
+    rewrite (plength_eq_nlength (fun _ : Z => O) (papp l1 l2)).
+    (* Step 2: distribute plist_2_nlist over papp *)
+    rewrite plist_2_nlist_app.
+    (* Step 3: apply the NatList theorem *)
+    rewrite nlength_napp.
+    (* Step 4: fold back to plength on each summand *)
+    rewrite <- (plength_eq_nlength (fun _ : Z => O) l1).
+    rewrite <- (plength_eq_nlength (fun _ : Z => O) l2).
+    reflexivity.
+Qed.
 
-Definition _ZPList   : Type                          := PList Z.
-Definition _zplength : _ZPList -> nat                := @plength Z.
-Definition _zpapp    : _ZPList -> _ZPList -> _ZPList := @papp Z.
+(* papp_assoc_Z and prev_papp_Z follow from the generic manual proofs;
+   no NatList bridge needed since papp_assoc_manual is already polymorphic. *)
+Theorem papp_assoc_Z : forall (l1 l2 l3 : PList Z),
+    papp (papp l1 l2) l3 = papp l1 (papp l2 l3).
+Proof. apply papp_assoc_manual. Qed.
 
-Fixpoint zplist_2_zlist (l : _ZPList) : ZList :=
-    match l with PNil => ZNil | PCons h t => ZCons h (zplist_2_zlist t) end.
-
-Fixpoint zlist_2_zplist (l : ZList) : _ZPList :=
-    match l with ZNil => PNil | ZCons h t => PCons h (zlist_2_zplist t) end.
-
-Lemma zplist_zlist_iso : forall l : _ZPList,
-    zlist_2_zplist (zplist_2_zlist l) = l.
-Proof. induction l as [|h t IH]; simpl. reflexivity. rewrite IH. reflexivity. Defined.
-
-Lemma zlist_zplist_iso : forall l : ZList,
-    zplist_2_zlist (zlist_2_zplist l) = l.
-Proof. induction l as [|h t IH]; simpl. reflexivity. rewrite IH. reflexivity. Defined.
-
-Definition R_ZList : Param44.Rel _ZPList ZList.
-Proof.
-    apply Iso.toParam; unshelve econstructor.
-    - exact zplist_2_zlist.
-    - exact zlist_2_zplist.
-    - exact zplist_zlist_iso.
-    - exact zlist_zplist_iso.
-Defined.
-
-Trocq Use R_ZList.
-
-Lemma _zplength_eq_zlength : forall l : _ZPList,
-    _zplength l = zlength (zplist_2_zlist l).
-Proof.
-    unfold _zplength. induction l as [|h t IH]; simpl.
-    - reflexivity.
-    - rewrite IH. reflexivity.
-Defined.
-
-Lemma zplist_2_zlist_app : forall l1 l2 : _ZPList,
-    zplist_2_zlist (_zpapp l1 l2) = zapp (zplist_2_zlist l1) (zplist_2_zlist l2).
-Proof.
-    unfold _zpapp. intros l1 l2. induction l1 as [|h t IH]; simpl.
-    - reflexivity.
-    - rewrite IH. reflexivity.
-Defined.
-
-Lemma R__zplength (l : _ZPList) (l' : ZList) (lR : rel R_ZList l l') :
-    natR (_zplength l) (zlength l').
-Proof.
-    change (zplist_2_zlist l = l') in lR.
-    apply map_in_R_nat.
-    rewrite _zplength_eq_zlength. rewrite lR. reflexivity.
-Defined.
-
-Lemma R__zpapp
-    (l1 : _ZPList) (l1' : ZList) (l1R : rel R_ZList l1 l1')
-    (l2 : _ZPList) (l2' : ZList) (l2R : rel R_ZList l2 l2') :
-    rel R_ZList (_zpapp l1 l2) (zapp l1' l2').
-Proof.
-    change (zplist_2_zlist l1 = l1') in l1R.
-    change (zplist_2_zlist l2 = l2') in l2R.
-    change (zplist_2_zlist (_zpapp l1 l2) = zapp l1' l2').
-    rewrite zplist_2_zlist_app. rewrite l1R. rewrite l2R. reflexivity.
-Defined.
-
-Trocq Use R__zplength.
-Trocq Use R__zpapp.
-
-Theorem _zplength_zpapp : forall (l1 l2 : _ZPList),
-    _zplength (_zpapp l1 l2) = _zplength l1 + _zplength l2.
-Proof. trocq. apply zlength_zapp. Qed.
+Theorem prev_papp_Z : forall (l1 l2 : PList Z),
+    prev (papp l1 l2) = papp (prev l2) (prev l1).
+Proof. apply prev_papp_manual. Qed.
