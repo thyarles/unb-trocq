@@ -125,7 +125,7 @@ Theorem trocq_update_neq: forall (m: _PartialMap) x1 x2 v,
   x2 <> x1 -> (_pm_update m x2 v) x1 = m x1.
 Proof.
   trocq. 
-  (* Trocq instantly rewrites the goal to:
+  (* Trocq supposed to rewrites the goal to:
      (_tm_update m' x2 (Some v)) x1 = m' x1 *)
   apply tm_update_neq.
 Qed.
