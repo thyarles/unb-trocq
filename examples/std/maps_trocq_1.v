@@ -12,21 +12,27 @@ Set Universe Polymorphism.
 
 (* 1. Definitions *)
 
+(*    TOTAL MAP *)
 Definition total_map (A: Type) :=
   string -> A.
-
-Definition tm_empty {A: Type} (v: A): total_map A :=
-  fun _ => v.
-
-Definition tm_update {A: Type} (m: total_map A) (x: string) (v: A) :=
+Definition tm_empty {A: Type}
+  (v: A): total_map A :=
+  (fun _ => v).
+Definition tm_update {A: Type}
+  (m: total_map A) (x: string) (v: A) :=
   fun x' => if String.eqb x x' then v else m x'.
+Notation "'_' '!->' v" := (tm_empty v)
+  (at level 100, right associativity).
+Notation "x '!->' v ';' m" := (tm_update m x v)
+  (at level 100, v at next level, right associativity).
 
-(* partial_map: total_map with option values and None as default *)
+(*    PARTIAL MAP *)
 Definition partial_map (A: Type) :=
   total_map (option A).
-
-Definition pm_update {A: Type} (m: partial_map A) (x: string) (v: A) :=
-  tm_update m x (Some v).
+Definition pm_empty  {A: Type}: partial_map A :=
+  tm_empty None.
+Definition pm_update {A: Type} (m: partial_map A) 
+  (x: string) (v: A) := (x !-> Some v; m).
 
 (* 2. Source theorem (concrete value type for Trocq GREFs) 
       Proved for total_map (option nat) — not polymorphic — because
