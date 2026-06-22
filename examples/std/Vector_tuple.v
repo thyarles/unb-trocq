@@ -350,9 +350,6 @@ Proof.
   - exact (@R_in_mapK_bv_bnat k).
 Defined.
 
-
-(* Set Printing All.
-Set Printing Universes. *)
 Definition Param44_bnat_bv_d {k : nat} :
   Param44.Rel (bounded_nat k) (bitvector k).
 Proof.

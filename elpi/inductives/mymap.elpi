@@ -62,14 +62,6 @@ bo-k-args ParamsRev IndGR K _ Args Tys R :-
   (bo-k-args.aux {coq.mk-app {coq.env.global (indc GR)} Params} IndGR Args Tys KT R),
   !. % the first combination that typechecks
 
-% pred map.aux i:term, o:term.
-% map.aux (prod T N B) (prod T N B).
-% map.aux FRel R :-
-%   coq.mk-app {{ map }} [FRel] R.
-% pred bobo i:term, o:term.
-% bobo T U :-
-%   mymap-db T U _.
-
 pred bo-k-args.aux i:term, i:gref, i:list term, i:list term, i:term, o:term.
 bo-k-args.aux R _ [] [] _ R :- coq.typecheck R _ ok.
 bo-k-args.aux K IndGR [A|As] [T|Ts] (prod _ S Ty) R :-
@@ -118,8 +110,6 @@ bo-params N Lno Ity1 Ity2 (prod A Sty1 Rty1) (prod _ Sty2 Rty2) Ps R :-
   coq.name-suffix A "f" Af,
   N1 is N + 1,
   (pi a b r f \ mk-map-ty a Sty1 b Sty2 (RAB a b) r (FAB a b r) f _ (Clause a b r f)),
-  % todo: add fun for map
-  %R = (fun A1 Sty1 a\ fun A2 Sty2 b\ fun Ar (RAB a b) r\ fun Af (FAB a b r) f\ Bo a b r f),
   R = (fun A1 Sty1 a\ fun A2 Sty2 b\ fun Ar (RAB a b) r\ fun Af (FAB a b r) f\ Bo a b r f),
   pi a b r f\ sigma Ity1A Ity2A \
     coq.mk-app Ity1 [a] Ity1A,
@@ -168,7 +158,6 @@ mk-map-ty A (prod _ S1 T1) B (prod _ _ T2) RelTy RTerm (prod `x` S1 x\ R x) F N 
     mk-map-ty Ax (T1 x) Bx (T2 x) RelTy RTerm (R x) {coq.mk-app F [x]} M (C x),
     N is M + 1),
   map-pi C C1.
-% mk-map-ty (app[X|XS] as A) _ (app[Y|YS] as B) _ {{ Param10.Rel lp:A lp:B }} (app [G|GS] as F) 0 [mymap-db PLA PLB PLF,mymap-db A B F] :-
 mk-map-ty (app[X|XS] as A) _ (app[Y|YS] as B) _ (prod `x` A _\ B) _ _ (app [G|GS] as F) 0 [mymap-db PLA PLB PLF,mymap-db A B F] :-
   drop-last 1 XS LA,
   drop-last 1 YS LB,
@@ -177,7 +166,6 @@ mk-map-ty (app[X|XS] as A) _ (app[Y|YS] as B) _ (prod `x` A _\ B) _ _ (app [G|GS
   coq.mk-app Y LB PLB,
   coq.mk-app G LF PLF.
 mk-map-ty A _ B _ RelTy RTerm Map F 0 [mymap-db A B {{ lp:M1mTerm lp:A lp:B _ lp:F }} ] :-
-  % todo: fix use of universe
   coq.env.global {{:gref lib:trocq.map1.map }} M1mTerm,
   RelTy = {{ lp:A -> lp:B -> Type }} ,
   Map = {{ lib:trocq.map1 lp:RTerm }}.

@@ -11,16 +11,6 @@ From elpi.apps Require Import derive derive.param2.
 From Trocq Require Export Stdlib Hierarchy Param_lemmas.
 Unset Uniform Inductive Parameters. 
 
-(* Elpi Db derive.rel44.db lp:{{
-
-  % [rel44 I S] links I inductive type, 
-  %  with the function showing i1 i2, [| I |]^ i2 i1 <->> [| I |] i1 i2
-  pred rel44-db i:term, o:term.
-
-  % [rel44-done T K] means T K was already derived
-  pred rel44-done o:inductive. 
-}}. *)
-
 Elpi Command derive.relnm.
 Elpi Accumulate File derive_hook.
 Elpi Accumulate Db Header derive.param2.db.
