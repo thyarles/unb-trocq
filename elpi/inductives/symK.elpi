@@ -141,7 +141,7 @@ main GR Prefix Clauses :- std.do! [
   coq.env.indt GR _ TyParamNo _ _ KNs KTys,
   coq.env.global (indt GR) Ind,
   std.assert! (param Ind Ind TR) "derive.sym: use derive.param2 before",
-  coq.typecheck TR TRTy _,
+  coq.typecheck TR TRTy ok,
   std.assert! (sym-db Ind SymInd) "derive.sym: use derive.sym before",
   mk-mR-type-symK TyParamNo TRTy TR SymInd SymKTy,
   (@keepunivs! => std.assert-ok! (coq.elaborate-skeleton SymKTy _ SymKTyE) "derive.symK generates illtyped type"),

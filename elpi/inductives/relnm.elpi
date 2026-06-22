@@ -55,7 +55,7 @@ generate-relNM GR (pc N M as PC) ReTy Re :-
   coq.env.indt GR _ TyParamNo _ _ _ _,
   coq.env.global (indt GR) Ind,
   std.assert! (param Ind Ind TR) "derive.relNM: use derive.param2 before",
-  coq.typecheck TR TRTy _,
+  coq.typecheck TR TRTy ok,
   trocq.db.rel PC PRelNM BuildNM _ CovNM ContraNM,
   mk-mR-type-relnm TyParamNo TRTy TR (pglobal PRelNM _) RTy,
   std.assert-ok! (coq.elaborate-skeleton RTy _ ReTy) "derive.relNM generates illtyped type",

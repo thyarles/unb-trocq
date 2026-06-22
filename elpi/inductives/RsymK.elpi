@@ -34,7 +34,7 @@ main GR Prefix Clauses :- std.do! [
   coq.env.indt GR _ TyParamNo _ _ _ _,
   coq.env.global (indt GR) Ind,
   std.assert! (param Ind Ind TR) "derive.rsymK: use derive.param2 before",
-  coq.typecheck TR TRTy _,
+  coq.typecheck TR TRTy ok,
   mk-mR-type-rsymK TyParamNo TRTy TR {{ fun (A B : Type) => A <->> B }} SymKTy,
   std.assert-ok! (coq.elaborate-skeleton SymKTy _ SymKTyE) "derive.rsymK generates illtyped type",
   std.assert! (sym-db Ind SymInd) "derive.rsymK: use derive.sym before",

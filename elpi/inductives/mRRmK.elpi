@@ -266,7 +266,7 @@ main GR Prefix Clauses :- std.do! [
   coq.env.indt GR _ TyParamNo _ _ KNs KTys,
   coq.env.global (indt GR) Ind,
   param Ind Ind TR,
-  coq.typecheck TR TRTy _,
+  coq.typecheck TR TRTy ok,
   mymap-def (indt GR) IndMapGR,
   coq.env.global IndMapGR IndMap,
   coq.env.global {mR-def (indt GR)} MR,

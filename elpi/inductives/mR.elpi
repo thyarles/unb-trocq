@@ -22,7 +22,8 @@ sub-branch YTy TyParamNo K1 Args1 ArgTys1 K2 Args2 ArgTys2 Bo (fun `e` ETy e\ (R
   coq.mk-app K1 Args1 X,
   coq.mk-app K2 Args2 Y,
   BoXY = Bo X Y,
-  coq.elaborate-skeleton BoXY _ BoXYE _,
+  coq.elaborate-skeleton BoXY _ BoXYE ok,
+  !,
   BoXYE = prod _ ETy G,
   whd K1 [] Constr1 TypeArgs1,
   whd K2 [] Constr2 TypeArgs2,
@@ -32,6 +33,7 @@ sub-branch YTy TyParamNo K1 Args1 ArgTys1 K2 Args2 ArgTys2 Bo (fun `e` ETy e\ (R
 % Each branch matches on Y as Y0, returning a term of type (Bo (K KArgs) Y0) given by matrix.
 pred mkBranch i:int, i:(term -> term -> term), i:term, i:term, i:term, i:term, i:list term, i:list term, o:term.
 mkBranch TyParamNo Bo Y YTy K _ Ts TYs R :-
+  !,
   coq.mk-app K Ts X,
   coq.build-match Y YTy (rty-2 Bo X)
     (k2\ _\ ts\ tys\
@@ -173,7 +175,7 @@ main GR Prefix Clauses :- std.do! [
   coq.env.indt GR _ UnifParamNo _ _ _ _,
   coq.env.global (indt GR) Ind,
   param Ind Ind TR,
-  coq.typecheck TR TRTy _,
+  coq.typecheck TR TRTy ok,
   mymap-def (indt GR) IndMapGR,
   mk-mR-type-mR UnifParamNo TRTy {coq.env.global IndMapGR} {{ Type }} TR MRTy,
   std.assert-ok! (coq.elaborate-skeleton MRTy _ MRTyE) "derive.mR generates illtyped type",
