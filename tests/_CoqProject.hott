@@ -3,7 +3,7 @@
 -arg -w -arg +elpi.typechecker
 
 -R ../hott/ Trocq
--R ../hott/generic/inductives Trocq
+-R ../generic/inductives Trocq
 -R ../elpi/ Trocq.Elpi
 
 unit_arrow_contravariant.v

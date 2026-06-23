@@ -111,18 +111,18 @@ bo-params N Lno Ity1 Ity2 (prod A Sty1 Rty1) (prod _ Sty2 Rty2) Ps R :-
   N1 is N + 1,
   (pi a b r f \ mk-map-ty a Sty1 b Sty2 (RAB a b) r (FAB a b r) f _ (Clause a b r f)),
   R = (fun A1 Sty1 a\ fun A2 Sty2 b\ fun Ar (RAB a b) r\ fun Af (FAB a b r) f\ Bo a b r f),
-  pi a b r f\ sigma Ity1A Ity2A \
-    coq.mk-app Ity1 [a] Ity1A,
-    coq.mk-app Ity2 [b] Ity2A,
-    Clause a b r f ==>
-    decl a A1 Sty1 ==>
-    decl b A2 Sty2 ==>
-    (coq.elaborate-skeleton (RAB a b) _ (RABTy a b) ok,
-    decl r Ar (RABTy a b) ==>
+  @pi-decl A1 Sty1 a\
+  @pi-decl A2 Sty2 b\
+    coq.elaborate-skeleton (RAB a b) _ (RABTy a b) ok,
+    coq.mk-app Ity1 [a] (Ity1A a),
+    coq.mk-app Ity2 [b] (Ity2A b),
+  @pi-decl Ar (RABTy a b) r\
     coq.elaborate-skeleton (FAB a b r) _ (FABTy a b r) ok,
-    decl f Af (FABTy a b r) ==>
-    mymap-db a b (FAB a b r)==>
-      bo-params N1 Lno Ity1A Ity2A (Rty1 a) (Rty2 b) [b|Ps] (Bo a b r f)).
+  pi f\
+    decl f Af (FABTy a b r) =!=>
+    Clause a b r f =!=>
+    (mymap-db a b (FAB a b r)==>
+      bo-params N1 Lno (Ity1A a) (Ity2A b) (Rty1 a) (Rty2 b) [b|Ps] (Bo a b r f)).
 
 bo-params N Lno Ity1 Ity2 T OT Ps R :-
   whd1 T T1, whd1 OT OT1, !,
