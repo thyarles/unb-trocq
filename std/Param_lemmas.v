@@ -175,3 +175,130 @@ Register eq_Map2a  as trocq.eq_map2a.
 Register eq_Map2b  as trocq.eq_map2b.
 Register eq_Map3 as trocq.eq_map3.
 Register eq_Map4 as trocq.eq_map4.
+
+Section propRel.
+
+  Variable A : Type.
+
+  Variable AR : A -> A -> Type.
+  Hypothesis AR_refl : forall a : A, AR a a.
+  Hypothesis AR_eqb : forall a1 a2 : A, AR a1 a2 -> a1 = a2.
+  Hypothesis rel_refl_uniq : forall (a : A) (r1 : AR a a), r1 = (AR_refl a).
+
+  Lemma eqb_AR (a1 a2 : A) : a1 = a2 -> AR a1 a2.
+  Proof. by move=> ->; apply AR_refl. Qed.
+
+  Lemma AR_irrel : forall (a1 a2 : A) (r1 r2 : AR a1 a2), r1 = r2.
+  Proof.
+    move=> a1 a2 r.
+    have e : a1 = a2 by apply AR_eqb.
+    move: r; rewrite {}e=> r1 r2.
+    by rewrite (rel_refl_uniq _ r1) (rel_refl_uniq _ r2).
+  Qed.
+
+  Definition mapR : A -> A := idmap.
+
+  Lemma mR : forall a1 a2 : A, mapR a1 = a2 -> AR a1 a2.
+  Proof. by move=> a1 a2; by rewrite /mapR=> ->; apply AR_refl. Qed.
+
+  Lemma Rm : forall a1 a2 : A, AR a1 a2 -> idmap a1 = a2.
+  Proof. by move=> /= a1 a2 /AR_eqb ->. Qed.
+
+  Lemma mRRmK : forall (a1 a2 : A) (r : AR a1 a2), mR a1 a2 (Rm a1 a2 r) = r.
+  Proof. by move=> a1 a2 r; apply AR_irrel. Qed.
+
+  Lemma Map4_AR : Map4.Has AR.
+  Proof.
+    unshelve econstructor.
+    - by apply mapR.
+    - by apply mR.
+    - by apply Rm.
+    - by apply mRRmK.
+  Qed.
+
+  Lemma AR_sym : forall a1 a2, AR a1 a2 -> AR a2 a1.
+  Proof. by move=> a1 a2 /AR_eqb ->; apply AR_refl. Qed.
+
+  Lemma AR_sym_R : forall (a1 a2 : A), sym_rel AR a1 a2 <->> AR a1 a2.
+  Proof.
+    move=> a1 a2; unshelve eexists _,_ .
+    - by apply AR_sym.
+    - by apply AR_sym.
+    - by move=> r; apply AR_irrel.
+  Qed.
+
+  Lemma Param44_AR : Param44.Rel A A.
+  Proof.
+    unshelve econstructor.
+    - exact AR.
+    - exact Map4_AR.
+    - apply (fun e => @eq_Map4 _ _ (sym_rel AR) AR e Map4_AR).
+      apply AR_sym_R.
+   Qed.
+
+End propRel.
+
+Section RmmRK.
+
+  Variable A B : Type.
+  Variable R : A -> B -> Type.
+  Variable map : A -> B.
+  Variable map_in_R : forall x y, map x = y -> R x y. 
+  Variable R_in_map : forall x y, R x y -> map x = y.
+  Variable mRRmK : forall x y (r : R x y), map_in_R _ _ (R_in_map _ _ r) = r.
+
+  Definition F {x : A} {y : B}  (p : map x = y) := apd (R_in_map x) p.
+
+  Definition inverses_concat_tr : forall x y,
+    forall p : map x = y,
+    R_in_map x (map x) (map_in_R x (map x) 1) @ p 
+    = R_in_map x y (transport _ p (map_in_R x (map x) 1)).
+  Proof. 
+  move=> x y p.
+  rewrite -tr_concat.
+  apply Wdpath_arrow.
+  exact: F.
+  Defined.
+
+  Definition path_shape {x y} :
+  forall p : map x = y,
+  p = (R_in_map x (map x) (map_in_R x (map x) 1))^ 
+      @ R_in_map x y (transport _ p (map_in_R x (map x) 1)).
+  Proof.
+  move=> p.
+  rewrite -[LHS](concat_1p p).
+  rewrite -[X in X @ p](concat_Vp (R_in_map x (map x) (map_in_R x (map x) 1))).
+  rewrite concat_pp_p; apply ap.
+  by apply inverses_concat_tr.
+  Defined.
+
+  Lemma tr_1 : forall (x : A) y (p : map x = y), 
+    transport (fun y=> R x y) p (map_in_R _ _ 1) = (map_in_R x y p).
+  Proof.
+  move=> x y p.
+  by case: _ / p .
+  Defined.
+
+  Lemma Rm_concat : forall a b b' 
+    (e : map a = b)
+    (e1 : b = b'),
+    R_in_map a b' (map_in_R a b' (e @ e1)) =
+    R_in_map a b (map_in_R a b e) @ e1.
+  Proof.
+  move=> a b1 b2 e e1.
+  by case: _ / e1.
+  Defined.
+
+  Definition RmmRK : forall a b (e : map a = b), 
+   R_in_map _ _ (map_in_R _ _ e) = e.
+  Proof.
+  move=> a b e.
+  rewrite [RHS](path_shape e) tr_1.
+  set q := R_in_map a b _.
+  set p := R_in_map _ _ _.
+  apply (moveL_Vp p q q).
+  rewrite -Rm_concat concat_1p.
+  by rewrite /q mRRmK.
+  Defined.
+
+End RmmRK.

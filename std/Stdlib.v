@@ -168,3 +168,28 @@ Definition is_true: Bool -> Type :=
     | false => Empty
     end.
 
+Definition apd {T : Type}{P : T -> Type} (f : forall x, P x) {x y : T} (p : x = y) : 
+  transport _ p (f x) = f y.
+Proof. by case: _ / p. Defined.
+
+Lemma tr_concat {T : Type} {x y z : T} (p : x = y) (q : y = z) : transport _ q p = p @ q.
+Proof. by case: _ /q; case: _ /p. Defined.
+
+Lemma moveL_Vp : forall {T : Type}
+      {x y : T} (p : x = y) {z : T} (q : y = z) (r : x = z),
+      p @ q = r -> q = p^ @ r.
+Proof.
+move=> T x y p.
+case : _ / p => /= z q r.
+by rewrite !concat_1p. 
+Defined.
+
+Lemma Wdpath_arrow : forall {T : Type}{P Q : T -> Type} {x y : T} (p : x = y) 
+  (f : P x -> Q x) (g : P y -> Q y),
+  transport (fun x => P x -> Q x) p f = g -> 
+  forall x, transport _ p (f x) = g (transport _ p x).
+Proof.
+move=> T P Q x y p.
+case: _ / p.
+by rewrite /transport/eq_rect_r/= => f g -> //. 
+Defined.
