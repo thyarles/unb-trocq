@@ -302,6 +302,86 @@ Section RmmRK.
   Defined.
 
 End RmmRK.
+Section Genthm722.
+
+  Variable A B : Type.
+  Variable R : A -> B -> Type.
+  Variable m : A -> B.
+  Variable Rrefl : forall x y, m x = y -> R x y. (* 2a *)
+  Variable imp : forall x y, R x y -> m x = y. (* 2b *)
+  Variable MereR : forall x y (r1 r2 : R x y), r1 = r2.
+
+  Definition inverses_concat_tr' : forall x,
+  forall p : m x = m x,
+    imp x (m x) (Rrefl x _ 1) @ p = imp x (m x) (transport _ p (Rrefl x _ 1)).
+  Proof. 
+  move=> x p.
+  rewrite -transport_paths_r.
+  apply Wdpath_arrow.
+  exact: F.
+  Defined.
+
+  Definition path_shape' : forall x,
+  forall p : m x = m x,
+  p = (imp x (m x) (Rrefl x _ 1))^ @ imp x (m x) (@transport _ _ _ _ p (Rrefl x _ 1)).
+  Proof.
+  move=> x p.
+  rewrite -[X in X = _](concat_1p p).
+  rewrite -[X in X @ p](concat_Vp (imp x (m x) (Rrefl x _ 1))).
+  rewrite concat_pp_p.
+  apply ap.
+  apply inverses_concat_tr.
+  Defined.
+
+  Lemma tr_id : forall (x : A) (p : m x = m x), 
+    transport (fun y=> R x y) p (Rrefl x _ 1) = (Rrefl x _ 1).
+  Proof. move=> x p; apply MereR. Qed.
+
+  Definition UIP_MA {x y : A} (p q : m x = m y): p = q.
+  Proof.
+  move: q.
+  case: _ /p.
+  move=> q.
+  rewrite (path_shape' x 1) /=.
+  rewrite (path_shape' x q).
+  by rewrite !tr_id.
+  Defined.
+
+  Section surj.
+
+    Hypothesis comap : B -> A.
+    Hypothesis corefl : forall b, R (comap b) b.
+    
+    Lemma UIP_B : forall (x y : B) (p q : x = y), p = q.
+    Proof.
+    move=> x y.
+    rewrite -(imp _ _ (corefl x)).
+    rewrite -(imp _ _ (corefl y)).
+    apply UIP_MA.
+    Qed.
+
+  End surj.
+
+End Genthm722.
+
+Section thm722.
+
+    Variable A : Type.
+    Variable R : A -> A -> Type.
+    Variable rrefl : forall x, R x x. (* 2a *)
+    Definition rrefl' : forall x y, x = y -> R x y. 
+    by move=> x y p; case: _ /p; apply rrefl. 
+    Defined.
+    Variable imp : forall x y, R x y -> x = y.  (* 2b *)
+    Variable mereR : forall x y (r1 r2 : R x y), r1 = r2.
+
+    Lemma uip_a (x y : A) (p q : x = y) : p = q.
+    Proof. 
+    apply (UIP_MA A A R (idmap) (rrefl') imp). 
+    by move=> e ?; apply mereR.
+    Qed.
+
+End thm722.
 
 (************************)
 (* Proofs about Param44 *)
