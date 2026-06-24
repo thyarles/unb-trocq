@@ -18,22 +18,15 @@ Elpi Db derive.mymap.db lp:{{
 }}.
 
 Elpi Command derive.mymap.
+Elpi Accumulate Db Header derive.mymap.db.
 Elpi Accumulate File derive_hook.
-Elpi Accumulate Db derive.mymap.db.
 Elpi Accumulate File mymap.
+Elpi Accumulate Db derive.mymap.db.
 Elpi Accumulate lp:{{
   main [str I] :- !, 
     coq.locate I (indt GR),
     coq.gref->id (indt GR) Tname,
     Prefix is Tname ^ "_",
-    %derive.mymap.main GR Prefix _.
-
-    % derive.mymap.mk-map-ty A _ B _ {{ Param10.Rel lp:A lp:B }} F 0 [mymap-db A B F] =>
-    % (derive.mymap.bo-k-args.aux K [A|As] [T|Ts] (prod _ S Ty) R :-
-    % mymap-db T S FRel,
-    % coq.mk-app {{ map }} [FRel] F,
-    % coq.mk-app F [A] FA,
-    % bo-k-args.aux {coq.mk-app K [FA]} As Ts (Ty FA) R) =>
 
     derive.mymap.main GR Prefix _.
   main _ :- usage.
@@ -43,8 +36,9 @@ Elpi Accumulate lp:{{
 }}. 
 
 (* hook into derive *)
-Elpi Accumulate derive Db derive.mymap.db.
+Elpi Accumulate derive Db Header derive.mymap.db.
 Elpi Accumulate derive File mymap.
+Elpi Accumulate derive Db derive.mymap.db.
 
 Elpi Accumulate derive lp:{{
 

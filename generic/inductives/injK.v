@@ -32,11 +32,13 @@ Elpi Db derive.injectionsK.db lp:{{
 }}.
 
 Elpi Command derive.injK.
+Elpi Accumulate Db Header derive.injections.db.
+Elpi Accumulate Db Header derive.injectionsK.db.
 Elpi Accumulate File derive_hook.
 Elpi Accumulate File algo_utils.
-Elpi Accumulate Db derive.injectionsK.db.
-Elpi Accumulate Db derive.injections.db.
 Elpi Accumulate File injK.
+Elpi Accumulate Db derive.injections.db.
+Elpi Accumulate Db derive.injectionsK.db.
 Elpi Accumulate lp:{{
   main [str I] :- !, coq.locate I (indt GR),
     coq.gref->id (indt GR) Tname,
@@ -58,9 +60,9 @@ Elpi Accumulate lp:{{
 }}.
 
 (* hook into derive *)
-Elpi Accumulate derive Db derive.injectionsK.db.
 Elpi Accumulate derive File algo_utils.
 Elpi Accumulate derive File injK.
+Elpi Accumulate derive Db derive.injectionsK.db.
 
 Elpi Accumulate derive lp:{{
 

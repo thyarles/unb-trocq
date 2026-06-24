@@ -24,18 +24,18 @@ Elpi Db derive.rsymK.db lp:{{
 }}.
 
 Elpi Command derive.rsymK.
-Elpi Accumulate File derive_hook.
 Elpi Accumulate Db Header derive.param2.db.
-Elpi Accumulate Db derive.param2.db.
 Elpi Accumulate Db Header derive.sym.db.
-Elpi Accumulate Db derive.sym.db.
 Elpi Accumulate Db Header derive.symK.db.
-Elpi Accumulate Db derive.symK.db.
+Elpi Accumulate Db Header derive.rsymK.db.
+Elpi Accumulate File derive_hook.
 Elpi Accumulate File common.  
 Elpi Accumulate File utils. 
-Elpi Accumulate Db Header derive.rsymK.db.
-Elpi Accumulate Db derive.rsymK.db.
 Elpi Accumulate File rsymK.
+Elpi Accumulate Db derive.param2.db.
+Elpi Accumulate Db derive.sym.db.
+Elpi Accumulate Db derive.symK.db.
+Elpi Accumulate Db derive.rsymK.db.
 Elpi Accumulate lp:{{
   
   main [str I] :- !, 
@@ -61,14 +61,14 @@ Elpi Accumulate lp:{{
 }}.
 (* hook into derive *)
 Elpi Accumulate derive Db Header derive.rsymK.db.
-Elpi Accumulate derive Db derive.rsymK.db.
-Elpi Accumulate Db Header derive.sym.db.
-Elpi Accumulate Db derive.sym.db.
-Elpi Accumulate Db Header derive.symK.db.
-Elpi Accumulate Db derive.symK.db.
+Elpi Accumulate derive Db Header derive.sym.db.
+Elpi Accumulate derive Db Header derive.symK.db.
 Elpi Accumulate derive File common.
 Elpi Accumulate derive File utils.  
 Elpi Accumulate derive File rsymK.
+Elpi Accumulate derive Db derive.rsymK.db.
+Elpi Accumulate derive Db derive.sym.db.
+Elpi Accumulate derive Db derive.symK.db.
 
 Elpi Accumulate derive lp:{{
 

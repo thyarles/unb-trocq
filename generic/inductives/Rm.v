@@ -32,15 +32,16 @@ Elpi Db derive.Rm.db lp:{{
 }}.
 
 Elpi Command derive.Rm.
-Elpi Accumulate File derive_hook.
 Elpi Accumulate Db Header derive.param2.db.
-Elpi Accumulate Db derive.param2.db.
-Elpi Accumulate Db derive.mymap.db.
+Elpi Accumulate Db Header derive.mymap.db.
+Elpi Accumulate Db Header derive.Rm.db.
+Elpi Accumulate File derive_hook.
 Elpi Accumulate File common.
 Elpi Accumulate File algo_utils.
-Elpi Accumulate Db Header derive.Rm.db.
-Elpi Accumulate Db derive.Rm.db.
 Elpi Accumulate File Rm.
+Elpi Accumulate Db derive.param2.db.
+Elpi Accumulate Db derive.mymap.db.
+Elpi Accumulate Db derive.Rm.db.
 Elpi Accumulate lp:{{
 
   main [str I] :- !, coq.locate I (indt GR),
@@ -55,10 +56,10 @@ Elpi Accumulate lp:{{
 
 (* hook into derive *)
 Elpi Accumulate derive Db Header derive.Rm.db.
-Elpi Accumulate derive Db derive.Rm.db.
 Elpi Accumulate derive File common.
 Elpi Accumulate derive File algo_utils.
 Elpi Accumulate derive File Rm.
+Elpi Accumulate derive Db derive.Rm.db.
 
 Elpi Accumulate derive lp:{{
 dep1 "Rm" "mymap".
