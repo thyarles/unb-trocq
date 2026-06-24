@@ -1,7 +1,6 @@
 
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
 From Trocq.Elpi.inductives Extra Dependency "injK.elpi" as injK.
-From Trocq.Elpi.inductives Extra Dependency "utils.elpi" as algo_utils.
 From Trocq Require Export injection_lemmas. 
 
 From Trocq Require Import DeriveLib HoTTNotations Stdlib Hierarchy.
@@ -35,7 +34,6 @@ Elpi Command derive.injK.
 Elpi Accumulate Db Header derive.injections.db.
 Elpi Accumulate Db Header derive.injectionsK.db.
 Elpi Accumulate File derive_hook.
-Elpi Accumulate File algo_utils.
 Elpi Accumulate File injK.
 Elpi Accumulate Db derive.injections.db.
 Elpi Accumulate Db derive.injectionsK.db.
@@ -60,7 +58,6 @@ Elpi Accumulate lp:{{
 }}.
 
 (* hook into derive *)
-Elpi Accumulate derive File algo_utils.
 Elpi Accumulate derive File injK.
 Elpi Accumulate derive Db derive.injectionsK.db.
 

@@ -1,7 +1,5 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
 From elpi.apps.derive.elpi Extra Dependency "derive_synterp_hook.elpi" as derive_synterp_hook.
-From Trocq.Elpi.inductives Extra Dependency "common_algo.elpi" as common.
-From Trocq.Elpi.inductives Extra Dependency "utils.elpi" as utils.
 From Trocq.Elpi.inductives Extra Dependency "sym.elpi" as sym.
 
 From elpi.apps Require Export derive derive.param2.
@@ -33,8 +31,6 @@ Elpi Command derive.sym.
 Elpi Accumulate Db Header derive.param2.db.
 Elpi Accumulate Db Header derive.sym.db.
 Elpi Accumulate File derive_hook.
-Elpi Accumulate File common.
-Elpi Accumulate File utils.
 Elpi Accumulate File sym.
 Elpi Accumulate Db derive.sym.db.
 Elpi Accumulate Db derive.param2.db.
@@ -56,8 +52,6 @@ Elpi Accumulate lp:{{
 
 
 Elpi Accumulate derive Db Header derive.sym.db.
-Elpi Accumulate derive File common.
-Elpi Accumulate derive File utils. 
 Elpi Accumulate derive File sym.
 Elpi Accumulate derive Db derive.sym.db.
 

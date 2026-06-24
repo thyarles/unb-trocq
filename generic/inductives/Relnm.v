@@ -1,7 +1,5 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
 From elpi.apps.derive.elpi Extra Dependency "derive_synterp_hook.elpi" as derive_synterp_hook.
-From Trocq.Elpi.inductives Extra Dependency "common_algo.elpi" as common. (* TODO: check if common/utils is used in rsymK *)
-From Trocq.Elpi.inductives Extra Dependency "utils.elpi" as utils.  
 From Trocq.Elpi.inductives Extra Dependency "relnm.elpi" as relnm.
 From Trocq Require Import sym symK RsymK Param_lemmas mapn map4. 
 Import HoTTNotations.
@@ -16,8 +14,6 @@ Elpi Accumulate Db Header derive.param2.db.
 Elpi Accumulate Db Header derive.rsymK.db.
 Elpi Accumulate Db Header trocq.db.
 Elpi Accumulate File derive_hook.
-Elpi Accumulate File common.  
-Elpi Accumulate File utils. 
 Elpi Accumulate File relnm.
 Elpi Accumulate Db derive.param2.db.
 Elpi Accumulate Db derive.rsymK.db.
@@ -38,8 +34,6 @@ Elpi Accumulate lp:{{
 
 (* hook into derive *)
 Elpi Accumulate Db Header derive.rsymK.db.
-Elpi Accumulate derive File common.
-Elpi Accumulate derive File utils.  
 Elpi Accumulate derive File relnm.
 Elpi Accumulate Db derive.rsymK.db.
 Elpi Accumulate Db trocq.db.

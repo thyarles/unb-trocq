@@ -1,3 +1,6 @@
+accumulate "Trocq.Elpi.inductives/utils".
+accumulate "elpi.apps.derive.elpi/injection".
+
 shorten derive.algo-utils.{duplicate-arguments, count-args, name-ijs, for-K-get-KI}.
 
 namespace derive.injections {

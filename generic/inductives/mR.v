@@ -1,9 +1,5 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
-From elpi.apps.derive.elpi Extra Dependency "discriminate.elpi" as discr.
-From Trocq.Elpi.inductives Extra Dependency "common_algo.elpi" as common.
-From Trocq.Elpi.inductives Extra Dependency "utils.elpi" as utils.
 From Trocq.Elpi.inductives Extra Dependency "mR.elpi" as mR.
-From Trocq.Elpi.inductives Extra Dependency "injection_lemmas.elpi" as injections.
 
 From elpi Require Import elpi.
 From elpi.apps Require Export derive.param2 derive.isK. (* for isK db required by discriminate *)
@@ -41,9 +37,6 @@ Elpi Accumulate Db Header derive.mymap.db.
 Elpi Accumulate Db Header derive.injections.db.
 Elpi Accumulate Db Header derive.mR.db.
 Elpi Accumulate File derive_hook.
-Elpi Accumulate File discr.
-Elpi Accumulate File common.
-Elpi Accumulate File utils.
 Elpi Accumulate File mR.
 Elpi Accumulate Db derive.param2.db.
 Elpi Accumulate Db derive.mymap.db.
@@ -63,9 +56,6 @@ Elpi Accumulate lp:{{
 }}. 
 
 (* hook into derive *)
-Elpi Accumulate derive File discr.
-Elpi Accumulate derive File common.
-Elpi Accumulate derive File injections.
 Elpi Accumulate derive File mR.
 Elpi Accumulate derive Db derive.mR.db.
 

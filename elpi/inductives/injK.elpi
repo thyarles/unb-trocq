@@ -1,3 +1,5 @@
+accumulate "Trocq.Elpi.inductives/utils".
+
 shorten derive.algo-utils.{duplicate-arguments,count-args, name-prefix, mk-chain, name-ijs}.
 
 namespace derive.injK {

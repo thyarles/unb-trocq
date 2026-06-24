@@ -1,8 +1,6 @@
-From elpi.apps.derive.elpi Extra Dependency "injection.elpi" as injection.
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
 From elpi.apps.derive.elpi Extra Dependency "derive_synterp_hook.elpi" as derive_synterp_hook.
 From Trocq.Elpi.inductives Extra Dependency "injection_lemmas.elpi" as injections.
-From Trocq.Elpi.inductives Extra Dependency "utils.elpi" as algo_utils.
 
 From elpi.apps Require Export derive.
 From elpi.apps Require Export derive.projK. 
@@ -28,8 +26,6 @@ Elpi Command derive.injections.
 Elpi Accumulate Db Header derive.projK.db.
 Elpi Accumulate Db Header derive.injections.db.
 Elpi Accumulate File derive_hook.
-Elpi Accumulate File injection.
-Elpi Accumulate File algo_utils.
 Elpi Accumulate File injections.
 Elpi Accumulate Db derive.projK.db.
 Elpi Accumulate Db derive.injections.db.
@@ -57,8 +53,6 @@ Elpi Accumulate lp:{{
 }}.
 
 (* hook into derive *)
-Elpi Accumulate derive File injection.
-Elpi Accumulate derive File algo_utils.
 Elpi Accumulate derive File injections.
 Elpi Accumulate derive Db derive.injections.db.
 

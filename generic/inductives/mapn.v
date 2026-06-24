@@ -1,7 +1,5 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
 From Trocq.Elpi Extra Dependency "inductives/mapn.elpi" as mapn.
-From Trocq.Elpi Extra Dependency "inductives/common_algo.elpi" as common.
-From Trocq.Elpi Extra Dependency "inductives/utils.elpi" as algo_utils.
 From Trocq Require Import Database map4.
 Unset Uniform Inductive Parameters. 
 
@@ -27,8 +25,6 @@ Elpi Accumulate Db Header derive.Rm.db.
 Elpi Accumulate Db Header derive.mRRmK.db.
 Elpi Accumulate Db Header trocq.db.
 Elpi Accumulate File derive_hook.
-Elpi Accumulate File common.
-Elpi Accumulate File algo_utils.
 Elpi Accumulate File mapn.
 Elpi Accumulate Db derive.param2.db.
 Elpi Accumulate Db derive.mymap.db.
@@ -55,8 +51,6 @@ Elpi Accumulate lp:{{
     coq.env.global GRR R.
 
 }}.
-Elpi Accumulate derive File common.
-Elpi Accumulate derive File algo_utils.
 Elpi Accumulate derive File mapn.
 Elpi Accumulate derive Db trocq.db.
 
