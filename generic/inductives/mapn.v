@@ -3,20 +3,6 @@ From Trocq.Elpi Extra Dependency "inductives/mapn.elpi" as mapn.
 From Trocq Require Import Database map4.
 Unset Uniform Inductive Parameters. 
 
-(* I have to use Trocq db due to a dependency of type declaration of predicates in umap-db *)
-(* if the class file is accumulated in umap-db then accumulating trocq.db is an issue *)
-(* Elpi Db derive.umap.db lp:{{ }}.  *)
-
-(* Elpi Accumulate derive.umap.db Db trocq.db. *)
-(* Elpi Accumulate derive Db trocq.db. *)
-(* Elpi Db derive.umap.db lp:{{
-  % [umap-db T D]
-  pred umap-db i:term, i:map-class, o:term.
-
-  % [umap-done T D]
-  pred umap-done o:inductive, o:map-class.
-}}. *)
-
 Elpi Command derive.mapn.
 Elpi Accumulate Db Header derive.param2.db.
 Elpi Accumulate Db Header derive.mymap.db.
