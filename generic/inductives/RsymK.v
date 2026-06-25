@@ -19,6 +19,13 @@ Elpi Db derive.rsymK.db lp:{{
 
   % [rsymK-done T K] means T K was already derived
   pred rsymK-done o:inductive. 
+
+  % refactor db dispatchers
+  rsymK-db I R :-
+    coq.env.global (indt GRI) I,
+    rsymK-def (indt GRI) GRR,
+    coq.env.global GRR R.
+
 }}.
 
 Elpi Command derive.rsymK.
@@ -46,15 +53,6 @@ Elpi Accumulate lp:{{
   usage :- coq.error "Usage: derive.rsymK <object name>".
 }}. 
 
-#[superglobal] Elpi Accumulate derive.rsymK.db lp:{{ 
-
-  % refactor db dispatchers
-  rsymK-db I R :-
-    coq.env.global (indt GRI) I,
-    rsymK-def (indt GRI) GRR,
-    coq.env.global GRR R.
-
-}}.
 (* hook into derive *)
 Elpi Accumulate derive Db Header derive.rsymK.db.
 Elpi Accumulate derive Db Header derive.sym.db.

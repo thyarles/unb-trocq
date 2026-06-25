@@ -18,10 +18,7 @@ Elpi Db derive.mRRmK.db lp:{{
 
   % [mRRmK-done T] mean T was already derived
   pred mRRmK-done o:inductive.
-}}.
 
-#[superglobal] Elpi Accumulate derive.mRRmK.db lp:{{ 
-  
   % refactor db dispatchers
   mRRmK-db I _ R :-
     coq.env.global (indt GRI) I,

@@ -18,16 +18,12 @@ Elpi Db derive.mR.db lp:{{
 
   % [mR-done T] mean T was already derived
   pred mR-done o:inductive.
-}}.
-
-#[superglobal] Elpi Accumulate derive.mR.db lp:{{ 
 
   % refactor db dispatchers
   mR-db I _ R :-
     coq.env.global (indt GRI) I,
     mR-def (indt GRI) GRR,
     coq.env.global GRR R.
-
 }}.
 
 Elpi Command derive.mR.

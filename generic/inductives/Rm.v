@@ -17,9 +17,6 @@ Elpi Db derive.Rm.db lp:{{
 
   % [Rm-done T] mean T was already derived
   pred rm-done o:inductive.
-}}.
-
-#[superglobal] Elpi Accumulate derive.Rm.db lp:{{  
 
   % refactor db dispatchers
   rm-db I _ R :-

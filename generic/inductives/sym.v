@@ -15,9 +15,6 @@ Elpi Db derive.sym.db lp:{{
 
   % [sym-done T K] means T K was already derived
   pred sym-done o:inductive. 
-}}.
-
-#[superglobal] Elpi Accumulate derive.sym.db lp:{{ 
 
   % refactor db dispatchers
   sym-db I R :-

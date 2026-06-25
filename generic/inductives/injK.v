@@ -28,6 +28,12 @@ Elpi Db derive.injectionsK.db lp:{{
 
   % [injectionsK-done T K] means T K was already derived
   pred injectionsK-done o:inductive. 
+
+  injectionsK-db K N R :-
+    coq.env.global (indc GRK) K,
+    injectionsK-def (indc GRK) N GRR,
+    coq.env.global GRR R.
+
 }}.
 
 Elpi Command derive.injK.
@@ -47,15 +53,6 @@ Elpi Accumulate lp:{{
   pred usage.
   usage :- coq.error "Usage: derive.Rm <object name>".
 }}. 
-
-#[superglobal] Elpi Accumulate derive.injectionsK.db lp:{{ 
-
-  injectionsK-db K N R :-
-    coq.env.global (indc GRK) K,
-    injectionsK-def (indc GRK) N GRR,
-    coq.env.global GRR R.
-
-}}.
 
 (* hook into derive *)
 Elpi Accumulate derive File injK.
