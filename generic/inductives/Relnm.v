@@ -1,5 +1,4 @@
 From elpi.apps.derive.elpi Extra Dependency "derive_hook.elpi" as derive_hook.
-From elpi.apps.derive.elpi Extra Dependency "derive_synterp_hook.elpi" as derive_synterp_hook.
 From Trocq.Elpi.inductives Extra Dependency "relnm.elpi" as relnm.
 From Trocq Require Import sym symK RsymK Param_lemmas mapn map4. 
 Import HoTTNotations.
