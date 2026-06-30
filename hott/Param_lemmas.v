@@ -474,9 +474,9 @@ unshelve eapply equiv_functor_sigma.
 - move=> mR a b e; exact (e # mR a).
 - move=> mR mRK x y r; apply: mRK.
 - apply: isequiv_biinv.
-  split; (unshelve eexists; first by move=> + a; apply) => //.
-  move=> r; apply path_forall => a; apply path_forall => b.
-  by apply path_arrow; elim.
+  (do ?unshelve eexists); do ?by [
+    move=> + a; apply => //|
+    move=> r; apply path_forall => a //; apply path_forall => b; apply path_arrow; elim].
 - by move=> mR; unshelve econstructor.
 Defined.
 

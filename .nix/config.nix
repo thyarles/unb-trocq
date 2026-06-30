@@ -29,7 +29,6 @@
 	};
       coqPackages = common-bundles // {
         coq.override.version = "9.1";
-        HoTT.override.version = "9dbe413246b53352d4891efb85cd2ea1a8d01c12"; # HoTT isn't available yet for 9.1
         coq-elpi.override.version = "ba3cc750eda486c85d94e3eb35fb0eba77609338"; # 3.4.0. is enough for trocq-std, trocq-hott needs https://github.com/LPCIC/coq-elpi/pull/1030
 	
       };

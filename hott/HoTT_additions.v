@@ -10,7 +10,7 @@
 (*                        |_| * GNU Lesser General Public License Version 3  *)
 (*                            * see LICENSE file for the text of the license *)
 (*****************************************************************************)
-
+From elpi Require Import elpi.
 Require Import ssreflect.
 From HoTT Require Export HoTT.
 
@@ -131,3 +131,15 @@ Notation "A <->> B" := (LeftInversesBetween A B) (at level 70) : fibration_scope
 Definition equiv_flip@{i k} (A B : Type@{i}) (P : A -> B -> Type@{k}) :
   LeftInversesBetween@{k} (forall (a : A) (b : B), P a b) (forall (b : B) (a : A), P a b).
 Proof. by do 2!exists (fun PAB b a => PAB a b). Defined.
+
+Elpi Command Trocq.missing.
+Elpi Accumulate lp:{{
+      main [] :-
+        coq.locate-all "isequiv_isbiinv" [loc-gref GR|_],
+        coq.env.global GR Term,
+        @udecl! [] tt [] tt =>
+        coq.env.add-const "isequiv_biinv" Term _ @transparent! _.
+      main [].
+      }}.
+Elpi Export Trocq.missing.
+Trocq.missing.
