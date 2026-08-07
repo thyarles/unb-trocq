@@ -15,4 +15,4 @@
 /tests/_CoqProject
 
 # Website
-website/_site/
+docs/_site/

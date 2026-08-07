@@ -96,8 +96,8 @@ Definition map :
   fun A A' AR =>
     fix F n n' nR :=
       match nR with
-      | OR => fun _ => nil
-      | SR m m' mR => fun v => cons (map AR (hd v)) (F m m' mR (tail v))
+      | O_R => fun _ => nil
+      | S_R m m' mR => fun v => cons (map AR (hd v)) (F m m' mR (tail v))
       end.
 
 Definition t0 {A} (v : t A O) : v = nil := match v in t _ m return
@@ -169,36 +169,32 @@ Proof.
   by case: _ / R_in_map.
 Qed.
 
-Definition Param_nat_symK m n (nR : natR m n) : nR = Param_nat_sym (Param_nat_sym nR).
-Proof. by elim: nR => //= {}m {}n mn emn; apply: ap. Defined.
-
 Definition tR_sym_f {A A' : Type} (AR : A -> A' -> Type) {n n' : nat} (nR : natR n n')
   {v : t A n} {v' : t A' n'} :
-      sym_rel (tR A A' AR n n' nR) v' v -> tR A' A (sym_rel AR) n' n (Param_nat_sym nR) v' v.
+      sym_rel (tR A A' AR n n' nR) v' v -> tR A' A (sym_rel AR) n' n (nat_sym _ _ nR) v' v.
 Proof. by elim=> //=; constructor. Defined.
 
 Definition tR_sym_t {A A' : Type} (AR : A -> A' -> Type) {n n' : nat} (nR : natR n n')
    {v' : t A' n'} {v : t A n} :
-    tR A A' AR n n' (Param_nat_sym (Param_nat_sym nR)) v v' -> tR A A' AR n n' nR v v'.
+    tR A A' AR n n' (nat_sym _ _ (nat_sym _ _ nR)) v v' -> tR A A' AR n n' nR v v'.
 Proof.
 apply: (transport (fun nR => tR _ _ _ _ _ nR _ _)).
-  symmetry; exact: Param_nat_symK.
+  exact: nat_symK.
 Defined.
 
 Definition tR_sym_tV {A A' : Type} (AR : A -> A' -> Type) {n n' : nat} (nR : natR n n')
    {v' : t A' n'} {v : t A n} :
-    tR A A' AR n n' nR v v' -> tR A A' AR n n' (Param_nat_sym (Param_nat_sym nR)) v v'.
+    tR A A' AR n n' nR v v' -> tR A A' AR n n' (nat_sym _ _ (nat_sym _ _ nR)) v v'.
 Proof.
 apply: (transport (fun nR => tR _ _ _ _ _ nR _ _)).
-exact: Param_nat_symK.
+symmetry; exact: nat_symK. 
 Defined.
 
-(* Definition tR_symK  *)
 Lemma tR_sym_tK A A' AR n n' nR v v' (vR : tR A A' AR n n'
-   (Param_nat_sym (Param_nat_sym nR)) v v') :
+   (nat_sym _ _ (nat_sym _ _ nR)) v v') :
       tR_sym_tV AR nR (tR_sym_t AR nR vR) = vR.
 Proof.
-by rewrite /tR_sym_t /tR_sym_tV -transport_pp concat_Vp.
+by rewrite /tR_sym_t /tR_sym_tV -transport_pp concat_pV.
 Defined.
 
 Local Notation f := (tR_sym_f _ _).
@@ -209,8 +205,18 @@ Definition tR_sym_fK {A A' : Type} (AR : A -> A' -> Type) {n n' : nat} (nR : nat
   (v : t A n) (v' : t A' n') (vR : tR A A' AR n n' nR v v') :
      g (f (f vR)) = vR.
 Proof.
-elim: vR => // {}n {}n' {}nR a a' aR {}v {}v' vR {2}<-/=; rewrite /g /=.
-by case: _ / Param_nat_symK (tR_sym_f _ _ _).
+elim: vR => // {}n {}n' {}nR a a' aR {}v {}v' vR {2}<-/=; rewrite /g/=.
+move: (tR_sym_f _ _ _)=> vR'; move: vR'.
+move: ((nat_symK _ _ _))=> p.
+set f := (X in (X nR _ )).
+by refine (match p as p0 in (_ = nRR)
+return
+forall vR' : tR A A' (sym_rel (sym_rel AR)) n n' (nat_sym n' n (nat_sym n n' nR)) v v',
+transport _ (f nRR (fun t1 : nat_R n n' => S_R n n' t1 = S_R n n' nRR) 1 _ p0^)
+  (consR A A' (sym_rel (sym_rel AR)) n n' (nat_sym n' n (nat_sym n n' nR)) a a' aR v v' vR')
+= consR A A' AR n n' nRR a a' aR v v' (transport _ p0 vR')
+with idpath => _ end
+).
 Qed.
 
 Definition tR_sym_fE {A A' : Type} (AR : A -> A' -> Type) {n n' : nat} (nR : natR n n')
@@ -220,7 +226,7 @@ Proof. by rewrite -{2}[vR]tR_sym_fK tR_sym_tK tR_sym_fK. Qed.
 
 Definition tR_sym  (A A' : Type) (AR : A -> A' -> Type) (n n' : nat) (nR : natR n n')
    (v' : t A' n') (v : t A n) :
-      sym_rel (tR A A' AR n n' nR) v' v <->> tR A' A (sym_rel AR) n' n (Param_nat_sym nR) v' v.
+      sym_rel (tR A A' AR n n' nR) v' v <->> tR A' A (sym_rel AR) n' n (nat_sym _ _ nR) v' v.
 Proof.
   unshelve eexists _, _.
   - exact: tR_sym_f.
@@ -249,9 +255,9 @@ Proof.
   - unshelve eapply
       (@eq_Map4 _ _
         (sym_rel (tR A A' AR n n' nR))
-        (tR A' A (sym_rel AR) n' n (Param_nat_sym nR))).
+        (tR A' A (sym_rel AR) n' n (nat_sym _ _ nR))).
     + exact (tR_sym A A' AR n n' nR).
-    + exact (Map4 A' A (Param44_sym A A' AR) n' n (Param_nat_sym nR)).
+    + exact (Map4 A' A (Param44_sym A A' AR) n' n (nat_sym _ _ nR)).
 Defined.
 
 (* append ~ append *)

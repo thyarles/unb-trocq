@@ -3,6 +3,7 @@
 -arg -w -arg +elpi.typechecker
 
 -R ../hott/ Trocq
+-R ../generic/inductives Trocq
 -R ../elpi/ Trocq.Elpi
 
 unit_arrow_contravariant.v
@@ -28,3 +29,17 @@ unit_transfer5.v
 unit_twoTranslations.v
 unit_typeArrow.v
 unit_type.v
+
+inductives/coverage.v
+inductives/test_sym.v
+inductives/test_symK.v
+inductives/test_RsymK.v
+inductives/test_mymap.v
+inductives/test_injection_lemmas.v
+inductives/test_mR.v
+inductives/test_Rm.v
+inductives/test_injK.v
+inductives/test_mRRmK.v
+inductives/test_map4.v
+inductives/test_mapn.v
+inductives/test_Relnm.v

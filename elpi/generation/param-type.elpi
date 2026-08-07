@@ -11,6 +11,8 @@
 %                            % (see LICENSE file for the text of the license) %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+accumulate "Trocq.Elpi/database".
+
 pred generate-fields
   i:map-class, i:term, i:param-class, i:univ,
   i:univ.variable, i:univ.variable, o:list term.

@@ -3,12 +3,12 @@ all: Makefile.rocq
 
 clean: _CoqProject
 	# We have to make the coq makefile in case it is missing
-	coq_makefile -f $< -o Makefile.rocq
+	rocq makefile -f $< -o Makefile.rocq
 	$(MAKE) -f Makefile.rocq $@
 	rm Makefile.rocq Makefile.rocq.conf
 
 Makefile.rocq: _CoqProject
-	coq_makefile -f $< -o $@
+	rocq makefile -f $< -o $@
 
 .DEFAULT:
 	$(MAKE) Makefile.rocq

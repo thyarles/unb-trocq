@@ -17,3 +17,25 @@ From Trocq Require Export HoTT_additions.
 Module HoTTNotations.
   (* Stub for compatibility with stdlib version  *)
 End HoTTNotations.
+
+Register paths as trocq.paths.
+Register concat as trocq.concat.
+Register idpath as trocq.idpath.
+Register inverse as trocq.inverse.
+Register paths_ind as trocq.paths_ind.
+Register exist as trocq.exist.
+Register ap as trocq.ap.
+
+Definition paths_nondep (A : Type) (x : A) (P : A -> Type) : P x -> forall y : A, x = y -> P y :=
+  fun w y e=> paths_rect A x (fun a0 e => P a0) w y e.
+
+(* Weak HoTT.Types.Arrow.dpath_arrow. *)
+Lemma Wdpath_arrow : forall {T : Type}{P Q : T -> Type} {x y : T} (p : x = y) 
+  (f : P x -> Q x) (g : P y -> Q y),
+  transport (fun x => P x -> Q x) p f = g -> 
+  forall x, transport _ p (f x) = g (transport _ p x).
+Proof.
+intros T P Q x y p.
+destruct p; simpl; intros f g ->.
+reflexivity.
+Defined.

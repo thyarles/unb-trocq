@@ -40,7 +40,6 @@ mkCoqDerivation {
 
   propagatedBuildInputs = [
     trocq.std
-    mathcomp.ssreflect
     mathcomp.algebra
   ];
 }

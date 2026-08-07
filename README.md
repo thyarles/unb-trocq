@@ -62,6 +62,7 @@ sequent-style presentation.
   - Enzo Crance ([**@ecranceMERCE**](https://github.com/ecranceMERCE))
   - Lucie Lahaye ([**@lweqx**](https://github.com/lweqx))
   - Assia Mahboubi ([**@amahboubi**](https://github.com/amahboubi))
+  - Tomas Vallejos ([**@Tvallejos**](https://github.com/Tvallejos))
 - License: [GNU Lesser General Public License v3.0](LICENSE)
 - Compatible Rocq/Coq versions: 9.0 and 9.1
 - Additional dependencies:

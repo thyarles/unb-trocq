@@ -15,6 +15,7 @@
 % -----------------------------------------------------------------------------
 
 accumulate "Trocq.Elpi/util-rocq".
+accumulate "Trocq.Elpi/database".
 
 namespace trocq.data {
 

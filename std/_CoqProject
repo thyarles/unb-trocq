@@ -2,6 +2,7 @@
 -arg -w -arg +elpi.typechecker
 
 -R . Trocq
+-R ./generic/inductives Trocq
 -R ../elpi/ Trocq.Elpi
 
 HoTTNotations.v
@@ -14,16 +15,31 @@ Param_arrow.v
 Param_forall.v
 Param_lemmas.v
 Stdlib.v
+
+generic/inductives/DeriveLib.v
+generic/inductives/sym.v
+generic/inductives/symK.v
+generic/inductives/RsymK.v
+generic/inductives/mymap.v
+generic/inductives/injection_lemmas.v
+generic/inductives/mR.v
+generic/inductives/Rm.v
+generic/inductives/injK.v
+generic/inductives/mRRmK.v 
+generic/inductives/map4.v
+generic/inductives/mapn.v
+generic/inductives/Relnm.v
+
 generic/Database.v
 generic/Param_Empty.v
 generic/Param_bool.v
-generic/Param_list.v
 generic/Param_nat.v
 generic/Param_option.v
-generic/Param_paths.v
 generic/Param_prod.v
-generic/Param_sigma.v
 generic/Param_sum.v
+generic/Param_list.v
+generic/Param_paths.v
+generic/Param_sigma.v
 generic/Param_trans.v
 generic/Param_vector.v
 generic/Trocq.v

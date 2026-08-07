@@ -29,8 +29,8 @@ Local Open Scope param_scope.
   + symmetry MapM_Type_symNP *)
 
 Elpi Command genmaptype.
-Elpi Accumulate Db trocq.db.
 Elpi Accumulate File param_type_generation.
+Elpi Accumulate Db trocq.db.
 
 Elpi Query lp:{{
   coq.univ.new U,
