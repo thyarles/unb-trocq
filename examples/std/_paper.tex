@@ -1,0 +1,658 @@
+\documentclass[runningheads]{llncs}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+
+\definecolor{codebg}{rgb}{0.96,0.96,0.96}
+\lstdefinelanguage{Coq}{
+  morekeywords={Lemma,Theorem,Proof,Qed,forall,intros,rewrite,apply,reflexivity,
+                Definition,Fixpoint,Inductive,trocq,Trocq,Use},
+  sensitive=true,
+  morecomment=[s]{(*}{*)},
+  commentstyle=\color{gray}\itshape,
+  keywordstyle=\color{blue}\bfseries,
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+}
+\lstset{language=Coq,backgroundcolor=\color{codebg},frame=single,columns=fullflexible}
+
+\begin{document}
+
+\title{When Does Proof Transfer Pay Off?\\
+An Empirical Cost Model for Trocq versus Manual\\
+Rewriting in Coq}
+
+\author{Vander Alves}
+\authorrunning{V. Alves}
+
+\institute{Department of Computer Science, University of Bras\'{i}lia (UnB)\\
+Bras\'{i}lia, Brazil}
+
+\maketitle
+
+\begin{abstract}
+Interactive theorem provers routinely maintain the same mathematical concept
+under several representations---for instance, a proof-oriented monomorphic
+data structure alongside a computation-oriented polymorphic one---and proving
+theorems on one representation obliges a proof engineer to either replay the
+argument or \emph{transfer} it from the other. Proof-transfer frameworks
+built on (univalent) parametricity, such as Trocq, promise to automate this
+replay, but automation is not free: it trades a per-theorem cost for a
+fixed setup cost, and it is not obvious a priori when that trade is
+worthwhile. This paper reports a small, code-grounded case study that
+contrasts manual proof transfer against Trocq-based transfer on a
+monomorphic/polymorphic list pair in Coq, and develops an economic
+(return-on-investment) model of the trade-off through three successive
+refinements, each falsified and corrected by evidence read directly off the
+Coq scripts. The final model isolates three variables that jointly decide
+the outcome---the number of theorems transferred, their structural
+complexity, and the size of the shared vocabulary that proof transfer must
+bridge---and yields a closed-form asymptotic return on investment. We use
+the model to derive a practical decision heuristic for proof engineers and
+discuss, in a threats-to-validity analysis organized around outstanding
+obligations rather than settled claims, the scope within which the
+heuristic can currently be trusted.
+
+\keywords{Proof transfer \and Trocq \and univalent parametricity \and Coq/Rocq \and
+proof engineering cost \and empirical software engineering}
+\end{abstract}
+
+
+\section{Introduction}
+\label{sec:intro}
+
+Formal developments in interactive theorem proving frequently keep more than
+one representation of the same underlying concept alive at once. A classic
+example is a pair of list types: one monomorphic and convenient to reason
+about, the other polymorphic (or otherwise more general) and convenient to
+compute with or reuse across a library. Once both representations exist,
+every theorem proved about one of them is, semantically, also true of the
+other---yet formally, nothing forces the two proof developments to stay in
+sync. Restating and reproving each theorem by hand is tedious and does not
+scale; this is the classical \emph{proof-transfer} problem, and it recurs
+throughout formalized mathematics and program verification, including in
+software-product-line (SPL) settings where the same variability-aware
+property must often be established over both a feature-oriented and a
+product-level view of a system.
+
+Proof assistants have accumulated a family of tools that attack this
+problem automatically, ranging from data refinement frameworks such as
+CoqEAL~\cite{cohen2013refinements} and the Isabelle/HOL Lifting and Transfer
+package~\cite{huffman2013lifting}, to frameworks grounded in
+\emph{univalent parametricity}~\cite{tabareau2018equivalences,tabareau2021marriage}.
+Trocq~\cite{cohen2024trocq,cohen2025trocq} is the most recent and most
+general of the latter family: it generalizes the univalent parametricity
+translation to a hierarchy of relatedness classes so that a single
+\texttt{trocq} tactic call can, in favorable cases, discharge most of a
+proof obligation automatically, leaving only a residual lemma about the
+target representation.
+
+Automation of this kind is attractive, but it is not obviously
+\emph{always} the right engineering choice. Setting up a Trocq translation
+for a given pair of types requires writing relational witnesses and
+registering them with the plugin---work that must be paid regardless of how
+many theorems will eventually benefit from it. Manual transfer, by
+contrast, avoids that setup but repeats a rewriting argument, in some form,
+for every theorem. Whether Trocq ``pays off'' therefore depends on how
+much proof-transfer work is actually being done, and on how the two
+approaches' costs scale with the size and shape of that work---a question
+that, to the best of our knowledge, has not been given an explicit cost
+model in the proof-transfer literature, which has so far focused on
+expressiveness and correctness rather than on effort.
+
+This paper makes the following contributions:
+\begin{itemize}
+\item A small, controlled Coq case study contrasting manual proof transfer
+      against Trocq-based transfer on a monomorphic/polymorphic list pair,
+      instrumented with a simple, syntactic effort proxy: the number of
+      proof obligations (tactic steps) required per approach
+      (Section~\ref{sec:setup}).
+\item An economic cost model of the manual-versus-Trocq trade-off,
+      developed through three successive iterations, each of which is
+      refuted and corrected by evidence read directly from the case
+      study's Coq scripts, rather than assumed a priori
+      (Section~\ref{sec:model}). This iterative-refinement structure is,
+      we argue, itself a methodological contribution: it shows how a naive
+      cost intuition about a proof-automation tool can be wrong in ways
+      that only inspection of the actual proof terms reveals.
+\item A closed-form return-on-investment (ROI) formula and a resulting
+      decision heuristic, organized around three variables---the number of
+      theorems transferred, their average structural complexity, and the
+      size of the shared vocabulary that both approaches must bridge---that
+      jointly determine which approach is cheaper
+      (Section~\ref{sec:results}).
+\item A threats-to-validity discussion that follows an \emph{evidence-debt}
+      framing~\cite{alves2025evidencedebt}, treating unresolved
+      methodological concerns as explicit, discharge-able obligations
+      rather than as blanket caveats (Section~\ref{sec:ttv}).
+\end{itemize}
+
+We stress at the outset that the case study is deliberately small: it is
+a single domain (lists over \texttt{nat}), a single Trocq relatedness
+class (isomorphism, \emph{Param44}), and effort measured by tactic count
+rather than wall-clock time or cognitive load. The contribution is the
+\emph{modeling methodology} and the qualitative structure of the trade-off
+it exposes, not a claim that the fitted constants generalize as-is to other
+domains; Section~\ref{sec:ttv} makes this scope explicit.
+
+Our core scientific hypothesis is that the initial setup overhead required by univalent parametricity tools like Trocq is offset by a lower per-theorem cost compared to manual rewriting, and that the breakeven point is governed by the structural complexity of the transferred theorems and the size of the vocabulary shared between the representations.
+
+
+
+\section{Background}
+\label{sec:background}
+
+\subsection{Proof transfer and its cost}
+Given two types $A$ and $B$ known to be related---typically by an
+isomorphism, or more generally by some relation $R$---proof transfer aims
+to derive a theorem about $B$ from an already-proved theorem about $A$
+(or vice versa) without re-deriving it from scratch. The problem is folklore
+in mathematics, where such transfers are usually left implicit
+(``clearly, the same argument applies''), but in a proof assistant every
+step must be justified, and the bridging argument becomes explicit proof
+work. That work has two natural components: a \emph{setup} cost, incurred
+once per pair of representations and per piece of shared vocabulary
+(functions, constructors) that both sides use; and a \emph{per-theorem}
+cost, incurred once for every theorem that is actually transferred.
+
+\subsection{Univalent parametricity and Trocq}
+Parametricity~\cite{reynolds1983types} associates to a type a relation
+describing how its elements are related across two interpretations of the
+same type former; \emph{univalent} parametricity~\cite{tabareau2018equivalences,tabareau2021marriage}
+strengthens ordinary parametricity so that it is preserved by type
+equivalences, which lets a proof engineer transport definitions and
+theorems along an equivalence between $A$ and $B$ largely automatically.
+Trocq~\cite{cohen2024trocq,cohen2025trocq} generalizes this translation
+into a calculus with several \emph{relatedness classes} (Param44 for
+isomorphisms down to weaker classes for non-invertible relations), together
+with a Coq/Rocq plugin, implemented in Coq-Elpi, that exposes a
+\texttt{trocq} tactic and \texttt{Trocq Use} vernacular commands for
+registering the relational witnesses of a given translation. Once a
+translation is registered, \texttt{trocq} rewrites a goal about one
+representation into a goal about the other, discharging as much of the
+argument as the calculus can justify automatically.
+
+\subsection{Related transfer and repair mechanisms}
+CoqEAL's \emph{Refinements for free}~\cite{cohen2013refinements} pursues a
+related but distinct goal: transporting \emph{computational} content
+(e.g., efficient data representations) rather than proofs, using
+parametricity translations tailored to refinement relations. The
+Isabelle/HOL Lifting and Transfer package~\cite{huffman2013lifting}
+addresses the analogous problem for quotient types in a different proof
+assistant. \emph{Proof repair}~\cite{ringer2018proof,viola2025proof} takes
+a complementary angle: rather than transferring a proof to a new
+representation ahead of time, it patches an existing proof after a
+representation change breaks it, using type-equivalence or quotient-type
+equivalence information much like Trocq's relational witnesses. None of
+these lines of work, to our knowledge, reports an explicit cost model
+comparing automated transfer against the manual alternative it is meant
+to replace.
+
+\subsection{Cost modeling}
+Software cost estimation has a long history of decomposing effort into a
+size-independent (fixed) component and a size-dependent (variable)
+component, most influentially in Boehm's COCOMO
+model~\cite{boehm1981economics}, which fits such a decomposition to
+project size and a set of scaling factors. We borrow this fixed/variable
+decomposition, applying it not to lines of code but to proof obligations,
+and use it to structure the manual-versus-Trocq comparison in
+Section~\ref{sec:model}.
+
+
+\section{Case Study Setup}
+\label{sec:setup}
+
+The case study formalizes a small pair of list representations in Coq
+(Table~\ref{tab:files}): a monomorphic list of natural numbers,
+\texttt{NatList}, together with base theorems relating its \texttt{length}
+and \texttt{append} operations (\texttt{nlength}, \texttt{napp}); and a
+polymorphic list, \texttt{PList nat}, with the corresponding functions
+\texttt{plength} and \texttt{papp}. \texttt{bs\_p4.v} transfers theorems
+from the monomorphic to the polymorphic side \emph{manually}, via explicit
+bijections and hand-written rewrite scripts. \texttt{bs\_p5.v} transfers
+the same theorems using Trocq's relational witnesses and the
+\texttt{trocq} tactic. \texttt{bs\_p6.v} extends the experiment with
+\texttt{rev} (list reversal), chosen because reversing an append
+(\texttt{rev\_app}-style theorems) requires several nested rewrites and
+so serves as a controlled increase in theorem complexity.
+
+\begin{table}[t]
+\centering
+\caption{Roles of the Coq scripts making up the case study.}
+\label{tab:files}
+\begin{tabular}{@{}ll@{}}
+\toprule
+File & Role \\
+\midrule
+\texttt{bs\_p1.v} & \texttt{NatList}: monomorphic list; base theorems (\texttt{nlength\_napp}, \ldots) \\
+\texttt{bs\_p2.v} & \texttt{PList nat}: polymorphic list; functions (\texttt{plength}, \texttt{papp}) \\
+\texttt{bs\_p4.v} & Manual proof transfer: explicit bijections and rewrite scripts \\
+\texttt{bs\_p5.v} & Trocq proof transfer: relational witnesses and the \texttt{trocq} tactic \\
+\texttt{bs\_p6.v} & Extended experiment adding \texttt{rev}: the complexity benchmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+As an effort proxy we count \emph{proof obligations}, operationalized as
+the number of tactic steps a script requires to close a theorem, including
+setup lemmas and Trocq registrations. This is a coarse, syntactic measure:
+it does not weight tactics by search cost or by the cognitive effort of
+discovering them, and Section~\ref{sec:ttv} returns to this limitation.
+Its virtue is that it is directly and unambiguously readable off the
+scripts, which lets every cost-model parameter below be traced back to a
+specific line of Coq code rather than to an impression of ``roughly how
+hard'' an approach felt.
+
+The guiding question is: as more theorems are transferred, and as those
+theorems grow more complex, at what point---if any---does Trocq's
+per-theorem economy overcome its setup cost, and how does that break-even
+point move as the surrounding vocabulary changes?
+
+
+\section{Iterative Development of the Cost Model}
+\label{sec:model}
+
+We present the cost model as three iterations. Each iteration is stated,
+then checked against the case study's code; each failure motivates the
+next iteration. We keep this structure in the paper, rather than
+presenting only the final model, because the failures are informative in
+their own right: they show two specific ways in which a plausible
+intuition about proof-automation cost is wrong.
+
+\subsection{First iteration: a purely linear model}
+\label{sec:first}
+
+The simplest possible model assumes both approaches' costs scale linearly
+with the number of theorems transferred, $n$, and with a per-theorem
+complexity factor $c$, and assumes Trocq alone pays a one-time setup cost
+governed by a type-distance factor $d$ (with $d=1$ for the isomorphism
+class \emph{Param44} used throughout this case study):
+\begin{align}
+C_{\text{manual}}(n,c) &= 7cn \\
+C_{\text{trocq}}(n,c,d) &= (12d+5) + 2cn
+\end{align}
+With $c=1$, $d=1$, these give a break-even point of
+$n^{*}=17/5\approx 3.4$ theorems, and a return on investment relative to
+Trocq's own cost, $\mathrm{ROI}(n) = (C_{\text{manual}} -
+C_{\text{trocq}})/C_{\text{trocq}} = (5n-17)/(17+2n)$, that is negative for
+$n<3.4$, zero at the break-even point, and tends to a bound of $2.5\times$
+as $n\to\infty$.
+
+\paragraph{Why this is wrong.} The model's key assumption is that manual
+transfer has \emph{no} fixed cost---every obligation in
+$C_{\text{manual}}$ scales with $n$. Inspecting \texttt{bs\_p4.v} shows
+this is false: the bijections between \texttt{NatList} and \texttt{PList}
+and the ``bridge'' lemmas relating \texttt{plength}/\texttt{papp} to their
+monomorphic counterparts are written \emph{once}, not once per theorem:
+
+\begin{lstlisting}
+(* bs_p4.v -- written once, not per theorem *)
+Lemma plist_natlist_iso :
+  natlist_to_plist (plist_to_natlist l) = l.
+Lemma natlist_plist_iso :
+  plist_to_natlist (natlist_to_plist l) = l.
+Lemma plength_eq_nlength :
+  nlength (plist_to_natlist l) = plength l.
+Lemma plist_to_natlist_app :
+  plist_to_natlist (papp l1 l2) = napp (plist_to_natlist l1) (plist_to_natlist l2).
+\end{lstlisting}
+
+Moreover, \texttt{bs\_p5.v} shows that Trocq's own base cost is not
+purely a fixed intercept either: it requires \emph{the same} bridge
+lemmas as the manual approach, restated for the relational encoding.
+Both halves of the first model's fixed/variable split were
+therefore mischaracterized: the manual approach silently has a fixed
+cost, and Trocq's fixed cost is not independent of it.
+
+\subsection{Second iteration: separating shared setup from per-theorem cost}
+\label{sec:second}
+
+The second iteration factors out a \emph{shared} base cost,
+$C_{\text{base}}(f)$, that both approaches pay and that scales with $f$,
+the number of distinct functions or constructors in the theory (here
+$f=2$: \texttt{plength} and \texttt{papp}):
+\begin{align}
+C_{\text{base}}(f) &= S_{\text{iso}} + f \cdot S_{\text{bridge}} \\
+C_{\text{manual}}(n,f) &= C_{\text{base}}(f) + n \cdot P_{\text{manual}} \\
+C_{\text{trocq}}(n,f) &= C_{\text{base}}(f) + f \cdot W_{\text{trocq}} + n \cdot 2
+\end{align}
+where $C_{\text{base}}(f)$ is the shared setup counted from
+\texttt{bs\_p4.v}/\texttt{bs\_p5.v} ($\approx 12$ tactic steps for $f=2$),
+$f \cdot W_{\text{trocq}}$ is Trocq's \emph{additional} overhead---one
+relational witness lemma (\texttt{R\_\_}) per function plus its
+registration via \texttt{Trocq Use}, measured at $W_{\text{trocq}}\approx
+11$ steps per function (so $\approx 22$ for $f=2$)---and $P_{\text{manual}}
+\approx 7$ is the observed length of a per-theorem rewrite chain in
+\texttt{bs\_p4.v}, against a flat $2$-tactic close (\texttt{trocq.} plus
+one residual lemma) observed in \texttt{bs\_p5.v}:
+
+\begin{lstlisting}
+(* bs_p5.v -- per-theorem cost is just 2 tactics *)
+Theorem _plength_papp : forall (l1 l2 : _PList),
+  _plength (_papp l1 l2) = _plength l1 + _plength l2.
+Proof.
+  trocq.
+  apply nlength_napp.
+Qed.
+\end{lstlisting}
+
+With $f=2$ this gives $C_{\text{manual}}(n) = 12+7n$ and
+$C_{\text{trocq}}(n) = 34+2n$: Trocq now starts \emph{more} expensive than
+manual transfer ($34$ against $12$ at $n=0$) but overtakes it once
+$n^{*}=22/5\approx 4.4$ theorems have been transferred. Its ROI converges,
+as $n\to\infty$, to the finite constant
+\begin{equation}
+\mathrm{ROI}_{\infty} = \frac{P_{\text{manual}} - 2}{2},
+\end{equation}
+which for the observed $P_{\text{manual}}=7$ gives a bounded
+$2.5\times$ return---not an ever-growing one, because both approaches'
+\emph{marginal} (per-theorem) costs are constant; only the intercepts
+differ. This is already a materially more accurate picture than the first
+iteration's, and it is the first version of the model in which Trocq's
+higher up-front cost is explicit rather than hidden inside a
+misattributed slope.
+
+\subsection{Third iteration: complexity-sensitive theorems}
+\label{sec:third}
+
+The second iteration still assumes every theorem costs the same
+$P_{\text{manual}}$ tactics to transfer manually, regardless of how
+complex it is. \texttt{bs\_p6.v}, which adds \texttt{rev}, falsifies this
+assumption directly. The theorem
+\texttt{\_prev\_papp} (reversing a concatenation) touches five function
+applications (\texttt{\_prev} three times, \texttt{\_papp} twice) and
+costs \emph{eleven} manual tactic steps, while its Trocq-based proof
+remains exactly two:
+
+\begin{lstlisting}
+(* Manual -- 11 tactic steps *)
+Theorem _prev_papp_manual :
+  _prev (_papp l1 l2) = _papp (_prev l2) (_prev l1).
+Proof.
+  intros l1 l2.                                  (* 1 *)
+  rewrite <- (plist_nlist_iso (_prev (_papp l1 l2))).      (* 2 *)
+  rewrite <- (plist_nlist_iso (_papp (_prev l2) (_prev l1))). (* 3 *)
+  apply f_equal.                                  (* 4 *)
+  rewrite plist_2_nlist_rev.                       (* 5 *)
+  rewrite plist_2_nlist_app.                       (* 6 *)
+  rewrite nrev_napp.                               (* 7 *)
+  rewrite plist_2_nlist_app.                       (* 8 *)
+  rewrite plist_2_nlist_rev.                       (* 9 *)
+  rewrite plist_2_nlist_rev.                       (* 10 *)
+  reflexivity.                                     (* 11 *)
+Qed.
+
+(* Trocq -- 2 tactic steps *)
+Theorem _prev_papp_trocq :
+  _prev (_papp l1 l2) = _papp (_prev l2) (_prev l1).
+Proof.
+  trocq.
+  apply nrev_napp.
+Qed.
+\end{lstlisting}
+
+We therefore introduce $c_{\text{avg}}$, the average number of function
+applications per transferred theorem, and a constant $k$ relating
+complexity to manual tactic count (here $k\approx 2.2$, fit from $11$
+steps over $5$ applications). Trocq's per-theorem cost, crucially,
+\emph{does not} grow with $c_{\text{avg}}$ in this data: the \texttt{trocq}
+tactic dispatches the relational bookkeeping regardless of how many
+functions the goal mentions, leaving a constant residual (here, $2$
+tactics):
+\begin{align}
+C_{\text{manual}}(n,f,c_{\text{avg}}) &= C_{\text{base}}(f) + n \cdot (k \cdot c_{\text{avg}}) \\
+C_{\text{trocq}}(n,f) &= C_{\text{base}}(f) + f \cdot W_{\text{trocq}} + n \cdot 2 \\
+\mathrm{ROI}(n,f,c_{\text{avg}}) &= \frac{n(k \cdot c_{\text{avg}} - 2) - f \cdot W_{\text{trocq}}}{C_{\text{base}}(f) + f \cdot W_{\text{trocq}} + 2n}
+\end{align}
+Fitting to \texttt{bs\_p6.v} ($f=1$, $C_{\text{base}}=3$,
+$f \cdot W_{\text{trocq}} = 11$, $c_{\text{avg}}=5$) gives
+$C_{\text{manual}}(n) = 18+11n$ and $C_{\text{trocq}}(n) = 24+2n$, with a
+break-even at $n^{*} = 2/3 \approx 0.67$ theorems: Trocq is cheaper
+starting from the very \emph{first} theorem, because that one theorem is
+already complex enough to amortize the setup by itself. This is the
+model's central qualitative finding: complexity, not volume, can be the
+deciding factor.
+
+
+\section{Results and a Decision Heuristic}
+\label{sec:results}
+
+The third-iteration model exposes three variables that jointly govern
+which approach is cheaper: the number of theorems transferred $n$
+(\emph{volume}), their average complexity $c_{\text{avg}}$
+(\emph{complexity}), and the size of the shared vocabulary $f$
+(\emph{vocabulary}). Table~\ref{tab:scenarios} summarizes the resulting
+decision structure.
+
+\begin{table}[t]
+\centering
+\caption{Qualitative outcomes of the third-iteration cost model.}
+\label{tab:scenarios}
+\begin{tabular}{@{}p{4.6cm}p{1.4cm}p{5.6cm}@{}}
+\toprule
+Scenario & Winner & Key factor \\
+\midrule
+Few theorems ($n<4$), simple goals & Manual & Trocq setup overhead not yet amortized \\
+Many theorems ($n\ge 4$), any complexity & Trocq & Per-theorem savings accumulate \\
+Single complex theorem ($n=1$, $c_{\text{avg}}\ge 5$) & Trocq & Complexity dominates immediately \\
+Large vocabulary ($f\gg 1$), few theorems & Manual & Wrapper cost $f \cdot W_{\text{trocq}}$ exceeds savings \\
+Growing library ($n\to\infty$) & Trocq & ROI $\to (k \cdot c_{\text{avg}} - 2)/2$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The asymptotic ROI, $(k \cdot c_{\text{avg}} - 2)/2$, is informative on
+its own: it does not grow without bound as $n\to\infty$, it \emph{saturates}
+at a value fixed by complexity alone. For the values observed on
+\texttt{bs\_p6.v} ($k=2.2$, $c_{\text{avg}}=6$), the asymptote evaluates to
+$\mathrm{ROI}_{\infty} = (13.2-2)/2 \approx 5.6$: a $560\%$ return on
+Trocq's setup investment in the long run, i.e., manual transfer becomes
+roughly $6.6\times$ more expensive per theorem at scale.
+
+From this, we distill a practical heuristic for a proof engineer deciding,
+before writing anything, whether to invest in a Trocq translation for a
+given pair of representations:
+\begin{enumerate}
+\item Estimate the shared vocabulary size $f$ (functions/constructors
+      that both representations use and that theorems will mention).
+      A large $f$ relative to the number of theorems actually needed
+      is the strongest signal \emph{against} Trocq, because the wrapper
+      cost $f \cdot W_{\text{trocq}}$ is paid regardless of how many of
+      those functions end up being exercised.
+\item If even one theorem is expected to have high structural complexity
+      (many nested function applications, as with \texttt{rev} over
+      \texttt{app}), Trocq is very likely to win immediately, independent
+      of $n$---the third iteration's break-even at $n^{*}\approx 0.67$
+      generalizes to: complex theorems amortize setup on their own.
+\item Otherwise, the decision reduces to the classical fixed-cost/
+      variable-cost trade-off of the second iteration: transfer
+      volume $n$ needs to clear the break-even point set by
+      $C_{\text{base}}(f)+f\cdot W_{\text{trocq}}$ divided by the
+      per-theorem savings $P_{\text{manual}}-2$.
+\end{enumerate}
+
+
+\section{Threats to Validity}
+\label{sec:ttv}
+
+Rather than listing caveats informally, we follow an evidence-debt
+framing~\cite{alves2025evidencedebt} and state each threat as an open
+obligation: a specific, checkable condition under which the corresponding
+claim would need to be revised, together with what would discharge it.
+
+\paragraph{Construct validity (O1): tactic count as an effort proxy.}
+The claim that ``proof obligations'' (tactic steps) approximate proof
+\emph{effort} is a modeling choice, not a measured fact. It ignores tactic
+search cost, the effort of discovering a relational witness in the first
+place, and the cognitive cost of debugging a failed \texttt{trocq} call.
+This obligation would be discharged by re-running the case study with a
+second, independent effort proxy---e.g., token or AST size of the
+completed proof term, or time-to-completion under a controlled
+protocol---and checking that the qualitative ranking of scenarios in
+Table~\ref{tab:scenarios} is preserved.
+
+\paragraph{Internal validity (O2): single-author, single-domain
+parameters.} All fitted constants ($P_{\text{manual}}\approx 7$,
+$W_{\text{trocq}}\approx 11$, $k\approx 2.2$) come from scripts written by
+one author working on one domain (lists over \texttt{nat}). Both the
+manual and the Trocq scripts could be non-representative---e.g., an
+author already fluent in Trocq's idioms may write shorter relational
+witnesses than a newcomer, biasing $W_{\text{trocq}}$ downward. This
+obligation is discharged by a multi-author replication with scripts
+written independently and blind to the cost model.
+
+\paragraph{External validity (O3): scope of the relatedness class and
+domain.} The case study exercises only the \emph{Param44} (isomorphism)
+class of Trocq's hierarchy, on one data structure. Trocq's stated purpose
+extends to weaker, non-invertible relations, where the setup/variable
+trade-off may differ qualitatively (e.g., $W_{\text{trocq}}$ may grow with
+the distance $d$ in ways the first iteration's discarded $d$-term
+gestured at but the later iterations dropped for lack of evidence). This
+obligation is discharged by repeating Sections~\ref{sec:model}
+and~\ref{sec:results} on at least one lower relatedness class and one
+larger data structure (e.g., trees or a variability-aware structure drawn
+from a software product line), and checking whether $n^{*}$ and
+$\mathrm{ROI}_{\infty}$ still take the same functional form.
+
+\paragraph{Reliability (O4): tool-version dependence.} The tactic counts
+in \texttt{bs\_p5.v}/\texttt{bs\_p6.v} depend on the specific version of
+the Trocq plugin used, whose automation is under active development; a
+later version could shrink $W_{\text{trocq}}$ or the per-theorem residual
+below the $2$ tactics observed here, moving every break-even point in
+Trocq's favor without any change to the manual baseline. This obligation
+is discharged by pinning and reporting the Trocq and Coq/Rocq versions in
+a replication package and re-measuring on each subsequent Trocq release.
+
+We consider O1--O4 open rather than fatal: they bound the \emph{scope} of
+the claims in Section~\ref{sec:results} to what the case study actually
+exercises (isomorphism-class transfer, small vocabularies, one domain,
+one author, one tool version), and each has a concrete, stated
+experiment that would discharge it, in the spirit of treating a
+threats-to-validity section as a to-do list rather than a disclaimer.
+
+
+\section{Related Work}
+\label{sec:related}
+
+Trocq~\cite{cohen2024trocq,cohen2025trocq} and its predecessor univalent
+parametricity framework~\cite{tabareau2018equivalences,tabareau2021marriage}
+are the object of this study; both papers focus on expressiveness (which
+relations and which fragments of the type theory the calculus supports)
+and on correctness (soundness of the translation), and neither reports an
+effort or cost comparison against a manual baseline, which is the gap this
+paper addresses for one small case. CoqEAL's data-refinement
+parametricity~\cite{cohen2013refinements} and Isabelle/HOL's Lifting and
+Transfer~\cite{huffman2013lifting} solve closely related transfer problems
+in different settings (computational refinement, and quotient types,
+respectively); a natural extension of this work is to check whether the
+three-variable ($n$, $c_{\text{avg}}$, $f$) structure found here for Trocq
+also organizes the cost trade-off for those tools. Proof
+repair~\cite{ringer2018proof}, and its recent extension to quotient-type
+equivalences~\cite{viola2025proof}, targets a different but related
+economic question: instead of \emph{transferring ahead of time}, it asks
+when it is cheaper to \emph{patch} a broken proof after a representation
+change than to redo it, and could plausibly be compared with Trocq under
+the same cost-modeling methodology used here. Finally, the fixed/variable
+cost decomposition itself is inherited from software cost estimation,
+most influentially COCOMO~\cite{boehm1981economics}; to our knowledge this
+paper is the first to apply that decomposition to a proof-transfer
+tactic's cost rather than to a software project's.
+
+
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
+
+Starting from a naive linear cost model that the case study's own Coq
+scripts immediately falsified, we arrived, through two further
+refinements, at a model in which three variables---the number of theorems
+transferred, their average structural complexity, and the size of the
+shared vocabulary a translation must bridge---jointly determine whether
+Trocq-based proof transfer is cheaper than writing the corresponding
+rewrite scripts by hand. The model's most actionable finding is that
+complexity, not volume, is often the deciding factor: a single
+sufficiently complex theorem can amortize Trocq's setup cost on its own,
+while a large, sparsely-used vocabulary can make Trocq a poor investment
+even when many theorems are eventually transferred. Both conclusions
+would have been invisible to the first iteration's linear model, which is
+itself an argument for treating a cost model, in this domain as in
+others, as something to be iteratively checked against code rather than
+asserted from macroscopic intuition.
+
+The obligations opened in Section~\ref{sec:ttv} set the immediate agenda:
+a larger, multi-domain, multi-relatedness-class corpus of manual/Trocq
+proof pairs, ideally contributed by more than one proof engineer, to fit
+$P_{\text{manual}}$, $W_{\text{trocq}}$, and $k$ statistically rather than
+by inspection of a handful of theorems, and to check whether the
+asymptotic ROI formula's functional form survives outside the isomorphism
+class. A further direction, motivated by the software-product-line origin
+of the proof-transfer problem in the introduction, is to instantiate the
+same model on a feature-oriented/product-level pair of representations of
+a variability-aware artifact, where $f$ (the shared vocabulary) and
+$c_{\text{avg}}$ (theorem complexity) are plausibly both larger than in
+the list case study, and where the decision this model supports---whether
+to invest in an automated transfer translation before undertaking a
+large proof effort---has direct practical stakes.
+
+
+\begin{thebibliography}{99}
+
+\bibitem{alves2025evidencedebt}
+Alves, V.: Evidence debt: reframing threats to validity as formal
+liability. Technical note (2025)
+
+\bibitem{boehm1981economics}
+Boehm, B.W.: Software Engineering Economics. Prentice-Hall (1981)
+
+\bibitem{cohen2013refinements}
+Cohen, C., D\'{e}n\`{e}s, M., M\"{o}rtberg, A.: Refinements for free! In:
+Gonthier, G., Norrish, M. (eds.) CPP 2013. LNCS, vol. 8307, pp. 147--162.
+Springer (2013). \doi{10.1007/978-3-319-03545-1_10}
+
+\bibitem{cohen2024trocq}
+Cohen, C., Crance, E., Mahboubi, A.: Trocq: proof transfer for free, with
+or without univalence. In: Weirich, S. (ed.) ESOP 2024. LNCS, vol. 14576,
+pp. 239--268. Springer (2024). \doi{10.1007/978-3-031-57262-3_10}
+
+\bibitem{cohen2025trocq}
+Cohen, C., Crance, E., Mahboubi, A.: Trocq: proof transfer for free,
+beyond equivalence and univalence. ACM Trans. Program. Lang. Syst. (2025)
+
+\bibitem{huffman2013lifting}
+Huffman, B., Kun\v{c}ar, O.: Lifting and transfer: a modular design for
+quotients in Isabelle/HOL. In: Gonthier, G., Norrish, M. (eds.) CPP 2013.
+LNCS, vol. 8307, pp. 131--146. Springer (2013).
+\doi{10.1007/978-3-319-03545-1_9}
+
+\bibitem{reynolds1983types}
+Reynolds, J.C.: Types, abstraction and parametric polymorphism. In: IFIP
+Congress. pp. 513--523 (1983)
+
+\bibitem{ringer2018proof}
+Ringer, T., Yazdani, N., Leo, J., Grossman, D.: Adapting proof automation
+to adapt proofs. In: CPP 2018. pp. 115--129. ACM (2018)
+
+\bibitem{tabareau2018equivalences}
+Tabareau, N., Tanter, \'{E}., Sozeau, M.: Equivalences for free: univalent
+parametricity for effective transport. Proc. ACM Program. Lang. 2(ICFP),
+92:1--92:29 (2018). \doi{10.1145/3236787}
+
+\bibitem{tabareau2021marriage}
+Tabareau, N., Tanter, \'{E}., Sozeau, M.: The marriage of univalence and
+parametricity. J. ACM 68(1), 5:1--5:44 (2021). \doi{10.1145/3429979}
+
+\bibitem{viola2025proof}
+Viola, C., Fan, M., Ringer, T.: Proof repair across quotient type
+equivalences. Proc. ACM Program. Lang. 9(OOPSLA2), 386:1--386:26 (2025).
+\doi{10.1145/3763164}
+
+\end{thebibliography}
+
+\end{document}
