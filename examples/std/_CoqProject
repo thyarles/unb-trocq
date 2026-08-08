@@ -28,6 +28,5 @@ summable.v
 trocq_setoid_rewrite.v
 stuck.v
 Vector_tuple.v
-maps_trocq_5.v
 trocq_gen_rewrite.v
 # maps_trocq.v

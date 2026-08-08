@@ -14,7 +14,6 @@
 % Annotated terms
 % -----------------------------------------------------------------------------
 
-accumulate "Trocq.Elpi/class".
 accumulate "Trocq.Elpi/util".
 
 kind aterm type.

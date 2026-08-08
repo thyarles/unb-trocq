@@ -188,6 +188,28 @@ Instance addableNat : Addable nat := {
     add_zero_r := ltac:(intros; lia)
 }.
 
+Definition PList_nat := PList nat.
+Definition plength_nat : PList_nat -> nat := @plength nat.
+Definition papp_nat : PList_nat -> PList_nat -> PList_nat := @papp nat.
+Definition prev_nat : PList_nat -> PList_nat := @prev nat.
+
+Fixpoint psum_nat_poly (A : Type) (f : A -> nat) (l : PList A) : nat :=
+    match l with
+    | PNil => O
+    | PCons h t => f h + psum_nat_poly A f t
+    end.
+
+Definition psum_nat : PList_nat -> nat := psum_nat_poly nat id.
+
+Lemma psum_nat_eq_psum : forall (l : PList nat), psum_nat l = psum l.
+Proof.
+    intros l.
+    unfold psum_nat.
+    induction l as [| h t IH]; simpl.
+    - reflexivity.
+    - rewrite IH. reflexivity.
+Defined.
+
 (* ── 3. Conversion functions ────────────────────────────────── *)
 
 Fixpoint plist_2_nlist {A : Type} (f : A -> nat) (l : PList A) : NatList :=
@@ -241,10 +263,7 @@ Defined.
 
 (* ── 5. Shared Trocq Use registrations ─────────────────────── *)
 
-(* R_NatList_nat: concrete (no lambda parameters) witness for PList nat <-> NatList.
-   Trocq Use requires a fully concrete gref; R_NatList is generic so we instantiate
-   once at id/id for nat.  The generic R_NatList stays available for manual proofs. *)
-Definition R_NatList_nat : Param44.Rel (PList nat) NatList.
+Definition R_NatList_nat : Param44.Rel PList_nat NatList.
 Proof. exact (R_NatList id id (fun _ => eq_refl) (fun _ => eq_refl)). Defined.
 
 Trocq Use R_NatList_nat.  (* Trocq Use #1 *)
@@ -359,47 +378,51 @@ Defined.
    whose conclusions have the real function names as heads. *)
 
 (* R_plength_nat: head of conclusion is 'plength' (global), not 'f' *)
-Lemma R_plength_nat (l : PList nat) (l' : NatList) (lR : rel R_NatList_nat l l') :
-    natR (plength l) (nlength l').
+Lemma R_plength_nat (l : PList_nat) (l' : NatList) (lR : rel R_NatList_nat l l') :
+    natR (plength_nat l) (nlength l').
 Proof.
+    unfold plength_nat.
     change (plist_2_nlist id l = l') in lR.
     apply map_in_R_nat.
-    rewrite (plength_eq_nlength id), lR.
+    rewrite (plength_eq_nlength id). rewrite lR.
     reflexivity.
 Qed.
 
 (* R_papp_nat: head of conclusion is 'papp' (global) *)
 Lemma R_papp_nat
-    (l1 : PList nat) (l1' : NatList) (l1R : rel R_NatList_nat l1 l1')
-    (l2 : PList nat) (l2' : NatList) (l2R : rel R_NatList_nat l2 l2') :
-    rel R_NatList_nat (papp l1 l2) (napp l1' l2').
+    (l1 : PList_nat) (l1' : NatList) (l1R : rel R_NatList_nat l1 l1')
+    (l2 : PList_nat) (l2' : NatList) (l2R : rel R_NatList_nat l2 l2') :
+    rel R_NatList_nat (papp_nat l1 l2) (napp l1' l2').
 Proof.
+    unfold papp_nat.
     change (plist_2_nlist id l1 = l1') in l1R.
     change (plist_2_nlist id l2 = l2') in l2R.
     change (plist_2_nlist id (papp l1 l2) = napp l1' l2').
-    rewrite plist_2_nlist_app, l1R, l2R.
+    rewrite plist_2_nlist_app. rewrite l1R. rewrite l2R.
     reflexivity.
 Qed.
 
 (* R_prev_nat: head of conclusion is 'prev' (global) *)
-Lemma R_prev_nat (l : PList nat) (l' : NatList) (lR : rel R_NatList_nat l l') :
-    rel R_NatList_nat (prev l) (nrev l').
+Lemma R_prev_nat (l : PList_nat) (l' : NatList) (lR : rel R_NatList_nat l l') :
+    rel R_NatList_nat (prev_nat l) (nrev l').
 Proof.
+    unfold prev_nat.
     change (plist_2_nlist id l = l') in lR.
     change (plist_2_nlist id (prev l) = nrev l').
-    rewrite plist_2_nlist_rev, lR.
+    rewrite plist_2_nlist_rev. rewrite lR.
     reflexivity.
 Qed.
 
-(* R_psum_nat: head of conclusion is 'psum' (global).
+(* R_psum_nat: head of conclusion is 'psum_nat' (global).
    R_psum's conclusion is 'natR (f (psum l)) ...' — with f = c2 (pi-variable),
    Trocq Use fails with "term->gref: no gref: c2".  Here f = id so the head
    is definitionally 'psum'.  Coq infers the Addable nat instance automatically. *)
-Lemma R_psum_nat (l : PList nat) (l' : NatList) (lR : rel R_NatList_nat l l') :
-    natR (psum l) (nsum l').
+Lemma R_psum_nat (l : PList_nat) (l' : NatList) (lR : rel R_NatList_nat l l') :
+    natR (psum_nat l) (nsum l').
 Proof.
     change (plist_2_nlist id l = l') in lR.
     apply map_in_R_nat.
+    rewrite psum_nat_eq_psum.
     rewrite <- lR.
     apply (plist_2_nlist_sum id).
     - reflexivity.
@@ -411,25 +434,99 @@ Trocq Use R_papp_nat.     (* Trocq Use #5 *)
 Trocq Use R_prev_nat.     (* Trocq Use #6 *)
 Trocq Use R_psum_nat.     (* Trocq Use #7  ← new vs bs_a1.v *)
 
+From Stdlib Require Import ZArith.
+
+Definition PList_Z := PList Z.
+Definition plength_Z : PList_Z -> nat := @plength Z.
+Definition papp_Z : PList_Z -> PList_Z -> PList_Z := @papp Z.
+Definition prev_Z : PList_Z -> PList_Z := @prev Z.
+
+Definition R_NatList_Z : Param2a0.Rel PList_Z NatList :=
+    mkParam2a0 (plist_2_nlist (fun _ => O)).
+
+Lemma R_plength_Z (l : PList_Z) (l' : NatList) (lR : rel R_NatList_Z l l') :
+    natR (plength_Z l) (nlength l').
+Proof.
+    unfold plength_Z.
+    change (plist_2_nlist (fun _ => O) l = l') in lR.
+    apply map_in_R_nat.
+    rewrite (plength_eq_nlength (fun _ => O)). rewrite lR.
+    reflexivity.
+Qed.
+
+Lemma R_papp_Z
+    (l1 : PList_Z) (l1' : NatList) (l1R : rel R_NatList_Z l1 l1')
+    (l2 : PList_Z) (l2' : NatList) (l2R : rel R_NatList_Z l2 l2') :
+    rel R_NatList_Z (papp_Z l1 l2) (napp l1' l2').
+Proof.
+    unfold papp_Z.
+    change (plist_2_nlist (fun _ => O) l1 = l1') in l1R.
+    change (plist_2_nlist (fun _ => O) l2 = l2') in l2R.
+    change (plist_2_nlist (fun _ => O) (papp l1 l2) = napp l1' l2').
+    rewrite plist_2_nlist_app. rewrite l1R. rewrite l2R.
+    reflexivity.
+Qed.
+
+Lemma R_prev_Z (l : PList_Z) (l' : NatList) (lR : rel R_NatList_Z l l') :
+    rel R_NatList_Z (prev_Z l) (nrev l').
+Proof.
+    unfold prev_Z.
+    change (plist_2_nlist (fun _ => O) l = l') in lR.
+    change (plist_2_nlist (fun _ => O) (prev l) = nrev l').
+    rewrite plist_2_nlist_rev. rewrite lR.
+    reflexivity.
+Qed.
+
+Trocq Use R_NatList_Z.
+Trocq Use R_plength_Z.
+Trocq Use R_papp_Z.
+Trocq Use R_prev_Z.
+
+Ltac trocq_poly :=
+    change (@plength nat) with plength_nat;
+    change (@papp nat) with papp_nat;
+    change (@prev nat) with prev_nat;
+    change (PList nat) with PList_nat;
+    change (@plength Z) with plength_Z;
+    change (@papp Z) with papp_Z;
+    change (@prev Z) with prev_Z;
+    change (PList Z) with PList_Z;
+    trocq.
+
 (* ── Final Trocq theorems ─────────────────────────────────────*)
 (* State theorems using the polymorphic PList nat functions directly;
    no monomorphic aliases needed because R_XXX_nat have the right gref heads. *)
 
 Theorem plength_papp_nat : forall (l1 l2 : PList nat),
     plength (papp l1 l2) = plength l1 + plength l2.
-Proof. trocq. apply nlength_napp. Qed.
+Proof. trocq_poly. apply nlength_napp. Qed.
 
 Theorem papp_assoc_nat : forall (l1 l2 l3 : PList nat),
     papp (papp l1 l2) l3 = papp l1 (papp l2 l3).
-Proof. trocq. apply napp_assoc. Qed.
+Proof. trocq_poly. apply napp_assoc. Qed.
 
 Theorem prev_papp_nat : forall (l1 l2 : PList nat),
     prev (papp l1 l2) = papp (prev l2) (prev l1).
-Proof. trocq. apply nrev_napp. Qed.
+Proof. trocq_poly. apply nrev_napp. Qed.
 
 Theorem psum_papp_nat : forall (l1 l2 : PList nat),
-    psum (papp l1 l2) = psum l1 + psum l2.
-Proof. trocq. apply nsum_napp. Qed.
+    psum_nat (papp l1 l2) = psum_nat l1 + psum_nat l2.
+Proof. trocq_poly. apply nsum_napp. Qed.
+
+(* Adding a new base n nlength_nrev theorem and applying
+   it next with trocq *)
+Theorem nlength_nrev : forall (l : NatList),
+    nlength (nrev l) = nlength l.
+Proof.
+    intros l.
+    induction l as [| h t IH]; simpl.
+    - reflexivity.
+    - rewrite nlength_napp. simpl. rewrite IH. lia.
+Defined.
+
+Theorem plength_prev_nat : forall (l : PList nat),
+    plength (prev l) = plength l.
+Proof. trocq_poly. apply nlength_nrev. Qed.
 
 (* ── PList Z: manual transfer using generic bridge lemmas ────────────
    The bridge lemmas (plength_eq_nlength, plist_2_nlist_app, etc.) are
@@ -437,8 +534,6 @@ Proof. trocq. apply nsum_napp. Qed.
    plength/papp/prev only count/rearrange structure so element values are
    irrelevant.  This demonstrates the infrastructure is NOT nat-specific.
    No Trocq tactic is used here. *)
-
-From Stdlib Require Import ZArith.
 
 (* plength_papp_Z: manual transfer via the generic bridge to NatList *)
 Theorem plength_papp_Z : forall (l1 l2 : PList Z),
@@ -466,3 +561,7 @@ Proof. apply papp_assoc_manual. Qed.
 Theorem prev_papp_Z : forall (l1 l2 : PList Z),
     prev (papp l1 l2) = papp (prev l2) (prev l1).
 Proof. apply prev_papp_manual. Qed.
+
+Theorem plength_prev_Z : forall (l : PList Z),
+    plength (prev l) = plength l.
+Proof. trocq_poly. apply nlength_nrev. Qed.
