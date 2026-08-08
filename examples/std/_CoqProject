@@ -13,7 +13,9 @@ bs_p6.v
 bs_p7.v
 bs_a1.v
 bs_a2.v
-bs_a5.v
+bs_f1.v
+bs_m1_sf_maps.v
+bs_m2.v
 baby_steps.v
 # flt3_step.v
 # int_to_Zp.v
