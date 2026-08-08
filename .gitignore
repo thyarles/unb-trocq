@@ -10,6 +10,7 @@
 **/Makefile.rocq.conf
 **/Makefile
 **/Makefile.conf
+**/Makefile.common
 
 # Symlink to /std/_CoqProject or /hott/_CoqProject
 /_CoqProject

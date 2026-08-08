@@ -392,3 +392,17 @@ As revisões necessárias concentram-se principalmente em:
 Com esses ajustes, o trabalho tem potencial para uma boa recepção em conferências ou periódicos voltados a métodos formais, engenharia de software aplicada a assistentes de prova e linguagens de programação.
 
 [1]: https://link.springer.com/chapter/10.1007/978-3-031-57262-3_10 "Trocq: Proof Transfer for Free, With or Without Univalence | Springer Nature Link"
+
+
+| Your file (`bs_*`) | `paper_final` name (`roi_list_*`) | Used in `.tex`/`.md`? |
+|---|---|---|
+| `bs_p1.v` | `roi_list_mono.v` | ✅ Yes — `_roi_slides.md` |
+| `bs_p2.v` | `roi_list_poly.v` | ✅ Yes — `_roi_slides.md` |
+| `bs_p3.v` | `roi_list_proof_objects.v` | — |
+| `bs_p4.v` | `roi_list_manual.v` | ✅ Yes — `_paper.tex`, `_roi.md`, `_roi_slides.md` |
+| `bs_p5.v` | `roi_list_trocq.v` | ✅ Yes — `_paper.tex`, `_roi.md`, `_roi_slides.md` |
+| `bs_p6.v` | `roi_list_rev_experiment.v` | ✅ Yes — `_roi.md`, `_roi_slides.md` |
+
+**The good news**: The `.tex` and `.md` files already reference your `bs_p*` names. The `paper_final` branch had internally renamed them to `roi_list_*`, but never updated the documentation to match. So **no updates needed** — your naming convention is already consistent with the documentation!
+
+The `roi_list_*` files are simply the same `bs_p*` files under a different name. You do not need to bring them in.
