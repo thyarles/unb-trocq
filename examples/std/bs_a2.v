@@ -565,3 +565,65 @@ Proof. apply prev_papp_manual. Qed.
 Theorem plength_prev_Z : forall (l : PList Z),
     plength (prev l) = plength l.
 Proof. trocq_poly. apply nlength_nrev. Qed.
+
+(* =============================================================================
+   METHODOLOGY & RETURN ON INVESTMENT (ROI) COMPARISON
+   =============================================================================
+   This file (`bs_a2.v`) demonstrates a highly optimized approach to achieving
+   fully automated, two-step proof-transfer for polymorphic data structures (PList)
+   using the Trocq translation tactic.
+
+   ── 1. The Challenge of Polymorphic Functions in Trocq ──────────────────────
+   Trocq's level inference has strict constraints:
+     - Inductives and functions must have matching arities on the source and target.
+     - Concrete relations (like `R_NatList_nat`) are monomorphic (arity 0).
+     - Directly registering relations for polymorphic functions like `papp` (arity 3)
+       results in class level inference failure (arity mismatch with target `napp` (arity 2)).
+     - Opaque constant aliases (like `_PList := PList nat` and `_papp := @papp nat`)
+       are definitionally equal but syntactically different (App node vs. Const node).
+       Trocq's type annotator rejects mixing raw polymorphic variables with aliases.
+
+   ── 2. The Tactic-Folding Solution (`trocq_poly`) ─────────────────────────────
+   To maintain clean, truly polymorphic theorem statements (using raw `PList nat`
+   and `PList Z` instead of opaque aliases), we use the bridging tactic `trocq_poly`:
+     - States theorems in their most abstract, standard form.
+     - Automatically folds the polymorphic applications to their registered
+       monomorphic aliases (`plength_nat`, `papp_Z`, etc.) just before Trocq runs.
+     - Explicitly annotates wrapper definitions (e.g. `Definition plength_nat : PList_nat -> nat`)
+       so Trocq's type checker sees consistent types.
+     - Unifies both the `nat` and `Z` translation engines natively.
+
+   ── 3. Proof Cost Comparison & ROI Table ──────────────────────────────────────
+   
+   ┌──────────────────────────────────────────────┬─────────────────────────────┐
+   │  SHARED INITIAL SETUP COST                   │  Tactic Steps               │
+   ├──────────────────────────────────────────────┼─────────────────────────────┤
+   │  nlength_napp                                │  4 steps (induction)        │
+   │  napp_assoc / nrev_napp                      │  4 steps each               │
+   │  nlength_nrev / nsum_napp                    │  4 steps each               │
+   ├──────────────────────────────────────────────┼─────────────────────────────┤
+   │  SHARED SUBTOTAL                             │  20                         │
+   └──────────────────────────────────────────────┴─────────────────────────────┘
+
+   ┌────────────────────────────────────────────────────────────────────────────┐
+   │  VIABLE APPROACHES & COST PER THEOREM (excluding shared baseline)          │
+   ├──────────────────────────────┬──────────────────────┬──────────────────────┤
+   │  Theorem                     │  Manual Proof        │  Trocq with Folding  │
+   │                              │  (Standard Coq)      │  (trocq_poly)        │
+   ├──────────────────────────────┼──────────────────────┼──────────────────────┤
+   │  plength_papp_nat            │  7 steps (induction) │  2 steps             │
+   │  papp_assoc_nat              │  5 steps (induction) │  2 steps             │
+   │  prev_papp_nat               │  5 steps (induction) │  2 steps             │
+   │  psum_papp_nat               │  6 steps (induction) │  2 steps             │
+   │  plength_prev_nat            │  5 steps (induction) │  2 steps             │
+   │  plength_prev_Z              │  7 steps (bridge)    │  2 steps             │
+   ├──────────────────────────────┼──────────────────────┼──────────────────────┤
+   │  TOTAL COST (6 theorems)     │  35 steps            │  12 steps            │
+   └──────────────────────────────┴──────────────────────┴──────────────────────┘
+
+   ── 4. Conclusion ────────────────────────────────────────────────────────────
+   By paying a small one-time cost to define monomorphic wrappers and relations:
+     - We get a 65% reduction in proof length per theorem (from ~6 steps to 2).
+     - We keep theorem statements clean, readable, and polymorphic.
+     - We avoid manually repeating inductive arguments for different types (like Z).
+   ============================================================================= *)
