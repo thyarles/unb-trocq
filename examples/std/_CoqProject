@@ -32,3 +32,6 @@ stuck.v
 Vector_tuple.v
 trocq_gen_rewrite.v
 # maps_trocq.v
+bs_z1.v
+bs_z1_lift.v
+
