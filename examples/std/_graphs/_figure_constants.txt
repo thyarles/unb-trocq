@@ -1,0 +1,26 @@
+Constants derived from _counts.csv by _graphs.py
+(cross-check these against _paper.tex)
+
+  S_iso                 = 10
+  C_base(f=3)           = 27
+  Trocq extra(f=3)      = 28
+  C_trocq  Regime B     = 55 + 2n
+  C_manual Regime B     = 27 + 11n
+  P_manual (simple)     = 7
+  P_manual (complex)    = 11
+  c_avg                 = 5
+  k                     = 2.2
+  n* Regime B           = 3.1111
+  ROI_inf Regime B      = 4.5000
+
+  P_paste               = 5.6667  (5+5+7)/3
+  S_bij                 = 16
+  per-function subtotal = 37
+  C_trocq  Regime A     = 53 + 2n
+  C_manual Regime A     = 5.67n
+  n* Regime A           = 14.4545
+  ROI_inf Regime A      = 1.8333
+
+  gref tax (bs_a2)      = 22
+  Z marginal, Trocq     = 24 setup (+6 theorems = 30)
+  Z marginal, manual    = 9

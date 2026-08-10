@@ -9,10 +9,14 @@
 \pgfplotsset{compat=1.17}
 \usepackage{xcolor}
 \usepackage{listings}
+\usepackage{microtype}
 \usepackage{hyperref}
 
-% llncs does not define \doi, but splncs04.bst emits it.
-\providecommand{\doi}[1]{\textsc{doi}:\ \texttt{#1}}
+% llncs does not define \doi, but splncs04.bst emits it. DOIs routinely
+% contain underscores, which arrive from the .bbl already tokenised as
+% subscripts; \detokenize re-reads them as printable characters, avoiding
+% the "Missing $ inserted" error.
+\providecommand{\doi}[1]{\textsc{doi}:\ \texttt{\detokenize{#1}}}
 
 \definecolor{codebg}{rgb}{0.96,0.96,0.96}
 \lstdefinelanguage{Coq}{
@@ -34,12 +38,14 @@
 An Empirical Cost Model for Trocq versus Manual\\
 Rewriting in Coq}
 
+\titlerunning{When Does Proof Transfer Pay Off?}
+
 \author{Charles Santos\inst{1} \and Vander Alves\inst{1} \and Leopoldo Teixeira\inst{2}}
 \authorrunning{C. Santos, V. Alves, L. Teixeira}
 
 \institute{Department of Computer Science, University of Bras\'{i}lia (UnB),
-Bras\'{i}lia, Brazil\\
-\email{thyarles@gmail.com}
+Bras\'{i}lia, Brazil
+\email{\ thyarles@gmail.com}
 \and
 Informatics Center, Federal University of Pernambuco (UFPE), Recife, Brazil}
 
@@ -426,7 +432,8 @@ $n\to\infty$, to the finite constant
 \end{equation}
 which for $P_{\text{manual}}=7$ gives a bounded $2.5\times$ return---not an
 ever-growing one, because both approaches' \emph{marginal} costs are
-constant; only the intercepts differ.
+constant; only the intercepts differ. Figure~\ref{fig:roi} plots the
+saturating return in both regimes.
 
 \subsection{Third iteration: complexity-sensitive theorems}
 \label{sec:third}
@@ -481,7 +488,9 @@ cost $5+6+6=17$, so $C_{\text{base}}(3)=27$; Trocq's extra is
 $5+3+6+8+6=28$. Hence $C_{\text{manual}}(n) = 27+11n$ and
 $C_{\text{trocq}}(n) = 55+2n$, with a break-even at
 $n^{*} = 28/9 \approx 3.1$ theorems, down from $4.4$. Complexity lowers the
-break-even; it does not abolish it. The asymptotic return rises to
+break-even; it does not abolish it. Figure~\ref{fig:sensitivity} plots the
+return over both variables at once, with the break-even locus drawn on the
+surface. The asymptotic return rises to
 $(k\cdot c_{\text{avg}}-2)/2 = 4.5$.
 
 \paragraph{Why this is still wrong.} Every iteration so far has compared
@@ -576,11 +585,31 @@ No rename rescues this; the engineer must supply new mathematics. Trocq, by
 contrast, absorbs the same gap once, inside a single bridge lemma whose
 inductive step closes with \texttt{lia}, after which all three theorems in
 that file transfer in two steps each.
+Figure~\ref{fig:typeclass} quantifies the intermediate case: in
+\texttt{bs\_a2.v} the rename still compiles after repair, and the effect is
+visible on both sides at once---the per-theorem manual cost rises from $5.67$
+to $6.00$ steps while Trocq's setup rises from $53$ to $82$, pushing the
+break-even out from $14.5$ to $20.5$ even as the asymptotic ceiling improves
+from $1.83\times$ to $2.00\times$.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{_graphs/fig5_typeclass}
+\caption{What introducing the \texttt{Addable} typeclass costs. (a) Both
+sides get dearer: the copy-paste baseline because two steps must be repaired
+by hand, Trocq because a fourth function needs its own bridge, witness and
+registration. (b) The long-run ceiling rises, but the break-even moves
+further out---an improvement in the limit bought with a longer wait.}
+\label{fig:typeclass}
+\end{figure}
 
 \paragraph{The model is a regime classification.} The fourth iteration's
 lesson is not a different constant but a different shape. There is no single
 break-even curve, because there is no single manual baseline
-(Table~\ref{tab:regimes}). What decides which curve applies is whether
+(Table~\ref{tab:regimes} and Figure~\ref{fig:regimes}).
+Figure~\ref{fig:iterations} traces how the estimate moved across the four
+iterations: the first three refine the model, the fourth changes what the
+model is measured against, and it is the one that dominates. What decides which curve applies is whether
 renaming still produces a script that typechecks.
 
 \begin{table}[t]
@@ -603,6 +632,24 @@ Verdict & Trocq rarely worth it & Trocq worth it early \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{_graphs/fig1_regimes}
+\caption{Cumulative transfer cost in the two regimes. The shaded wedge is the
+interval in which Trocq has not yet repaid its setup. Both panels share axes;
+only the manual baseline differs. Constants are measured, not fitted by eye.}
+\label{fig:regimes}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{_graphs/fig6_iterations}
+\caption{The break-even estimate across the four iterations. The first three
+move it by refining the model; the fourth moves it by changing what the model
+is compared against, which is why it dominates.}
+\label{fig:iterations}
+\end{figure}
 
 
 \section{Results and a Decision Heuristic}
@@ -638,6 +685,27 @@ of representations.
       Trocq's setup to amortize across element types. It does not, in this
       corpus: see Section~\ref{sec:scope}.
 \end{enumerate}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{_graphs/fig2_roi}
+\caption{Return on investment against Trocq's own cost. Both curves saturate:
+the marginal costs of the two approaches are constant, so only the intercepts
+differ, and no amount of volume buys an unbounded return.}
+\label{fig:roi}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{_graphs/fig3_roi_surface}
+\caption{The return-on-investment surface over both governing variables at
+once. The black curve is the break-even locus $\mathrm{ROI}=0$: below it Trocq
+has not repaid its setup. Increasing complexity moves that locus toward fewer
+theorems, but the surface flattens along $n$, so the return saturates rather
+than growing without bound. Drawn for Regime B, where $k$ was fitted; it does
+not govern the copy-paste baseline.}
+\label{fig:sensitivity}
+\end{figure}
 
 \subsection{Scope, scalability, and what generalizes}
 \label{sec:scope}
@@ -688,6 +756,20 @@ registrations against \texttt{bs\_p5.v}'s five, because the relatedness
 lattice must be registered by hand for each of five participating types. A
 development rich in higher-order type formers will pay this repeatedly. Both
 effects raise $n^{*}$, and neither is visible in the list example alone.
+Figure~\ref{fig:setup} shows both: the anatomy of the setup, and how
+registration count tracks the complexity of the type former rather than the
+number of theorems.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{_graphs/fig4_setup}
+\caption{(a) Where Trocq's setup cost goes; relational witnesses and bridge
+lemmas dominate, and the six registrations are the cheapest part. (b)
+Registrations required per file. Setup scales with the complexity of the type
+former: a function-encoded map needs the relatedness lattice registered by
+hand for every participating type.}
+\label{fig:setup}
+\end{figure}
 
 \paragraph{Cross-type amortization does not hold.} We expected the setup to
 amortize when a second element type was added, and it does not. In
@@ -845,9 +927,10 @@ supports---whether to invest in an automated transfer translation before
 undertaking a large proof effort---has direct practical stakes.
 
 \subsubsection*{Artifact availability.}
-The Coq/Rocq sources, the counting script \texttt{\_count\_steps.py} and the
-generated measurement tables are distributed with this paper; every constant
-reported above can be regenerated by re-running the script over the corpus.
+The Coq/Rocq sources, the counting script and the generated measurement
+tables are distributed with this paper. Every constant reported above can be
+regenerated by re-running that one script over the corpus, and the figures
+are plotted from the table it emits, so text and figures cannot drift apart.
 
 \bibliographystyle{splncs04}
 \bibliography{references}
